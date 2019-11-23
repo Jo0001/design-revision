@@ -1,0 +1,26 @@
+{
+  "name": "designrevision",
+  "version": "1.0.0",
+  "description": "A projekt in cooperation with vierdimensional.com and SAP.",
+  "dependencies": {
+    "dep-linker": "^1.0.24",
+    "webworkify": "^1.5.0"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "^2.2.228"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "browserify files/js/renderScript.js > files/js/renderScriptWLibrary.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jo0001/design-revision.git"
+  },
+  "author": "Skydeke, Jo0001 and NIki2345",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jo0001/design-revision/issues"
+  },
+  "homepage": "https://github.com/Jo0001/design-revision#readme"
+}
