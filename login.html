@@ -7,15 +7,15 @@
 </head>
 <body>
 <h1>Login</h1>
-<form name="login">
+<form name="login" action="login.php" method="post">
 
     <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email">
+        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de">
     </label><br><br>
-    <label>Password: <input type="password" placeholder="Password" name="password"></label><br>
+    <label>Password: <input type="password" placeholder="Password" name="password" value="Jo0001"></label><br>
 
     <p>Forgot Password?<a href="loginforgotpass.html"> Reset</a></p>
-    <input type="button" onclick="window.alert('Hello World')" value="Login">
+    <input type="submit"  value="Login">
 </form>
 <p>Don't have an account yet? <a href="loginNewAccount.html">Sign In</a></p>
 
