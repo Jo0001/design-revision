@@ -9,18 +9,21 @@ if (!empty($_POST['email'])) {
     $user = $statement->fetch();
 
     if ($user !== false) {
-        generateHash($pdo);
+        $statement = $pdo->prepare("UPDATE users SET reset_id = ? WHERE email = ?");
+        $statement->execute(array(generateHash($pdo), $email));
 
+        echo "adding reset-id: done";
     }
 }
 
 //TODO Needs testing with more users
-function generateHash($pdo){
-    do{
-       $hash = bin2hex(openssl_random_pseudo_bytes(128));
+function generateHash($pdo)
+{
+    do {
+        $hash = bin2hex(openssl_random_pseudo_bytes(128));
         $statement = $pdo->prepare("SELECT * FROM users WHERE reset_id = :reset_id");
         $result = $statement->execute(array('reset_id' => $hash));
         $token = $statement->fetch();
-    }while($token !== false);
+    } while ($token !== false);
     return $hash;
 }

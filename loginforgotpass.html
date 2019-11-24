@@ -7,11 +7,11 @@
 </head>
 <body>
 <h1> Rest your Design Revision Password </h1>
-<form name="forgottenpass">
+<form name="forgottenpass" action="reset.php" method="post">
     <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email">
+        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de">
     </label><br><br>
-    <input type="button" onclick="window.alert('Hello World')" value="Passwort zurücksetzen">
+    <input type="submit" value="Passwort zurücksetzen">
 </form>
 
 </body>
