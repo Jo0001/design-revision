@@ -1,4 +1,14 @@
 <?php
+function check_format()
+{
+    if (!empty($_POST['format'])) {
+        $value = filter_var($_POST['format'], FILTER_SANITIZE_STRING);
+        if ($value == "json") {
+            return "json";
+        }
+    }
+    return;
+}
 
 if (!empty($_POST['getuserdata'])) {
     $value = filter_var($_POST['getuserdata'], FILTER_SANITIZE_STRING);
@@ -18,13 +28,25 @@ if (!empty($_POST['getuserdata'])) {
 
 }
 
-function showError($e)
+function showError($error)
 {
-    $e = "Error: " . $e;
-    echo $e;
+    $error = "Error: " . $error;
+    handleOutput($error);
+}
+
+function handleOutput($o)
+{
+    if (check_format() == "json") {
+        header("Content-type:application/json");
+        $o = json_encode($o);
+    } else {
+        header("Content-type:text/plain");
+    }
+    echo $o;
+
 }
 
 function showDemo()
 {
-    echo "Nice job you send a correct value for the parameter 'getuserdata'";
+    handleOutput("Nice job the 'getuserdata' request was successful");
 }
