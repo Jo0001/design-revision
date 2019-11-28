@@ -23,13 +23,24 @@ if (!empty($_POST['getuserdata'])) {
     } elseif ($value == "projects") {
         showDemo();
     } else {
-        showError("Unknown value for parameter 'getuserdata=$value'");
+        showError("Unknown value for parameter 'getuserdata=$value'", 400);
     }
 
+} else {
+    showError("No parameters provided", 400);
 }
 
-function showError($error)
+function showError($error, $code)
 {
+    if ($code == 404) {
+        header("HTTP/1.0 404 Not Found");
+    } elseif ($code == 401) {
+        header('WWW-Authenticate: Login to get the requested data');
+        header("HTTP/1.0 401 Unauthorized ");
+    } else {
+        header("HTTP/1.0 400 Bad Request");
+    }
+
     $error = "Error: " . $error;
     handleOutput($error);
 }
