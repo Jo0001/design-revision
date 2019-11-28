@@ -20,7 +20,8 @@ document.body.addEventListener("contextmenu", function (e) {
 });
 
 var canvas = document.getElementById('pdf');
-        canvas.addEventListener("mousewheel", MouseWheelHandler, false);
+        canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+        canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
         renderPageFromPdf(pdfFileOrUrl, pdfPageNumber);
 dragElementWhenBtnIsDown(canvas, 1);
 
@@ -60,11 +61,11 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
     }
 }
 
-        function MouseWheelHandler(e) {
+        function listenForMouseWheelTurn(e) {
             var e = window.event || e;
             e.preventDefault()
             var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-            console.log(delta);
+            //console.log(delta);
             if (delta == 1) {
                 scale = scale + 0.1;
             } else {

@@ -20,6 +20,7 @@ document.body.addEventListener("contextmenu", function (e) {
 
 var canvas = document.getElementById('pdf');
 canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
 renderPageFromPdf(pdfFileOrUrl, pdfPageNumber);
 dragElementWhenBtnIsDown(canvas, 1);
 
