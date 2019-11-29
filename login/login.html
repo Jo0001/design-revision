@@ -7,18 +7,34 @@
 </head>
 <body>
 <h1>Login</h1>
-<form name="login" action="login.php" method="post">
+<form id="login" action="login.php" method="post">
 
     <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de">
+        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de" required>
     </label><br><br>
-    <label>Password: <input type="password" placeholder="Password" name="password" value="Jo0001"></label><br>
+    <label>Password: <input type="password" placeholder="Password" name="password" value="Jo0001" required></label><br>
 
     <p>Forgot Password?<a href="loginforgotpass.html"> Reset</a></p>
-    <input type="submit"  value="Login">
+    <input type="submit" value="Login">
 </form>
 <p>Don't have an account yet? <a href="loginNewAccount.html">Sign In</a></p>
 
 
 </body>
+<script>
+    var resetPass = document.getElementById("login");
+    resetPass.addEventListener('submit', function (evt) {
+        if (!(emailIsValid(document.querySelector("#email").value))) {
+            window.alert("Email ist falsch ");
+            evt.preventDefault();
+        } else {
+            window.alert("Email ist richtig");
+        }
+
+    });
+
+    function emailIsValid(email) {
+        return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    }
+</script>
 </html>

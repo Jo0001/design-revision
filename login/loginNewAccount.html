@@ -6,25 +6,43 @@
     <title>New Account</title>
 </head>
 <body>
-<form name="loginNewAccount">
+<form id="newAccountForm">
     <h1>Get new Account</h1>
     <label>First Name:
-        <input type="text" placeholder="First Name" id="firstName">
+        <input type="text" placeholder="First Name" id="firstName" required>
     </label><br><br>
     <label>Last Name:
-        <input type="text" placeholder="Last Name" id="lastName">
+        <input type="text" placeholder="Last Name" id="lastName" required>
     </label><br><br>
     <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email">
+        <input type="text" placeholder="E-mail" id="email" required>
     </label><br><br>
     <label>Password:
-        <input type="text" placeholder="Password" id="password">
+        <input type="password" placeholder="Password" id="password" required>
     </label><br><br>
     <label>Password again:
-        <input type="text" placeholder="Password" id="againPassword">
+        <input type="password" placeholder="Password" id="againPassword" required>
     </label><br><br>
-    <input type="button" onclick="window.alert('Hello World')" value="Sign In">
+    <input type="submit" value="Sign In">
 </form>
 <p>Already have an account yet? <a href="login.html">Get Account</a></p>
 </body>
+<script>
+    var newAcount = document.getElementById("newAccountForm");
+    newAcount.addEventListener('submit', function (evt) {
+        var pass1 = document.querySelector("#password").value;
+        var pass2 = document.querySelector("#againPassword").value;
+        if (!(pass1 === pass2) || !(emailIsValid(document.querySelector("#email").value))) {
+            window.alert(" Password oder Email ist falsch ");
+            evt.preventDefault();
+        } else {
+            window.alert("Password richtig");
+        }
+
+    });
+
+    function emailIsValid(email) {
+        return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    }
+</script>
 </html>

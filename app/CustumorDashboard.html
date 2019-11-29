@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CusumorDasboadr</title>
+</head>
+<body>
+<form id="CustumorDashForm" method="post" enctype="multipart/form-data">
+    <label>
+    <input type="text" placeholder="Kundenname" id="customername" name="customername" required>
+    </label><br><br>
+    <label>
+    <input type="text" placeholder="Projektname" id="projectname" name="projectname" required>
+    </label><br><br>
+    <label>
+    <input type="text" placeholder="E-mail" id="email" name="email" required>
+    </label><br><br>
+    <input name="datei" type="file" accept="application/pdf" >
+    <br><br>
+    <input type="submit" onclick="window.alert('Hello World')" value="Speichern">
+</form>
+
+</body>
+<script>
+    var dashMail= document.getElementById("CustumorDashForm");
+    dashMail.addEventListener('submit', function (evt) {
+        if (!(emailIsValid(document.querySelector("#email").value))) {
+            window.alert("Email ist falsch ");
+            evt.preventDefault();
+        } else {
+            window.alert("Email richtig");
+        }
+
+    });
+
+    function emailIsValid(email) {
+        return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    }
+
+</script>
+</html>

@@ -7,12 +7,28 @@
 </head>
 <body>
 <h1> Rest your Design Revision Password </h1>
-<form name="forgottenpass" action="reset.php" method="post">
+<form id="forgottenpass" action="reset.php" method="post">
     <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de">
+        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de" required>
     </label><br><br>
     <input type="submit" value="Passwort zurücksetzen">
 </form>
 
 </body>
+<script>
+    var resetPass = document.getElementById("forgottenpass");
+    resetPass.addEventListener('submit', function (evt) {
+        if (!(emailIsValid(document.querySelector("#email").value))) {
+            window.alert("Email ist falsch ");
+            evt.preventDefault();
+        } else {
+            window.alert("Email richtig");
+        }
+
+    });
+
+    function emailIsValid(email) {
+        return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    }
+</script>
 </html>
