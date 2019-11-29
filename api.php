@@ -1,8 +1,8 @@
 <?php
 function check_format()
 {
-    if (!empty($_POST['format'])) {
-        $value = filter_var($_POST['format'], FILTER_SANITIZE_STRING);
+    if (!empty($_GET['format'])) {
+        $value = filter_var($_GET['format'], FILTER_SANITIZE_STRING);
         if ($value == "json") {
             return "json";
         }
@@ -10,8 +10,8 @@ function check_format()
     return;
 }
 
-if (!empty($_POST['getuserdata'])) {
-    $value = filter_var($_POST['getuserdata'], FILTER_SANITIZE_STRING);
+if (!empty($_GET['getuser'])) {
+    $value = filter_var($_GET['getuser'], FILTER_SANITIZE_STRING);
     if ($value == "logged-in") {
         showDemo();
     } elseif ($value == "name") {
@@ -20,28 +20,32 @@ if (!empty($_POST['getuserdata'])) {
         showDemo();
     } elseif ($value == "company") {
         showDemo();
+    } elseif ($value == "avatar") {
+        showDemo();
     } elseif ($value == "projects") {
         showDemo();
     } else {
-        showError("Unknown value for parameter 'getuserdata=$value'", 400);
+        showError("Unknown value for parameter 'getuser=$value'", 400);
     }
 
 } else {
-    showError("No parameters provided", 400);
+    showError("No or wrong parameters provided", 400);
 }
 
 function showError($error, $code)
 {
-    if ($code == 404) {
-        header("HTTP/1.0 404 Not Found");
+    if ($code == 400) {
+        header("HTTP/1.0 400 Bad Request");
     } elseif ($code == 401) {
         header('WWW-Authenticate: Login to get the requested data');
         header("HTTP/1.0 401 Unauthorized ");
-    } else {
-        header("HTTP/1.0 400 Bad Request");
+    } elseif ($code == 403) {
+        header("HTTP/1.0 403 Forbidden");
+    } elseif ($code == 404) {
+        header("HTTP/1.0 404 Not Found");
     }
 
-    $error = "Error: " . $error;
+    $error = "ERROR: " . $error;
     handleOutput($error);
 }
 
@@ -59,5 +63,5 @@ function handleOutput($o)
 
 function showDemo()
 {
-    handleOutput("Nice job the 'getuserdata' request was successful");
+    handleOutput("DEMO: Nice job the 'getuser' request was successful");
 }
