@@ -3,6 +3,14 @@ var pdfjsLib = require('pdfjs-dist/build/pdf');
 var pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
+/*
+global variables.
+ */
+scale = 1;
+renderTask = undefined;
+pdfFileOrUrl = "../test.pdf";
+pdfPageNumber = 2;
+
 //Prevent a contextmenu on page, so people cant download the design.
 document.body.addEventListener("contextmenu", function (e) {
     console.log("don't you dare download.")
@@ -11,7 +19,9 @@ document.body.addEventListener("contextmenu", function (e) {
 });
 
 var canvas = document.getElementById('pdf');
-renderPageFromPdf("test.pdf", 2);
+canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
+renderPageFromPdf(pdfFileOrUrl, pdfPageNumber);
 dragElementWhenBtnIsDown(canvas, 1);
 
 
@@ -50,35 +60,54 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
     }
 }
 
+function listenForMouseWheelTurn(e) {
+    var e = window.event || e;
+    e.preventDefault()
+    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+    //console.log(delta);
+    if (delta == 1) {
+        scale = scale + 0.1;
+    } else {
+        scale = scale - 0.1;
+    }
+    if (scale <= 0) {
+        scale = 0.1;
+        renderPageFromPdf(pdfFileOrUrl, pdfPageNumber);
+    } else {
+        renderPageFromPdf(pdfFileOrUrl, pdfPageNumber);
+    }
+}
+
 function renderPageFromPdf(pdfFileOrLink, pageNumber) {
-    var loadingTask = pdfjsLib.getDocument(pdfFileOrLink);
-    loadingTask.promise.then(function (pdf) {
-        console.log('PDF loaded');
+    if (renderTask === undefined) {
+        var loadingTask = pdfjsLib.getDocument(pdfFileOrLink);
+        loadingTask.promise.then(function (pdf) {
+            //console.log('PDF loaded');
 
-        // Fetch the first page
-        pdf.getPage(pageNumber).then(function (page) {
-            console.log('Page loaded');
+            // Fetch the first page
+            pdf.getPage(pageNumber).then(function (page) {
+                var viewport = page.getViewport({scale: scale});
 
-            var scale = 1;
-            var viewport = page.getViewport({scale: scale});
+                // Prepare canvas using PDF page dimensions
+                var context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
 
-            // Prepare canvas using PDF page dimensions
-            var context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-
-            // Render PDF page into canvas context
-            var renderContext = {
-                canvasContext: context,
-                viewport: viewport
-            };
-            var renderTask = page.render(renderContext);
-            renderTask.promise.then(function () {
-                console.log('Page rendered');
+                // Render PDF page into canvas context
+                var renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                renderTask = page.render(renderContext);
+                renderTask.promise.then(function () {
+                    renderTask = undefined;
+                });
             });
+        }, function (reason) {
+            // PDF loading error
+            console.error(reason);
         });
-    }, function (reason) {
-        // PDF loading error
-        console.error(reason);
-    });
+    } else {
+        //console.log("Trying a render call without the previous one being done.")
+    }
 }
