@@ -4,25 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="../files/css/Login.css">
 </head>
 <body>
-<h1>Login</h1>
-<form id="login" action="login.php" method="post">
+<div class="form">
+    <h1>Login</h1>
 
-    <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de" required>
-    </label><br><br>
-    <label>Password: <input type="password" placeholder="Password" name="password" value="Jo0001" required></label><br>
+    <form id="login" action="login.php" method="post">
 
-    <p>Forgot Password?<a href="loginforgotpass.html"> Reset</a></p>
-    <input type="submit" value="Login">
-</form>
-<p>Don't have an account yet? <a href="loginNewAccount.html">Sign In</a></p>
+        <label>E-Mail:<br>
+            <input type="email" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de"
+                   required>
+        </label><br><br>
+        <label>Password:<br>
+            <input type="password" placeholder="Password" name="password" value="Jo0001"
+                   required></label><br>
 
+        <p>Forgot Password? <a href="loginforgotpass.html">Reset</a></p>
+        <input type="submit" value="Login">
+    </form>
+    <p>Don't have an account yet? <a href="loginNewAccount.html">Get Account</a></p>
 
+</div>
 </body>
 <script>
-    var resetPass = document.getElementById("login");
+    let resetPass = document.getElementById("login");
     resetPass.addEventListener('submit', function (evt) {
         if (!(emailIsValid(document.querySelector("#email").value))) {
             window.alert("Email ist falsch ");

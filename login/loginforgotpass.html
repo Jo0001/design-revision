@@ -4,19 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Reset Password </title>
+    <link rel="stylesheet" href="../files/css/Login.css">
 </head>
 <body>
+<div class="form">
 <h1> Rest your Design Revision Password </h1>
 <form id="forgottenpass" action="reset.php" method="post">
     <label>E-Mail:
-        <input type="text" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de" required>
+        <input type="email" placeholder="E-mail" id="email" name="email" value="max-mustermann@mustermann.de" required>
     </label><br><br>
     <input type="submit" value="Passwort zurücksetzen">
 </form>
-
+</div>
 </body>
+
 <script>
-    var resetPass = document.getElementById("forgottenpass");
+    let resetPass = document.getElementById("forgottenpass");
     resetPass.addEventListener('submit', function (evt) {
         if (!(emailIsValid(document.querySelector("#email").value))) {
             window.alert("Email ist falsch ");
