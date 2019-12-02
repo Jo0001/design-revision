@@ -26,7 +26,7 @@ function isLoggedIn()
 {
     if (isset($_SESSION['user-status']) && isset($_SESSION['user-id']) && isset($_SESSION['user-log']) && isset($_SESSION['user-time']) && $_SESSION['user-log'] == "true") {
         //TODO Needs testing
-        $date1 = strtotime($_SESSION["auth-date"]);
+        $date1 = strtotime($_SESSION["user-time"]);
         $date2 = strtotime(date("d-m-Y h:i:s"));
         $diff = abs($date2 - $date1) / 60 / 60 / 24;
         if ($diff >= 1) {

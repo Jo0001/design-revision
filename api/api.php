@@ -1,4 +1,6 @@
 <?php
+require "../libs/auth.php";
+
 function check_format()
 {
     if (!empty($_GET['format'])) {
@@ -12,20 +14,39 @@ function check_format()
 
 if (!empty($_GET['getuser'])) {
     $value = filter_var($_GET['getuser'], FILTER_SANITIZE_STRING);
-    if ($value == "logged-in") {
-        showDemo();
-    } elseif ($value == "name") {
-        showDemo();
+    $value = strtolower($value);
+    if ($value == "name") {
+        handleOutput(getUser($value));
     } elseif ($value == "email") {
-        showDemo();
+        handleOutput(getUser($value));
     } elseif ($value == "company") {
-        showDemo();
+        handleOutput(getUser($value));
     } elseif ($value == "avatar") {
-        showDemo();
+        handleOutput("DEMO: Avatar is not yet implemented :/");
     } elseif ($value == "projects") {
-        showDemo();
+        handleOutput(getUser($value));
     } else {
         showError("Unknown value for parameter 'getuser=$value'", 400);
+    }
+
+} else {
+    showError("No or wrong parameters provided", 400);
+}
+if (!empty($_GET['getproject'])) {
+    $value = filter_var($_GET['getproject'], FILTER_SANITIZE_STRING);
+    $value = strtolower($value);
+    if ($value == "name") {
+        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
+    } elseif ($value == "status") {
+        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
+    } elseif ($value == "link") {
+        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
+    } elseif ($value == "version") {
+        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
+    } elseif ($value == "members") {
+        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
+    } else {
+        showError("Unknown value for parameter 'getproject=$value'", 400);
     }
 
 } else {
@@ -61,7 +82,17 @@ function handleOutput($o)
 
 }
 
-function showDemo()
+function getUser($value)
 {
-    handleOutput("DEMO: Nice job the 'getuser' request was successful");
+    if (isLoggedIn()) {
+        $id = $_SESSION['user-id'];
+
+        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
+        $result = $statement->execute(array('pk_id' => $id));
+        $user = $statement->fetch();
+        return $user[$value];
+
+    }
+    showError("Unauthorized", 401);
 }
