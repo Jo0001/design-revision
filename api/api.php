@@ -12,6 +12,13 @@ function check_format()
     return;
 }
 
+function check_id()
+{
+    if (!empty($_GET['id'])) {
+        return filter_var($_GET['id'], FILTER_SANITIZE_STRING);
+    }
+}
+
 if (!empty($_GET['getuser'])) {
     $value = filter_var($_GET['getuser'], FILTER_SANITIZE_STRING);
     $value = strtolower($value);
@@ -29,10 +36,7 @@ if (!empty($_GET['getuser'])) {
         showError("Unknown value for parameter 'getuser=$value'", 400);
     }
 
-} else {
-    showError("No or wrong parameters provided", 400);
-}
-if (!empty($_GET['getproject'])) {
+} else if (!empty($_GET['getproject'])) {
     $value = filter_var($_GET['getproject'], FILTER_SANITIZE_STRING);
     $value = strtolower($value);
     if ($value == "name") {
@@ -68,6 +72,7 @@ function showError($error, $code)
 
     $error = "ERROR: " . $error;
     handleOutput($error);
+    die;
 }
 
 function handleOutput($o)
