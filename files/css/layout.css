@@ -1,0 +1,22 @@
+.middle {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.success {
+    border: 2px solid #00620b;
+    background: #02ac0c1c;
+}
+
+.error {
+    border: 2px solid #910000;
+    background: #ff00001c;
+}
+
+#verifyBox {
+    padding: 8px;
+    border-radius: 3px;
+    text-align: center;
+}
