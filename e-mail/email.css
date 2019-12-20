@@ -1,0 +1,18 @@
+.email{
+ text-align: center;
+}
+.email h1{
+    font-size: 48px;
+}
+.email p{
+    font-size: 20px;
+}
+.email input[type="submit"] {
+    background-color: #0cfad6;
+    color: #fff;
+    font-size: 20px;
+    padding: 10px 20px;
+    margin: 15px 15px 15px auto;
+    border: none;
+
+}
