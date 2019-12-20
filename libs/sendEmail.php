@@ -31,6 +31,7 @@ function sendMail($toAdr, $toName, $subject, $content)
         //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
         $mail->send();
+        //TODO Output just for development!
         echo 'Message has been sent';
     } catch (Exception $e) {
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
