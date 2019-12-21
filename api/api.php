@@ -29,7 +29,7 @@ if (!empty($_GET['getuser'])) {
     } elseif ($value == "company") {
         handleOutput(getUser($value));
     } elseif ($value == "avatar") {
-        handleOutput("DEMO: Avatar is not yet implemented :/");
+        handleOutput("http://localhost/design-revision/api/avatar.php?name=".getUser("name"));
     } elseif ($value == "projects") {
         handleOutput(getUser($value));
     } else {
