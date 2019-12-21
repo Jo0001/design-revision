@@ -19,7 +19,7 @@
         </label>
     </form>
 </div>
-<div id="form" class="form">
+<div class="form" id="form1">
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
         <label>
             <input id="customername" name="customername" placeholder="Kundenname" required type="text">
@@ -33,13 +33,23 @@
         <input accept="application/pdf" name="datei" type="file">
         <br><br>
         <input onclick="window.alert('Hello World')" type="submit" value="Speichern">
-        <p onclick="customerDelate()">Kunde löschen</p>
+
     </form>
 </div>
+<dialog id="dialog">
+    <p> Wollen sie den Kunden wirklich löschen?</p>
+    <p id="pName">Name</p>
+    <p id="pProjekt">Projekt</p>
+    <button onclick="closeYes()">Ja</button>
+    <button onclick="closeNo()">Nein</button>
+</dialog>
 <p onclick="generate()"> Hello World</p>
 
 </body>
 <script>
+    let a = true;
+    let counter = 1;
+
     let dashMail = document.getElementById("CustumorDashForm");
     dashMail.addEventListener('submit', function (evt) {
         if (!(emailIsValid(document.querySelector("#email").value))) {
@@ -64,40 +74,92 @@
         nameimg.setAttribute("alt", "tick");
         nameimg.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAA2CAIAAAAH0i23AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAVeSURBVGhDzZnfaxxVFMfnn9FYozG0tvVJXG20WrUJ/mj9CZZYNbTairpY2mAtrlRB6kMLMYIKpaQI9aFBJLBCJBBBG5FAHlqwZaENokJBBX88xM/OuXt25szd3TuT3cXDtzQ7c3985sy955yZidbWYRev/Dy3uDJ9bgEdeP/zicqM6NTZeY6cq/6wfOmqa1rIisBdWKmdOP312MGpO555r6NGXvjw2Edfcg1///Ov6x9sOeB+//MvmHbsO2mmD9Sdez44cvL8tV+uu+ECLAiOi/7s/Lf4wMy35cnK8NihoZ2vDz306s337VPd+uBBDg6Pvrl59zHTBXGFv17/ww3d1jrDcUeMt7Y88Q4Tb7h34oa7nuuom0ZeHHr4tc27306OwHVytW6C1tYBjqtMDoqrbtlxwEwfKDx6+66jydHKJ75ovxBbwrHC6KwDbX3qXe7djaU9Zsq8Grz/ZRyvwz57+NM2q9APRwe66RAbH5scuHvcTLMesSp0cG4xIclNnDYPHD7b9cbH2pmBzNBdEZtm69PHlc/rPw8c4VT60LnwCgsRq5DVInPhDpziCBpm4ZI7YPCBV8xwXRdbXv2HUxxEw1Jws98sK9ltO8tmoB4JF+ikuMahxNaEY1drPGMHmCF6KhyhfMnN0YQjVctpgll392aINEoTvxyQwpFPyH1ymnhmevZBG0ZektmROs/B6T4gQq4/0hbTpkePCAMhVqjqcKw2TepEcNOnb0o678q13xzc4o8/ySGKCNOhz9r4yGEhkbKgDkcxKIeoc0xrj0pT0zU6YavVSutNXZosL0iztctnQvc+901Ixo+epmMdTiMIjjWtPSpNVeMpY1sqlzINRJUl1yQPHMtdYzIJLaLmlh9sBdPULwe3VI0dU61kGsSK3bZaXVjlv3A4pNuCR5CIf/IjNME34Mrim4Up2wCNz17mVG22fCY3HAWB8LDYIo29oeFN4UqT8eJbnR63bUZjJpwqf+SCoxoQHlJtpLshNM034VrM3bFBW1HWCw/RLtICCWTTzq/E3O72yd/aIL7dAlQAjswpPGzTSCvegW17TTu/knBu4Se2RfpeF4BDumEjfTYuBudCRm12VH6KLxu7pCBcowKNJioz8lfgo56FS7vKOLIAHKFOeMioEU/h8iM0qxq4BkHdW40I4rxYbM1t2ys8FO6R1iMEGNPOrwycbovpDEoBOA0l3NKIFCs/QuvyLFzjbsaWOl4ATqv2ehCe//6i/Nj0+FumnV8+uGYmTSeMAnDDY4eEh+wQUcxpDTxwz/OmqUdeOHfQZosCcPo+YPnS1XpVonG4p0+pISJiCAkBDrA6nOb+Pj90ZUVBKSTHP5lzcDzdyCEUVNL1RkQ4HvwEg+LcwWFUnnKUcsr06Zv06ZWsKq/GHByrT06g0FTRVbEXNaXOfPWdUDk4TN/G8XxrevZB+lKMxKBvFJtwPMrKadTn5+rB7ft1auKuA0rCYalXTNv3myF6JKpLLUPkoUstBYc/dWfQgW5moK6L0lKjLrHNvGVPwWGc1gqPbqFFXiFBpq+wyVLZl68WDqORJjT8F1q+5xS3JfmVYm5xxU2fMA8cxqpUPhRaTQUr+cIVkePdxGnzw2FEvuS3EYJzV24x8Sz5Kh0XeH0m1hIOMy/8EfVMUOXiE9mJ1Jl0GBefXWdJaweHsX+Tn0oQcZxLz5VF5AuT5k0RYaHjF7AOcGIXVmoaYlTyVY4nDxZQ9n0jBxGXkf02RzRocyuTFgQnxi7RKOMVuBq0vOKBiryp2amj5YATy/UlWARTse/BueHUWMs8HMl3c8MKjRw/dXaei3Ed8ltxuD7Y/xhube0/xdMrYC4oLpkAAAAASUVORK5CYII=\n");
         customerdiv.appendChild(nameimg);
+        let statusImg = document.createElement("img");
+        statusImg.setAttribute("alt", "tick");
+        customerdiv.appendChild(statusImg);
         let projektname = document.createElement("p");
-        projektname.innerHTML = "Projekt Name";
+        projektname.innerHTML = "Projekt Name" + counter;
         projektname.setAttribute("style", "text-align:center");
         customerdiv.appendChild(projektname);
         let clientname = document.createElement("p");
-        clientname.innerHTML = "Max Musterman";
+        clientname.innerHTML = "Max Musterman" + counter;
         clientname.setAttribute("style", "text-align:center");
         customerdiv.appendChild(clientname);
         let clientemail = document.createElement("p");
-        clientemail.innerHTML = "max-musterman@web.de";
+        clientemail.innerHTML = "max-musterman@web.de" + counter;
         clientemail.setAttribute("style", "text-align:center");
         customerdiv.appendChild(clientemail);
         let versionen = document.createElement("p");
-        versionen.innerHTML = "Versionen";
+        versionen.innerHTML = "Versionen" + counter;
         versionen.setAttribute("style", "text-align:center");
         customerdiv.appendChild(versionen);
         let statusDiv = document.createElement("div");
-        statusDiv.className="status";
+        statusDiv.className = "status";
         customerdiv.appendChild(statusDiv);
         let textStatus = document.createElement("p");
-        textStatus.innerHTML="Warten Auf Kunden Rückmeldung";
+        textStatus.innerHTML = "Fertig/Druckfreigabe";
         statusDiv.appendChild(textStatus);
+        if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
+            statusImg.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAfCAIAAAB/DupQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAJGSURBVEhLjZW9SxxRFMXnz7KQgIWFiOiOxs3u6iIqbKGFYoiIiwga8QNFCwW1UGwUFrQJImIgCYJFIiKChYVIioCkEUTwo1jPep937tx583YOh2Fn5tzfzLvvzVuvHKN//+/ML6ccMTv65Pz6Q/fC+u6xOY+RO2ZBU0FN5yzsoFeNafS3XxdcQN79fmbuCUkuOUoPocGVaTaum8SbolyyogdoyfVzY3t+G458hemnl3+Z25CbKPnpfHaEY5Ju0Ip7kEr9aGnCUdGvbm7rC0t0Ci4ej9hRS3NPZphjE2v7xKygrVyyojO3vmOSuOy+T0McI7rn4JIVHa7rmNr2MyoGFzJfODOzcejJMcbV4AUx/OQZTAamutKQ5PS4uxiZ4ppeJ6fHcWXHfv65Imaw+JLQo1ZcXqNQgIasa8thBxcKoSH5pbnpbi6k0dDhySUXNOXG8UUoKDmbHeVYou3p/uExX9ykgtrO6bXWvCKyMRmYEkqijWimQbwrhJZceKWtS+GUJb2xf1n9LQRoxZ3/2KtAVkt6anBV0g06Idfa9y0/i9ZF6RX00/PLwFypKhcbEPZPKx1TEqV7ivu1vaDKyLyxJad7WDd0DmM9qQKy3DDhOPrn9ABnhhf39FsX032qQHHJUTraGNwtbmLyLL3Gw7lAbfByiJIe5ZppJDoq+TaIKMAI+AoGSMko3cqFgnUNSbrcHzAmPNuEwnQZk1wohIYknay4JEknKy6k0ZCkW7mkqjELGqIyB5fkjtnR0M7BbzeXFBsrl18BIcnf2PEdJAEAAAAASUVORK5CYII=")
+            boolStatus = true;
+        } else {
+            statusImg.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAfCAIAAAB/DupQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAJHSURBVEhLjdXPS1RRFAfw91+FUCJSiyRE3LiI6JeGjuEkTkNN6OikZvlzhBaii1y5EglmU0EFQbiRYBaFi6AgXOiqIEgRxu90juedd+59d96Xy+Cbd+7nvftjrlEjJQdHv/mvYAJlfvpz/celgZfrO7t8nZJwmYemDhduraIF9JZllq59+iodqG2/r/M9Fe1Sc/UEDVdXS8P3XPE/rkvN6DGt3Sv3lotPpvAp34i+9+2XuB39K4VS5drQopRpnWnjlsYny+UyPo2+//Pwcm6NLuHi8Sgbn5jszi1IWWXjHZlN2utSjC5u+112Jb3356WM9CjgUoyOdvFOdfRxhW+r9AzH7/5880Okx5jWBy+I4WevwWJgqZsTkl1Pu4uRGZfnOrue5uoZ+7j3ncx482XR3RhX9igS04h3bwUScJEEjehfWlgPu4ilkbe7+9Khc2AZvwjGkrk6uCRlmY6nP3//3ZjYog5tt6u54jRLTrAYWBKqxDRiMpk4T4LWLtrgwxlmUqL1rvyG+bcQ08btH5tlIBit9xReaZ3pjK533vOPnmLqXL1JH5+cPlh83dLFAYTz06tjSVw9Mu7N0WdcnowcbNn1CPuGrtGwn7gwGX1goqXpfSMvpKa4WrNvfT0/x4XnMS41V8c0yl0sGxbPM9d4OJc7B7weotZdl5eRdPSU2xDRASOQbzBAqnR1r4vE+xrRuj4fMCY8m4uSui7TLpKgEa1TMy5F69SMi1ga0brXpbQs89AIdQu4lHCZn0a23nwJu5TUskbjDGnMC5TCOwaqAAAAAElFTkSuQmCC")
+            boolStatus = false;
+        }
+        if (boolStatus) {
 
+            customerdiv.onclick = function () {
+                clientDivClick(clientname.innerHTML, projektname.innerHTML);
+            };
+        }
 
-
+        let id1 = clientname.innerHTML + projektname.innerHTML;
+        customerdiv.setAttribute("id", id1);
+        counter++;
     }
+
     function customerDelate() {
-        let div =document.getElementById("form");
-        let meldungDiv = document.createElement("div");
-        meldungDiv.className="loeschen";
-        div.appendChild(meldungDiv);
-        let text = document.createElement("p");
-        text.innerHTML="Sind sie sicher das Sie dieses Projekt löschen wollen ?";
-        meldungDiv.appendChild(text);
+        let dialog = document.getElementById("dialog");
+        dialog.showModal();
+
+
     }
+
+    function closeYes() {
+        document.getElementById("dialog").close();
+        a = true;
+        let divForm = document.getElementById("form1");
+        let loeschen = document.getElementById("p1");
+        divForm.removeChild(loeschen);
+        let id1 = document.getElementById("pName").innerHTML + document.getElementById("pProjekt").innerHTML;
+        let div = document.getElementById(id1);
+        div.remove();
+    }
+
+    function closeNo() {
+        document.getElementById("dialog").close();
+    }
+
+    function clientDivClick(name1, projekt1) {
+        let divForm = document.getElementById("form1");
+        let loeschen = document.createElement("p");
+        if (a) {
+            loeschen.innerHTML = "Kunde löschen";
+            loeschen.setAttribute("onclick", "customerDelate()");
+            loeschen.setAttribute("id", "p1");
+            divForm.appendChild(loeschen);
+            a = false;
+
+        }else {
+            divForm.lastChild.remove();
+            a =true;
+        }
+
+        document.getElementById("pName").innerHTML = name1;
+        document.getElementById("pProjekt").innerHTML = projekt1;
+
+
+    }
+
 </script>
 </html>

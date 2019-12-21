@@ -104,25 +104,19 @@ body {
     border-radius: 30px;
     background-color: #0cfad6;
 }
-.clients img {
+.clients img:first-child{
     position: absolute;
     padding-left: 40px;
     padding-top: 15px;
     float: left;
 }
+
 .status{
     background-color:gray;
     color: white;
     position: relative;
     border-radius: 15px;
     margin-left: 650px;
+    padding-left: 20px;
 
-}
-.loeschen{
-    background-color:gray;
-    color: white;
-    position: relative;
-    margin-top: 10%;
-    border-radius: 15px;
-    margin-left: 650px;
 }
