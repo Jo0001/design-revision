@@ -2,26 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Login</title>
-    <link rel="stylesheet" href="../files/css/Login.css">
+    <link href="../files/css/Login.css" rel="stylesheet">
 </head>
 <body>
 <div class="form">
     <h1>Login</h1>
 
-    <form id="login" action="login.php" method="post">
+    <form action="login.php" id="login" method="post">
 
         <label>E-Mail:<br>
-            <input type="email" placeholder="E-mail" id="email" name="email" value="lukas-biermann@fahr-zur-hoelle.org"
-                   required>
+            <input id="email" name="email" placeholder="E-mail" required type="email"
+                   value="lukas-biermann@fahr-zur-hoelle.org">
         </label><br><br>
         <label>Password:<br>
-            <input type="password" placeholder="Password" name="password" value="Jo0001"
-                   required></label><br>
+            <input id="password" name="password" placeholder="Password" required type="password"
+                   value="Jo0001"></label><br>
 
         <p>Forgot Password? <a href="loginforgotpass.html">Reset</a></p>
-        <input type="submit" value="Login">
+        <input id="btnLogin" name="btnLogin" type="submit" value="Login">
     </form>
     <p>Don't have an account yet? <a href="loginNewAccount.html">Get Account</a></p>
 
