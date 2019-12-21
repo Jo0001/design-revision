@@ -1,6 +1,7 @@
 <?php
 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
 require "../libs/sendEmail.php";
+require  "../libs/parser.php";
 if (!empty($_POST['email'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_STRING);
 
@@ -11,9 +12,12 @@ if (!empty($_POST['email'])) {
     if ($user !== false) {
         if($user['status']== "verified") {
             $statement = $pdo->prepare("UPDATE users SET reset_id = ? WHERE email = ?");
-            $statement->execute(array(generateHash($pdo), $email));
+            $hash = generateHash($pdo);
+            $statement->execute(array($hash, $email));
 
-            sendMail($email,$user['name'],"Reset your Password","demo content");
+            $link="http://localhost/design-revision/login/loginNewPassword.html?token=".$hash;
+
+            sendMail($email,$user['name'],"Reset your Password",parseHTML("../libs/templates/resetPassword.html",$user['name'],$link,null,null));
            die(" done");
         }
     }

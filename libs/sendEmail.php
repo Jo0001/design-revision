@@ -15,7 +15,7 @@ function sendMail($toAdr, $toName, $subject, $content)
         $mail->Host = 'mail.gmx.de';
         $mail->SMTPAuth = true;
         $mail->Username = 'design-revision@gmx.de';
-        $mail->Password = 'dsnRev-4D';
+        $mail->Password = 'dsnRev-4D#2020';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         // $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = 587;
