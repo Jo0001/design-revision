@@ -24,7 +24,7 @@ if (!empty($_GET['token'])) {
         $currentdate = date("Y-m-d H:i:s");
         $diff = dateDifference($timestamp, $currentdate);
         if ($diff <= 2) {
-            $statement = $pdo->prepare("UPDATE users SET status = ? WHERE token = ?");
+            $statement = $pdo->prepare("UPDATE users SET status = ?, token = NULL WHERE token = ?");
             $statement->execute(array("verified", $token));
             $verified = true;
         }
