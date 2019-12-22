@@ -17,7 +17,7 @@ body {
     width: 900px;
     height: auto;
     top: 50%;
-    left: 50%;
+    left: 40%;
     position: absolute;
     transform: translate(-50%, -50%);
     box-sizing: border-box;
@@ -28,7 +28,6 @@ body {
 .form input:hover {
     color: gray;
 }
-
 
 .form input[type="text"], input[type="password"], input[type="email"] {
     width: 50%;
@@ -69,23 +68,4 @@ body {
     height: 40px;
     color: black;
     font-size: 16px;
-}
-meter {
-    /* Ändert die Normale Erscheinung */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-
-    margin: 0 auto 1em;
-    width: 100%;
-    height: 0.5em;
-
-    /* Für Firefox*/
-    background: none;
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-meter::-webkit-meter-bar {
-    background: none;
-    background-color: rgba(0, 0, 0, 0.1);
 }

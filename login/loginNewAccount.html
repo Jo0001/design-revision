@@ -25,13 +25,14 @@
             <input id="firmName" name="firmName" placeholder="Firm Name (optional)" type="text">
         </label><br><br>
         <label>
-            <input id="password" name="password" onkeyup="char_count();" placeholder="Password" required
+            <input style="width: 300px" id="password" name="password" onkeyup="char_count();" placeholder="Password" required
                    type="password">
         </label>
+        <progress id="progress" max="100" value="0"></progress>
         <span id="feedback"></span>
         <br><br>
         <label>
-            <input id="againPassword" name="againPassword" placeholder="Password again" required type="password">
+            <input id="againPassword" style="width: 300px" name="againPassword" placeholder="Password again" required type="password">
         </label><br><br>
         <input id="btnSignIn" name="btnSignIn" type="submit" value="Sign In">
     </form>
@@ -59,20 +60,31 @@
     function char_count() {
         let val = document.getElementById('password').value;
         let call = document.getElementById('feedback');
+        let feedback = document.getElementById('progress');
+
         if (val.length > 7) {
             if (val.match(/\d+/) && val.match(/[a-zA-ZäöüÄÖÜ]+/) && val.match(/\W/)) {
                 call.style.color = "#428c0d";
-                call.innerHTML = "<strong>Das Passwort ist sehr sicher!</strong>";
+                call.innerHTML = "<strong>100% - Das Passwort ist sehr sicher!</strong>";
+                feedback.value =100;
             } else if (val.match(/\d+/) && val.match(/[a-zA-ZäöüÄÖÜ]+/) || val.match(/\W/) && val.match(/[a-zA-ZäöüÄÖÜ]+/)) {
                 call.style.color = "#56a40c";
-                call.innerHTML = "<strong>Das Passwort ist sicher!</strong>";
+                call.innerHTML = "<strong>75% - Das Passwort ist sicher!</strong>";
+                feedback.value=75;
             } else {
                 call.style.color = "#ff9410";
-                call.innerHTML = "<strong>Das Passwort ist unsicher!</strong>";
+                call.innerHTML = "<strong>50% -Das Passwort ist unsicher!</strong>";
+                feedback.value=50;
             }
         } else {
             call.style.color = "#ff352c";
-            call.innerHTML = "<strong>Das Passworrt ist zu kurz!</strong>";
+            call.innerHTML = "<strong>25% - Das Passwort ist zu kurz!</strong>";
+            feedback.value=25;
+        }
+        if(val.length===0){
+            call.innerHTML="";
+            feedback.value=0;
+
         }
     }
 
