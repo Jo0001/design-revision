@@ -3,21 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify E-Mail Address</title>
+    <title>E-Mail Adress verifizieren</title>
     <link rel="stylesheet" type="text/css" href="../files/css/layout.css">
 </head>
 <body>
 <?php
+require "../libs/util.php";
 $verified = false;
 if (!empty($_GET['token'])) {
     $token = filter_var($_GET['token'], FILTER_SANITIZE_STRING);
-    //TODO Database logic & check
-    $verified = true;
+
+    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
+    $result = $statement->execute(array('token' => $token));
+    $user = $statement->fetch();
+
+    if (!empty($user)) {
+        $timestamp = $user['token_timestamp'];
+        date_default_timezone_set('Europe/Berlin');
+        $currentdate = date("Y-m-d H:i:s");
+        $diff = dateDifference($timestamp, $currentdate);
+        if ($diff <= 2) {
+            $statement = $pdo->prepare("UPDATE users SET status = ? WHERE token = ?");
+            $statement->execute(array("verified", $token));
+            $verified = true;
+        }
+    }
 }
 if ($verified) {
     echo "<div id=\"verifyBox\" class=\"middle success\">
     <h3>E-Mailadresse erfolgreich verifiziert</h3>
-    <p>email@company.tld</p>
+    <p>" . $user['email'] . "</p>
 </div>";
 } else {
     echo "<div id=\"verifyBox\" class=\"middle error\">

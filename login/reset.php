@@ -1,7 +1,7 @@
 <?php
 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
 require "../libs/sendEmail.php";
-require  "../libs/parser.php";
+require  "../libs/util.php";
 if (!empty($_POST['email'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_STRING);
 
@@ -11,7 +11,7 @@ if (!empty($_POST['email'])) {
 
     if ($user !== false) {
         if($user['status']== "verified") {
-            $statement = $pdo->prepare("UPDATE users SET reset_id = ? WHERE email = ?");
+            $statement = $pdo->prepare("UPDATE users SET token = ? WHERE email = ?");
             $hash = generateHash($pdo);
             $statement->execute(array($hash, $email));
 
@@ -23,14 +23,3 @@ if (!empty($_POST['email'])) {
     }
 }
 
-//TODO Needs testing with more users
-function generateHash($pdo)
-{
-    do {
-        $hash = bin2hex(openssl_random_pseudo_bytes(128));
-        $statement = $pdo->prepare("SELECT * FROM users WHERE reset_id = :reset_id");
-        $result = $statement->execute(array('reset_id' => $hash));
-        $token = $statement->fetch();
-    } while ($token !== false);
-    return $hash;
-}
