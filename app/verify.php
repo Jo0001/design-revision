@@ -16,13 +16,13 @@ if (!empty($_GET['token'])) {
 }
 if ($verified) {
     echo "<div id=\"verifyBox\" class=\"middle success\">
-    <h3>Successful verified your e-mail address</h3>
+    <h3>E-Mailadresse erfolgreich verifiziert</h3>
     <p>email@company.tld</p>
 </div>";
 } else {
     echo "<div id=\"verifyBox\" class=\"middle error\">
-    <h3>Something went wrong</h3>
-    <p>Invalid or expired link</p>
+    <h3>Etwas ist schiefgelaufen</h3>
+    <p>Ungültiger oder abgelaufener Link</p>
 </div>";
 }
 ?>
