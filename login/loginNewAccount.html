@@ -9,13 +9,13 @@
 <body>
 <div class="form">
     <form action="signup.php" id="newAccountForm" method="post">
-        <h1>Get new Account</h1>
+        <h1>Erstellen sie eine Konto</h1>
         <div class="name">
             <label>
-                <input id="firstName" name="firstName" placeholder="First Name" required type="text">
+                <input id="firstName" name="firstName" placeholder="Vorname" required type="text">
             </label>
             <label>
-                <input id="lastName" name="lastName" placeholder="Last Name" required type="text">
+                <input id="lastName" name="lastName" placeholder="Nachname" required type="text">
             </label></div>
         <br>
         <label>
@@ -23,10 +23,10 @@
         </label>
         <span id="statusEmail"></span><br><br>
         <label>
-            <input id="firmName" name="company" placeholder="Firm Name (optional)" type="text">
+            <input id="firmName" name="company" placeholder="Firmenname (optional)" type="text">
         </label><br><br>
         <label>
-            <input id="password" name="password" onkeyup="char_count();" placeholder="Password" required
+            <input id="password" name="password" onkeyup="char_count();" placeholder="Passwort" required
                    style="width: 300px"
                    type="password">
         </label>
@@ -34,13 +34,13 @@
         <span id="feedback"></span>
         <br><br>
         <label>
-            <input id="againPassword" name="againPassword" onkeyup="check_up3()" placeholder="Password again"
+            <input id="againPassword" name="againPassword" onkeyup="check_up3()" placeholder="Passwort wiederholt"
                    required style="width: 300px" type="password">
             <span id="samePass"></span>
         </label><br><br>
         <input id="btnSignIn" name="btnSignIn" type="submit" value="Sign In">
     </form>
-    <p>Already have an account yet? <a href="login.html">Sign In</a></p>
+    <p>Sie haben schon ein Konot? <a href="login.html">Sign In</a></p>
 </div>
 </body>
 <script>
@@ -71,7 +71,7 @@
 
     function check_up() {
         let statusEmail = document.getElementById('statusEmail');
-        statusEmail.innerHTML = "<strong>Gültige E-mail eingeben</strong>";
+        statusEmail.innerHTML = "";
     }
 
 

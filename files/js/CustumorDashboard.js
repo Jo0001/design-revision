@@ -94,10 +94,10 @@ function generate() {
     statusDiv.appendChild(textStatus);
     //Abfrage für den Status
     if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
-        statusImg.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAfCAIAAAB/DupQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAJGSURBVEhLjZW9SxxRFMXnz7KQgIWFiOiOxs3u6iIqbKGFYoiIiwga8QNFCwW1UGwUFrQJImIgCYJFIiKChYVIioCkEUTwo1jPep937tx583YOh2Fn5tzfzLvvzVuvHKN//+/ML6ccMTv65Pz6Q/fC+u6xOY+RO2ZBU0FN5yzsoFeNafS3XxdcQN79fmbuCUkuOUoPocGVaTaum8SbolyyogdoyfVzY3t+G458hemnl3+Z25CbKPnpfHaEY5Ju0Ip7kEr9aGnCUdGvbm7rC0t0Ci4ej9hRS3NPZphjE2v7xKygrVyyojO3vmOSuOy+T0McI7rn4JIVHa7rmNr2MyoGFzJfODOzcejJMcbV4AUx/OQZTAamutKQ5PS4uxiZ4ppeJ6fHcWXHfv65Imaw+JLQo1ZcXqNQgIasa8thBxcKoSH5pbnpbi6k0dDhySUXNOXG8UUoKDmbHeVYou3p/uExX9ykgtrO6bXWvCKyMRmYEkqijWimQbwrhJZceKWtS+GUJb2xf1n9LQRoxZ3/2KtAVkt6anBV0g06Idfa9y0/i9ZF6RX00/PLwFypKhcbEPZPKx1TEqV7ivu1vaDKyLyxJad7WDd0DmM9qQKy3DDhOPrn9ABnhhf39FsX032qQHHJUTraGNwtbmLyLL3Gw7lAbfByiJIe5ZppJDoq+TaIKMAI+AoGSMko3cqFgnUNSbrcHzAmPNuEwnQZk1wohIYknay4JEknKy6k0ZCkW7mkqjELGqIyB5fkjtnR0M7BbzeXFBsrl18BIcnf2PEdJAEAAAAASUVORK5CYII=")
+        statusImg.setAttribute("src", "../files/img/XBereit.png");
         boolStatus = true;
     } else {
-        statusImg.setAttribute("src", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAfCAIAAAB/DupQAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAJHSURBVEhLjdXPS1RRFAfw91+FUCJSiyRE3LiI6JeGjuEkTkNN6OikZvlzhBaii1y5EglmU0EFQbiRYBaFi6AgXOiqIEgRxu90juedd+59d96Xy+Cbd+7nvftjrlEjJQdHv/mvYAJlfvpz/celgZfrO7t8nZJwmYemDhduraIF9JZllq59+iodqG2/r/M9Fe1Sc/UEDVdXS8P3XPE/rkvN6DGt3Sv3lotPpvAp34i+9+2XuB39K4VS5drQopRpnWnjlsYny+UyPo2+//Pwcm6NLuHi8Sgbn5jszi1IWWXjHZlN2utSjC5u+112Jb3356WM9CjgUoyOdvFOdfRxhW+r9AzH7/5880Okx5jWBy+I4WevwWJgqZsTkl1Pu4uRGZfnOrue5uoZ+7j3ncx482XR3RhX9igS04h3bwUScJEEjehfWlgPu4ilkbe7+9Khc2AZvwjGkrk6uCRlmY6nP3//3ZjYog5tt6u54jRLTrAYWBKqxDRiMpk4T4LWLtrgwxlmUqL1rvyG+bcQ08btH5tlIBit9xReaZ3pjK533vOPnmLqXL1JH5+cPlh83dLFAYTz06tjSVw9Mu7N0WdcnowcbNn1CPuGrtGwn7gwGX1goqXpfSMvpKa4WrNvfT0/x4XnMS41V8c0yl0sGxbPM9d4OJc7B7weotZdl5eRdPSU2xDRASOQbzBAqnR1r4vE+xrRuj4fMCY8m4uSui7TLpKgEa1TMy5F69SMi1ga0brXpbQs89AIdQu4lHCZn0a23nwJu5TUskbjDGnMC5TCOwaqAAAAAElFTkSuQmCC")
+        statusImg.setAttribute("src", "../files/img/XWarten.png");
         boolStatus = false;
     }
     //Abfrage ob der Kunden gelöscht werden kann
