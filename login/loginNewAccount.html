@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="form">
-    <form id="newAccountForm" action="signup.php" method="post">
+    <form action="signup.php" id="newAccountForm" method="post">
         <h1>Get new Account</h1>
         <div class="name">
             <label>
@@ -19,19 +19,24 @@
             </label></div>
         <br>
         <label>
-            <input id="email" name="email" placeholder="E-mail" required type="email">
+            <input id="email" name="email" onkeyup="check_up()" placeholder="E-mail" required type="email">
+        </label>
+        <span id="statusEmail"></span><br><br>
+        <label>
+            <input id="firmName" name="company" placeholder="Firm Name (optional)" type="text">
         </label><br><br>
         <label>
-            <input type="text" placeholder="Firm Name (optional)" id="firmName" name="company">
-        </label><br><br>
-        <label>
-            <input style="width: 300px" id="password" name="password" onkeyup="char_count();" placeholder="Password" required
+            <input id="password" name="password" onkeyup="char_count();" placeholder="Password" required
+                   style="width: 300px"
                    type="password">
         </label>
+        <progress id="progress" max="100" value="0"></progress>
         <span id="feedback"></span>
         <br><br>
         <label>
-            <input type="password" placeholder="Password again" id="againPassword" name="againPassword" required>
+            <input id="againPassword" name="againPassword" onkeyup="check_up3()" placeholder="Password again"
+                   required style="width: 300px" type="password">
+            <span id="samePass"></span>
         </label><br><br>
         <input id="btnSignIn" name="btnSignIn" type="submit" value="Sign In">
     </form>
@@ -39,15 +44,23 @@
 </div>
 </body>
 <script>
+    let status = true;
     let newAcount = document.getElementById("newAccountForm");
     newAcount.addEventListener('submit', function (evt) {
-        let pass1 = document.querySelector("#password").value;
-        let pass2 = document.querySelector("#againPassword").value;
-        if (!(pass1 === pass2) || !(emailIsValid(document.querySelector("#email").value))) {
-            window.alert(" Password oder Email ist falsch ");
+        let call = document.getElementById("feedback");
+        let feedback = document.getElementById('progress');
+        let statusEmail = document.getElementById('statusEmail');
+        if (!(emailIsValid(document.querySelector("#email").value)) || status) {
+            if (!(emailIsValid(document.querySelector("#email").value))) {
+                statusEmail.style.color = "red";
+                statusEmail.innerHTML = "<strong>Gültige E-mail eingeben</strong>";
+            }
+            if (status) {
+                call.style.color = "black";
+                feedback.value = 0;
+                call.innerHTML = "<strong>Das Passwort muss sicher sein</strong>";
+            }
             evt.preventDefault();
-        } else {
-            window.alert("Password richtig");
         }
 
     });
@@ -56,43 +69,59 @@
         return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     }
 
+    function check_up() {
+        let statusEmail = document.getElementById('statusEmail');
+        statusEmail.innerHTML = "<strong>Gültige E-mail eingeben</strong>";
+    }
+
+
     function char_count() {
-        //Über die DOM-Methode document.getElementById wird der Wert aus dem Eingabefeld geholt
-        //und der Variablen val zugewiesen.
         let val = document.getElementById('password').value;
-
-        //Anschließend wird über die selbe DOM-Methode ein Referenzpunkt für das Feedback erzeugt
-        //und in der Variablen call gespeichert.
         let call = document.getElementById('feedback');
+        let feedback = document.getElementById('progress');
 
-        //Ab hier beginnt die Prüfung.
-        //Das Passwort ist entweder zu kurz, unsicher, sicher oder sehr sicher
-
-        //Ist das Passwort wenigstens 6 Zeichen lang?
-        if (val.length > 5) {
-
-            //Wenn das Passwort neben Buchstaben zusätzlich wenigstens eine Zahl
-            //und ein Sonderzeichen enthält, ist es "sehr sicher".
-            if (val.match(/\d+/) && val.match(/[a-zA-ZäöüÄÖÜ]+/) && val.match(/\W/)) {
+        if (val.length > 7) {
+            if (val.match(/\d+/) && val.match(/[a-zäöü]+/) && val.match(/\W/) && val.match(/[[A-ZÄÖU]+/)) {
                 call.style.color = "#428c0d";
-                call.innerHTML = "<strong>sehr sicher!</strong>";
-            }
+                call.innerHTML = "<strong>100% - Das Passwort ist sehr sicher!</strong>";
+                feedback.value = 100;
+                status = false;
 
-            //Wenn das Passwort nur eine Zahl oder ein Sonderzeichen enthält, ist es "sicher"?
-            else if (val.match(/\d+/) && val.match(/[a-zA-ZäöüÄÖÜ]+/) || val.match(/\W/) && val.match(/[a-zA-ZäöüÄÖÜ]+/)) {
-                call.style.color = "#56a40c";
-                call.innerHTML = "<strong>sicher!</strong>";
-            } else //Hier enthält das Passwort weder Ziffern noch Sonderzeichen und ist somit "unsicher".
-            {
-
+            } else if (val.match(/\d+/) && val.match(/[a-zäöü]+/) || val.match(/\W/) && val.match(/[a-zäöü]+/)) {
                 call.style.color = "#ff9410";
-                call.innerHTML = "<strong>unsicher!</strong>";
+                call.innerHTML = "<strong>75% - Das Passwort fast sicher!</strong>";
+                feedback.value = 75;
+                status = true;
+            } else {
+                call.style.color = "#ff9410";
+                call.innerHTML = "<strong>50% -Das Passwort ist unsicher!</strong>";
+                feedback.value = 50;
             }
-        } else //Hier enthält das Passwort nicht mal die erforderlichen 6 Zeichen und ist daher "zu kurz"
-        {
+        } else {
             call.style.color = "#ff352c";
-            call.innerHTML = "<strong>zu kurz!</strong>";
+            call.innerHTML = "<strong>25% - Das Passwort ist zu kurz!</strong>";
+            feedback.value = 25;
+            status = true;
         }
+        if (val.length === 0) {
+            call.innerHTML = "";
+            feedback.value = 0;
+            status = true;
+
+        }
+    }
+
+    function check_up3() {
+        let pass1 = document.querySelector("#password").value;
+        let pass2 = document.querySelector("#againPassword").value;
+        let samePass1 = document.getElementById("samePass");
+        if (!(pass1 === pass2)) {
+            samePass1.style.color = "red";
+            samePass1.innerHTML = "<strong>Passwörter verschieden</strong>";
+        } else {
+            samePass1.innerHTML = "";
+        }
+
     }
 
 </script>

@@ -2,36 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title> Reset Password </title>
-    <link rel="stylesheet" href="../files/css/Login.css">
+    <link href="../files/css/Login.css" rel="stylesheet">
 </head>
 <body>
 <div class="form">
-<h1> Rest your Design Revision Password </h1>
-<form id="forgottenpass" action="reset.php" method="post">
-    <label>E-Mail:
-        <input type="email" placeholder="E-mail" id="email" name="email" value="lukas-biermann@fahr-zur-hoelle.org" required>
-    </label><br><br>
-    <input type="submit" name="resetpass" id="resetpass" value="Passwort zurücksetzen">
-</form>
+    <h1> Rest your Design Revision Password </h1>
+    <form action="reset.php" id="forgottenpass" method="post">
+        <label>E-Mail:
+            <input id="email" name="email" onkeyup="check_up3()" placeholder="E-mail" required
+                   type="email" value="lukas-biermann@fahr-zur-hoelle.org">
+        </label><span id="statusEmail"></span><br><br>
+        <input id="resetpass" name="resetpass" type="submit" value="Passwort zurücksetzen">
+    </form>
 </div>
 </body>
 
 <script>
     let resetPass = document.getElementById("forgottenpass");
+    let statusEmail = document.getElementById('statusEmail');
     resetPass.addEventListener('submit', function (evt) {
         if (!(emailIsValid(document.querySelector("#email").value))) {
-            window.alert("Email ist falsch ");
+            statusEmail.style.color = "red";
+            statusEmail.innerHTML = "<strong>Gültige E-mail eingeben</strong>";
             evt.preventDefault();
-        } else {
-            window.alert("Email richtig");
         }
 
     });
 
     function emailIsValid(email) {
         return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    }
+
+    function check_up3() {
+        statusEmail.innerHTML = "";
+
     }
 </script>
 </html>
