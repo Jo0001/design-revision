@@ -1,15 +1,11 @@
 <?php
 require "../libs/auth.php";
-
+//Veraltet
 function check_format()
 {
     if (!empty($_GET['format'])) {
-        $value = filter_var($_GET['format'], FILTER_SANITIZE_STRING);
-        if ($value == "json") {
-            return "json";
-        }
+        return filter_var($_GET['format'], FILTER_SANITIZE_STRING);
     }
-    return;
 }
 
 function check_id()
@@ -28,18 +24,23 @@ if (!empty($_GET['getuser'])) {
         handleOutput(getUser($value));
     } elseif ($value == "company") {
         handleOutput(getUser($value));
+    } elseif ($value == "status") {
+        handleOutput(getUser($value));
     } elseif ($value == "avatar") {
-        handleOutput("http://localhost/design-revision/api/avatar.php?name=".getUser("name"));
+        handleOutput("../api/avatar.php?name=" . getUser("name"));
     } elseif ($value == "projects") {
         handleOutput(getUser($value));
     } else {
         showError("Unknown value for parameter 'getuser=$value'", 400);
     }
-
+} else if (isset($_GET['getuser'])) {
+    handleOutput(array("user" => getUser("all")));
 } else if (!empty($_GET['getproject'])) {
     $value = filter_var($_GET['getproject'], FILTER_SANITIZE_STRING);
     $value = strtolower($value);
-    if ($value == "name") {
+    if ($value == "id") {
+        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
+    } else if ($value == "name") {
         handleOutput("DEMO: 'getprojects' is not yet implemented :/");
     } elseif ($value == "status") {
         handleOutput("DEMO: 'getprojects' is not yet implemented :/");
@@ -53,38 +54,48 @@ if (!empty($_GET['getuser'])) {
         showError("Unknown value for parameter 'getproject=$value'", 400);
     }
 
+} else if (isset($_GET['getproject'])) {
+    //Demo logic:
+    $id = (int)check_id();
+    if (is_null($id)) {
+        $id = -1;
+    }
+    handleOutput(array("project" => array("id" => $id, "name" => "demo", "status" => "demo", "link" => "demo", "version" => "demo", "members" => array(1, 2, 3))));
 } else {
     showError("No or wrong parameters provided", 400);
 }
 
 function showError($error, $code)
 {
+    $http_message = null;
     if ($code == 400) {
         header("HTTP/1.0 400 Bad Request");
+        $http_message = "Bad Request";
     } elseif ($code == 401) {
         header('WWW-Authenticate: Login to get the requested data');
         header("HTTP/1.0 401 Unauthorized ");
+        $http_message = "Unauthorized";
     } elseif ($code == 403) {
         header("HTTP/1.0 403 Forbidden");
+        $http_message = "Forbidden";
     } elseif ($code == 404) {
         header("HTTP/1.0 404 Not Found");
+        $http_message = "Not Found";
     }
-
-    $error = "ERROR: " . $error;
-    handleOutput($error);
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-ersion" => 1.2));
+    handleOutput($err);
     die;
 }
 
 function handleOutput($o)
 {
-    if (check_format() == "json") {
+    if (check_format() == "raw") {
+        header("Content-type:text/plain");
+    } else {
         header("Content-type:application/json");
         $o = json_encode($o);
-    } else {
-        header("Content-type:text/plain");
     }
     echo $o;
-
 }
 
 function getUser($value)
@@ -96,8 +107,20 @@ function getUser($value)
         $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
         $result = $statement->execute(array('pk_id' => $id));
         $user = $statement->fetch();
-        return $user[$value];
-
+        if ($value == "all") {
+            return ["name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "http://localhost/design-revision/api/avatar.php?name=" . $user['name'], "projects" => [$user['projects']]];
+        } else {
+            return $user[$value];
+        }
     }
-    showError("Unauthorized", 401);
+    showError("Login to get the requested data", 401);
+}
+
+function getProject($value)
+{
+    $id = (int)check_id();
+    if (!is_null($id)) {
+        //TODO Database logic
+    }
+
 }
