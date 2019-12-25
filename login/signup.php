@@ -35,7 +35,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
             $user = $statement->fetch();
             $link = "http://localhost/design-revision/app/verify.php?token=" . $hash;
             $content = parseHTML("../libs/templates/welcome.html", $name, $link, null, null);
-            sendMail($email, $name, "Best&auml;tige deine E-Mailadresse", $content);
+            sendMail($email, $name, "Willkommen bei Design Revison", $content);
 
             logIn($email, $password);
         } else {

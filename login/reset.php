@@ -15,7 +15,7 @@ if (!empty($_POST['email'])) {
             $hash = generateHash($pdo);
             $statement->execute(array($hash, $email));
 
-            $link="http://localhost/design-revision/login/loginNewPassword.html?token=".$hash;
+            $link="../login/loginNewPassword.html?token=".$hash;
 
             sendMail($email,$user['name'],"Reset your Password",parseHTML("../libs/templates/resetPassword.html",$user['name'],$link,null,null));
            die(" done");

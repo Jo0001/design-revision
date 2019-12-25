@@ -108,7 +108,7 @@ function getUser($value)
         $result = $statement->execute(array('pk_id' => $id));
         $user = $statement->fetch();
         if ($value == "all") {
-            return ["name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "http://localhost/design-revision/api/avatar.php?name=" . $user['name'], "projects" => [$user['projects']]];
+            return ["name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'], "projects" => [$user['projects']]];
         } else {
             return $user[$value];
         }
