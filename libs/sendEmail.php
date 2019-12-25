@@ -25,6 +25,7 @@ function sendMail($toAdr, $toName, $subject, $content)
         $mail->addAddress($toAdr, $toName);
 
         // Content
+        $mail->CharSet = 'UTF-8';
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $content;

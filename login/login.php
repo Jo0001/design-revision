@@ -5,7 +5,8 @@ if (isset($_GET['logout'])) {
     die;
 }
 if(isLoggedIn()){
-    header("Location: ../app/CustumorDashboard.html");
+    //header("Location: ../app/CustumorDashboard.html");
+    header("Location: ../simulate/dashboard.php");
     die;
 }
 

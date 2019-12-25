@@ -13,7 +13,7 @@ function logIn($email, $password)
         $_SESSION['user-log'] = "true";
         $_SESSION['user-id'] = $user['pk_id'];
         $_SESSION['user-time'] = date("d-m-Y h:i:s");
-        header("Location: ../app/CustumorDashboard.html");
+        header("Location: ../simulate/dashboard.php");
         die;
     } else {
         header("Location: ../login/login.html?err=1");

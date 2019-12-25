@@ -23,9 +23,7 @@ function parseHTML($file_path, $name, $link, $project_name, $project_version)
 
 function dateDifference($d1, $d2)
 {
-    $date1 = date_create($d1);
-    $date2 = date_create($d2);
-    $diff = date_diff($date1, $date2);
-    return $diff->format("%h");
-
+    $date1 = strtotime($d1);
+    $date2 = strtotime($d2);
+    return abs($date2 - $date1);
 }

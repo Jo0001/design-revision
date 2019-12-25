@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Mail Adress verifizieren</title>
     <link rel="stylesheet" type="text/css" href="../files/css/layout.css">
+    <link rel="icon" href="../files/img/favicon.ico" type="image/x-icon">
 </head>
 <body>
 <?php
