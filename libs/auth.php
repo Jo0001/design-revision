@@ -1,4 +1,5 @@
 <?php
+require "util.php";
 session_start();
 
 function logIn($email, $password)
@@ -12,7 +13,8 @@ function logIn($email, $password)
         $_SESSION['user-status'] = $user['status'];
         $_SESSION['user-log'] = "true";
         $_SESSION['user-id'] = $user['pk_id'];
-        $_SESSION['user-time'] = date("d-m-Y h:i:s");
+        date_default_timezone_set('Europe/Berlin');
+        $_SESSION['user-time'] = date("Y-m-d H:i:s");
         header("Location: ../simulate/dashboard.php");
         die;
     } else {
@@ -25,11 +27,11 @@ function logIn($email, $password)
 function isLoggedIn()
 {
     if (isset($_SESSION['user-status']) && isset($_SESSION['user-id']) && isset($_SESSION['user-log']) && isset($_SESSION['user-time']) && $_SESSION['user-log'] == "true") {
-        //TODO Needs testing
-        $date1 = strtotime($_SESSION["user-time"]);
-        $date2 = strtotime(date("d-m-Y h:i:s"));
-        $diff = abs($date2 - $date1) / 60 / 60 / 24;
-        if ($diff >= 1) {
+        date_default_timezone_set('Europe/Berlin');
+        $currentdate = date("Y-m-d H:i:s");
+        $usertime = $_SESSION['user-time'];
+        $diff = dateDifference($usertime, $currentdate);
+        if ($diff > 86400) {
             logout();
             return false;
         } else {

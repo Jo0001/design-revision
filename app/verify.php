@@ -18,13 +18,12 @@ if (!empty($_GET['token'])) {
     $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
     $result = $statement->execute(array('token' => $token));
     $user = $statement->fetch();
-
     if (!empty($user)) {
         $timestamp = $user['token_timestamp'];
         date_default_timezone_set('Europe/Berlin');
         $currentdate = date("Y-m-d H:i:s");
         $diff = dateDifference($timestamp, $currentdate);
-        if ($diff <= 2) {
+        if ($diff <= 7200) {
             $statement = $pdo->prepare("UPDATE users SET status = ?, token = NULL WHERE token = ?");
             $statement->execute(array("verified", $token));
             $verified = true;

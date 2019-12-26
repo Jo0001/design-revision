@@ -1,7 +1,6 @@
 <?php
 require "../libs/auth.php";
 require "../libs/sendEmail.php";
-require "../libs/util.php";
 
 if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['againPassword'])) {
     $token = filter_var($_GET['token'], FILTER_SANITIZE_STRING);
