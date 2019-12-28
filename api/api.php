@@ -1,12 +1,6 @@
 <?php
 require "../libs/auth.php";
-//Veraltet
-function check_format()
-{
-    if (!empty($_GET['format'])) {
-        return filter_var($_GET['format'], FILTER_SANITIZE_STRING);
-    }
-}
+$method = filter_var($_SERVER['REQUEST_METHOD'],FILTER_SANITIZE_STRING);
 
 function check_id()
 {
@@ -15,6 +9,9 @@ function check_id()
     }
 }
 
+/*
+ * GET USER
+ */
 if (!empty($_GET['getuser'])) {
     $value = filter_var($_GET['getuser'], FILTER_SANITIZE_STRING);
     $value = strtolower($value);
@@ -35,36 +32,24 @@ if (!empty($_GET['getuser'])) {
     }
 } else if (isset($_GET['getuser'])) {
     handleOutput(array("user" => getUser("all")));
-} else if (!empty($_GET['getproject'])) {
-    $value = filter_var($_GET['getproject'], FILTER_SANITIZE_STRING);
-    $value = strtolower($value);
-    if ($value == "id") {
-        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
-    } else if ($value == "name") {
-        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
-    } elseif ($value == "status") {
-        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
-    } elseif ($value == "link") {
-        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
-    } elseif ($value == "version") {
-        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
-    } elseif ($value == "members") {
-        handleOutput("DEMO: 'getprojects' is not yet implemented :/");
-    } else {
-        showError("Unknown value for parameter 'getproject=$value'", 400);
-    }
-
+    /*
+    * GET PROJECT
+    */
 } else if (isset($_GET['getproject'])) {
-    //Demo logic:
-    $id = (int)check_id();
-    if (is_null($id)) {
-        $id = -1;
-    }
-    handleOutput(array("project" => array("id" => $id, "name" => "demo", "status" => "demo", "link" => "demo", "version" => "demo", "members" => array(1, 2, 3))));
+    getProject();
+    /*
+     * POST PROJECT
+     */
+} else if (!empty($_POST['createproject'])) {
+    //TODO Return on success 201 Created
+    handleOutput("createproject demo");
 } else {
     showError("No or wrong parameters provided", 400);
 }
 
+/*
+ * Handle Output & Errors
+ */
 function showError($error, $code)
 {
     $http_message = null;
@@ -82,33 +67,30 @@ function showError($error, $code)
         header("HTTP/1.0 404 Not Found");
         $http_message = "Not Found";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-ersion" => 1.2));
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-ersion" => 1.3));
     handleOutput($err);
     die;
 }
 
 function handleOutput($o)
 {
-    if (check_format() == "raw") {
-        header("Content-type:text/plain");
-    } else {
-        header("Content-type:application/json");
-        $o = json_encode($o);
-    }
-    echo $o;
+    header("Content-type:application/json");
+    echo json_encode($o);
 }
 
+/*
+ * DATABASE LOGIC
+ */
 function getUser($value)
 {
     if (isLoggedIn()) {
         $id = $_SESSION['user-id'];
-
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
         $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
         $result = $statement->execute(array('pk_id' => $id));
         $user = $statement->fetch();
         if ($value == "all") {
-            return ["name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'], "projects" => [$user['projects']]];
+            return ["name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'], "projects" => json_decode($user['projects'])];
         } else {
             return $user[$value];
         }
@@ -116,11 +98,29 @@ function getUser($value)
     showError("Login to get the requested data", 401);
 }
 
-function getProject($value)
+function getProject()
 {
-    $id = (int)check_id();
+    $id = check_id();
     if (!is_null($id)) {
-        //TODO Database logic
+        if (isLoggedIn()) {
+            $id = (int)$id;
+            if (in_array($id, json_decode(getUser("projects")))) {
+                $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+                $statement = $pdo->prepare("SELECT * FROM projects WHERE pd_id = :pd_id");
+                $result = $statement->execute(array('pd_id' => $id));
+                $project = $statement->fetch();
+                if (!empty($project)) {
+                    handleOutput(array("project" => array("id" => $id, "name" => $project['name'], "status" => $project['status'], "link" => "demo", "version" => ++$id, "members" => json_decode($project['members']))));
+                } else {
+                    showError("Found no project with id " . $id, 404);
+                }
+            } else {
+                showError("You are not allowed to view this", 403);
+            }
+        } else {
+            showError("Login to get the requested data", 401);
+        }
+    } else {
+        showError("Missing id, please specify it with &id=value", 400);
     }
-
 }
