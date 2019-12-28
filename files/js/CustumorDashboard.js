@@ -10,6 +10,7 @@ function generate() {
     let request = new XMLHttpRequest();
     let request1 = new XMLHttpRequest();
     let requestURL;
+    let projectid=2;
     let b = document.body;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
@@ -33,20 +34,28 @@ function generate() {
     statusImg.style.padding = "20px";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = "http://localhost/design-revision/api/?getproject";
+    requestURL = "http://localhost/design-revision/api/?getproject&id="+projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
         //wir bekommen ein Jason Object
         if (request1.readyState === 4 && request1.status === 200) {
             let projectObejct = JSON.parse(request1.response);
-            projektname.innerHTML = projectObejct.project.name + " " + projectObejct.project.id;
+            projektname.innerHTML = projectObejct.project.name ;
             versionen.innerHTML = projectObejct.project.version;
             textStatus.innerHTML = projectObejct.project.status;
             //window.location als ersatz zu a da man sonst dedign ändern muss
             projektname.onclick = function () {
                 window.location = projectObejct.project.link;
             }
+        }else if(request1.readyState === 4 &&request1.status===401){
+           customerdiv.remove();
+           window.alert("Nicht eingelogt");
+            document.location="../login/login.html";
+        }else if(request1.readyState === 4 &&request1.status===403){
+            window.alert("Forbidden");
+        }else if(request1.readyState === 4 &&request1.status===404){
+            window.alert("Nichts gefunden");
         }
     };
 
@@ -62,11 +71,13 @@ function generate() {
         let userObject = JSON.parse(request.response);
         if (request.readyState === 4 && request.status === 200) {
             clientname.innerHTML = userObject.user.name;
-            requestURL = "http://localhost/design-revision/api/avatar.php?name=" + clientname.innerHTML;
             nameimg.setAttribute("src", userObject.user.avatar);
             clientemail.innerHTML = userObject.user.email;
             company.innerHTML = userObject.user.company;
-
+        } else if(request.readyState === 4 &&request.status===403){
+            window.alert("Forbidden");
+        }else if(request.readyState === 4 &&request.status===404){
+            window.alert("Nichts gefunden");
         }
     };
     clientname.setAttribute("style", "text-align:center");
