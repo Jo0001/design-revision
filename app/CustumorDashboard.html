@@ -45,6 +45,18 @@
     <button onclick="closeNo()">Nein</button>
 </dialog>
 <p onclick="generate()"> Hello World</p>
+<script>
+    //Muss hier stehen da das form sonst nicht gekannt wird
+    let dashMail = document.getElementById("CustumorDashForm");
+    dashMail.addEventListener('submit', function (evt) {
+        if (!(emailIsValid(document.querySelector("#email").value))) {
+            window.alert("Email ist falsch ");
+            evt.preventDefault();
+        } else {
+            window.alert("Email richtig");
+        }
 
+    });
+</script>
 </body>
 </html>
