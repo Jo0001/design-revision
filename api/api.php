@@ -1,6 +1,6 @@
 <?php
 require "../libs/auth.php";
-$method = filter_var($_SERVER['REQUEST_METHOD'],FILTER_SANITIZE_STRING);
+$method = filter_var($_SERVER['REQUEST_METHOD'], FILTER_SANITIZE_STRING);
 
 function check_id()
 {
@@ -12,39 +12,94 @@ function check_id()
 /*
  * GET USER
  */
+//veraltet
 if (!empty($_GET['getuser'])) {
-    $value = filter_var($_GET['getuser'], FILTER_SANITIZE_STRING);
-    $value = strtolower($value);
-    if ($value == "name") {
-        handleOutput(getUser($value));
-    } elseif ($value == "email") {
-        handleOutput(getUser($value));
-    } elseif ($value == "company") {
-        handleOutput(getUser($value));
-    } elseif ($value == "status") {
-        handleOutput(getUser($value));
-    } elseif ($value == "avatar") {
-        handleOutput("../api/avatar.php?name=" . getUser("name"));
-    } elseif ($value == "projects") {
-        handleOutput(getUser($value));
-    } else {
-        showError("Unknown value for parameter 'getuser=$value'", 400);
-    }
+    showError("Outdated -use getuser instead", 400);
 } else if (isset($_GET['getuser'])) {
     handleOutput(array("user" => getUser("all")));
     /*
     * GET PROJECT
     */
 } else if (isset($_GET['getproject'])) {
-    getProject();
+    $value = filter_var($_GET['getproject'], FILTER_SANITIZE_STRING);
+    $value = strtolower($value);
+    if ($value == "data") {
+        getProject("data");
+    } else {
+        getProject("");
+    }
     /*
      * POST PROJECT
      */
-} else if (!empty($_POST['createproject'])) {
-    //TODO Return on success 201 Created
-    handleOutput("createproject demo");
+    //TODO  needs testing
+} else if (isset($_POST['createproject']) && !empty($_POST['name']) && !empty($_POST['members'])) {
+    //TODO DATABASE LOGIC!!
+    $target_dir = "../user-content/";
+    $hash = bin2hex(openssl_random_pseudo_bytes(4));
+    $filename = $hash . time() . $hash . ".pdf";
+    $target_file = $target_dir . basename($filename);
+
+    $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+    //TODO Check file size (in Bytes)
+    if ($_FILES["file"]["type"] == "application/pdf" && $imageFileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 524288000) {
+        if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+            header("HTTP/1.1 201 Created ");
+            handleOutput("Successful uploaded file");
+        } else {
+            showError("Something went seriously wrong", 500);
+        }
+    } else {
+        showError("Invalid Request", 400);
+    }
+
+
+} else if ($method == "PUT") {
+    $_PUT = null;
+    parse_str(file_get_contents('php://input'), $_PUT);
+    if (isset($_PUT['updateproject'])) {
+        if ($_PUT['updateproject'] == "addmember" && !empty(($_PUT['id'])) && !empty(($_PUT['role']))) {
+            handleOutput("Success");
+            //TODO error http code
+        } elseif ($_PUT['updateproject'] == "removemember" && !empty(($_PUT['id']))) {
+            handleOutput("Success");
+        } elseif ($_PUT['updateproject'] == "data" && !empty(($_PUT['id'])) && !empty(($_PUT['data']))) {
+            handleOutput("Success");
+        } elseif ($_PUT['updateproject'] == "status" && !empty(($_PUT['id'])) && !empty(($_PUT['status']))) {
+            handleOutput("Success");
+        } elseif ($_PUT['updateproject'] == "file" && !empty(($_PUT['id']))) {
+
+            $target_dir = "../user-content/";
+            $hash = bin2hex(openssl_random_pseudo_bytes(4));
+            $filename = $hash . time() . $hash . ".pdf";
+            $target_file = $target_dir . basename($filename);
+
+            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+            //TODO Check file size (in Bytes)
+            if ($_FILES["file"]["type"] == "application/pdf" && $imageFileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 524288000) {
+                if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+                    header("HTTP/1.1 201 Created ");
+                    handleOutput("Successful uploaded file");
+                } else {
+                    showError("Something went seriously wrong", 500);
+                }
+            } else {
+                showError("Invalid Request", 400);
+            }
+        }
+    }
+
+    /*
+     * DELETE PROJECT
+     */
+} else if ($method == "DELETE") {
+    $_DELETE = null;
+    parse_str(file_get_contents('php://input'), $_DELETE);
+    $id = $_DELETE['id'];
+    //TODO Check Permission and add db logic
+    handleOutput("get delete request");
+    //header("HTTP/1.1 204 No Content ");
 } else {
-    showError("No or wrong parameters provided", 400);
+    showError("No / wrong parameters provided or wrong request method", 400);
 }
 
 /*
@@ -54,18 +109,21 @@ function showError($error, $code)
 {
     $http_message = null;
     if ($code == 400) {
-        header("HTTP/1.0 400 Bad Request");
+        header("HTTP/1.1 400 Bad Request");
         $http_message = "Bad Request";
     } elseif ($code == 401) {
         header('WWW-Authenticate: Login to get the requested data');
-        header("HTTP/1.0 401 Unauthorized ");
+        header("HTTP/1.1 401 Unauthorized ");
         $http_message = "Unauthorized";
     } elseif ($code == 403) {
-        header("HTTP/1.0 403 Forbidden");
+        header("HTTP/1.1 403 Forbidden");
         $http_message = "Forbidden";
     } elseif ($code == 404) {
-        header("HTTP/1.0 404 Not Found");
+        header("HTTP/1.1 404 Not Found");
         $http_message = "Not Found";
+    } elseif ($code == 500) {
+        header("HTTP/1.1 500 Internal Server Error");
+        $http_message = "Internal Server Error";
     }
     $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-ersion" => 1.3));
     handleOutput($err);
@@ -98,7 +156,7 @@ function getUser($value)
     showError("Login to get the requested data", 401);
 }
 
-function getProject()
+function getProject($value)
 {
     $id = check_id();
     if (!is_null($id)) {
@@ -110,7 +168,11 @@ function getProject()
                 $result = $statement->execute(array('pd_id' => $id));
                 $project = $statement->fetch();
                 if (!empty($project)) {
-                    handleOutput(array("project" => array("id" => $id, "name" => $project['name'], "status" => $project['status'], "link" => "demo", "version" => ++$id, "members" => json_decode($project['members']))));
+                    if ($value == "data") {
+                        handleOutput(array("link" => "../user-content/test.pdf", "data" => "Some kind of data kp"));
+                    } else {
+                        handleOutput(array("project" => array("id" => $id, "name" => $project['name'], "status" => $project['status'], "link" => "demo", "version" => ++$id, "members" => json_decode($project['members']))));
+                    }
                 } else {
                     showError("Found no project with id " . $id, 404);
                 }
