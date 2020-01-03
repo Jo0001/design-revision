@@ -1,5 +1,6 @@
 let a = true;
 let counter = 1;
+let customerid;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -68,9 +69,9 @@ function generate() {
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function () {
-        let userObject = JSON.parse(request.response);
         if (request.readyState === 4 && request.status === 200) {
-            clientname.innerHTML = userObject.user.name;
+            let userObject = JSON.parse(request.response);
+            clientname.innerHTML = userObject.user.name+counter;
             nameimg.setAttribute("src", userObject.user.avatar);
             clientemail.innerHTML = userObject.user.email;
             company.innerHTML = userObject.user.company;
@@ -107,9 +108,11 @@ function generate() {
     //Abfrage ob der Kunden gelöscht werden kann
     if (boolStatus) {
         customerdiv.onclick = function () {
-            clientDivClick(clientname.innerHTML, projektname.innerHTML);
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
+            clientDivClick(clientname.innerHTML, projektname.innerHTML,id1);
+
+
         };
     }
     counter++;
@@ -131,8 +134,7 @@ function closeYes() {
     let divForm = document.getElementById("form1");
     let loeschen = document.getElementById("p1");
     divForm.removeChild(loeschen);
-    let id1 = document.getElementById("pName").innerHTML + document.getElementById("pProjekt").innerHTML;
-    let div = document.getElementById(id1);
+    let div = document.getElementById(customerid);
     div.remove();
     toggleDialog();
 }
@@ -144,7 +146,7 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(name1, projekt1) {
+function clientDivClick(name1, projekt1,id1) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
     if (a) {
@@ -152,10 +154,15 @@ function clientDivClick(name1, projekt1) {
         loeschen.setAttribute("onclick", "customerDelate()");
         loeschen.setAttribute("id", "p1");
         divForm.appendChild(loeschen);
+        customerid=id1;
+        let customerdiv1 = document.getElementById(customerid);
+        customerdiv1.style.border="4px solid red";
         a = false;
 
     } else {
         divForm.lastChild.remove();
+        let customerdiv1 = document.getElementById(customerid);
+        customerdiv1.style.border="4px solid black";
         a = true;
     }
 
