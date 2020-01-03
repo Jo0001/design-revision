@@ -38,8 +38,8 @@
         }
     });
     window.onload=function mailOrPass() {
-        let url = window.location;
-        if (url == "http://localhost/design-revision/login/login.html?err=1") {
+        var err = getURLParameter('err');
+        if (err === "1") {
             let feedback = document.getElementById("statusEmail");
             feedback.style.color = "red";
             feedback.innerHTML = "<strong>E-Mail oder Passwort falsch</strong>"
@@ -53,6 +53,10 @@
         function check_up3() {
             statusEmail.innerHTML = "";
 
+    }
+    function getURLParameter(name) {
+        var value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+        return (value !== 'null') ? value : false;
     }
 </script>
 </html>
