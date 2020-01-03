@@ -1,6 +1,7 @@
 var a = true;
 let counter = 1;
 let customerid;
+let bool1 = false;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -200,6 +201,69 @@ function toggleDialog() {
 
     }
 }
+
+
+function showRes() {
+    let content = document.querySelectorAll('[data-test');
+    let arrayLength = content.length;
+    let value = document.getElementById("searchform").value;
+    value=value.toLowerCase();
+    let message=document.getElementById("message");
+    let dis=[];
+    if (bool1) {
+        message.style.display="none";
+        bool1 = false;
+    }
+//sucht nach CustomerDivs die Datatest haben un macht sie in ein Array
+    for (let i = 0; i < arrayLength; i++) {
+        let help = content[i].getAttribute("data-test");
+        help=help.toLowerCase();
+        //schaut ob die inhalte desvon data-test mit dem Suchbegriff übereinstimmen
+        if (help.match(value)) {
+            content[i].style.display = "block";
+            dis[i]="block";
+            //die Div werden entwieder sichtbar oder unsichtbar
+        } else {
+            content[i].style.display = "none";
+            dis[i]="none";
+        }
+
+    }
+    //schaut ob mindestens ein div angeziegt wird
+    if (!(dis.includes("block"))) {
+        message.style.display="block";
+        bool1 = true;
+
+    }
+}
+//Wartet bis die Seite geladen ist
+let readyStateCheckInterval = setInterval(function() {
+    if (document.readyState === "complete") {
+        clearInterval(readyStateCheckInterval);
+        //generirt 3 User
+        for (let i = 0; i <= 5; i++) {
+            generate();
+        }
+        //E-Mail validierung
+        let dashMail = document.getElementById("CustumorDashForm");
+        dashMail.addEventListener('submit', function (evt) {
+            if (!(emailIsValid(document.querySelector("#email").value))) {
+                window.alert("Email ist falsch ");
+                evt.preventDefault();
+            } else {
+
+                window.alert("Email richtig");
+            }
+
+        });
+        //beim submit Event wird der Submit gehindert
+        document.getElementById('search1').onsubmit = function (evt) {
+            evt.preventDefault();
+        };
+        // führt die Methode showRes beim Keyup_Event aus
+        document.getElementById("searchform").addEventListener('keyup', showRes);
+    }
+}, 10);
 
 
 
