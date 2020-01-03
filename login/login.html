@@ -35,17 +35,23 @@
             statusEmail.style.color ="red";
             statusEmail.innerHTML ="<strong>Gültige E-mail eingeben</strong>";
             evt.preventDefault();
-        } else {
+        }
+    });
+    window.onload=function mailOrPass() {
+        let url = window.location;
+        if (url == "http://localhost/design-revision/login/login.html?err=1") {
+            let feedback = document.getElementById("statusEmail");
+            feedback.style.color = "red";
+            feedback.innerHTML = "<strong>E-Mail oder Passwort falsch</strong>"
+        }
+    };
 
+        function emailIsValid(email) {
+            return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
         }
 
-    });
-
-    function emailIsValid(email) {
-        return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    }
-    function check_up3() {
-        statusEmail.innerHTML ="";
+        function check_up3() {
+            statusEmail.innerHTML = "";
 
     }
 </script>
