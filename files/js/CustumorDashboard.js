@@ -1,5 +1,5 @@
 let a = true;
-let counter = 1;
+var counter = 1;
 let customerid;
 
 function emailIsValid(email) {
@@ -11,7 +11,7 @@ function generate() {
     let request = new XMLHttpRequest();
     let request1 = new XMLHttpRequest();
     let requestURL;
-    let projectid=2;
+    let projectid = 2;
     let b = document.body;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
@@ -35,28 +35,30 @@ function generate() {
     statusImg.style.padding = "20px";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = "http://localhost/design-revision/api/?getproject&id="+projectid;
+    requestURL = "http://localhost/design-revision/api/?getproject&id=" + projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
         //wir bekommen ein Jason Object
         if (request1.readyState === 4 && request1.status === 200) {
             let projectObejct = JSON.parse(request1.response);
-            projektname.innerHTML = projectObejct.project.name ;
+            projektname.innerHTML = projectObejct.project.name;
             versionen.innerHTML = projectObejct.project.version;
             textStatus.innerHTML = projectObejct.project.status;
             //window.location als ersatz zu a da man sonst dedign ändern muss
             projektname.onclick = function () {
                 window.location = projectObejct.project.link;
             }
-        }else if(request1.readyState === 4 &&request1.status===401){
-           customerdiv.remove();
-           window.alert("Nicht eingelogt");
-            document.location="../login/login.html";
-        }else if(request1.readyState === 4 &&request1.status===403){
+        } else if (request1.readyState === 4 && request1.status === 401) {
+            customerdiv.remove();
+            //window.alert("Nicht eingelogt");
+            document.location = "../login/login.html";
+        } else if (request1.readyState === 4 && request1.status === 403) {
             window.alert("Forbidden");
-        }else if(request1.readyState === 4 &&request1.status===404){
+        } else if (request1.readyState === 4 && request1.status === 404) {
             window.alert("Nichts gefunden");
+        } else if (request1.readyState === 4 && request1.status === 400) {
+            window.alert("Unbekannter Anfrageparameter");
         }
     };
 
@@ -71,14 +73,19 @@ function generate() {
     request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
             let userObject = JSON.parse(request.response);
-            clientname.innerHTML = userObject.user.name+counter;
+            clientname.innerHTML = userObject.user.name + counter;
+            let help = userObject.user.name + counter;
+            customerdiv.setAttribute('data-test', help);
             nameimg.setAttribute("src", userObject.user.avatar);
             clientemail.innerHTML = userObject.user.email;
             company.innerHTML = userObject.user.company;
-        } else if(request.readyState === 4 &&request.status===403){
+            counter++;
+        } else if (request.readyState === 4 && request.status === 403) {
             window.alert("Forbidden");
-        }else if(request.readyState === 4 &&request.status===404){
+        } else if (request.readyState === 4 && request.status === 404) {
             window.alert("Nichts gefunden");
+        } else if (request1.readyState === 4 && request1.status === 400) {
+            window.alert("Unbekannter AnfrageParameter");
         }
     };
     clientname.setAttribute("style", "text-align:center");
@@ -110,13 +117,11 @@ function generate() {
         customerdiv.onclick = function () {
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
-            clientDivClick(clientname.innerHTML, projektname.innerHTML,id1);
+            clientDivClick(clientname.innerHTML, projektname.innerHTML, id1);
 
 
         };
     }
-    counter++;
-
 }
 
 function customerDelate() {
@@ -146,7 +151,7 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(name1, projekt1,id1) {
+function clientDivClick(name1, projekt1, id1) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
     if (a) {
@@ -154,15 +159,15 @@ function clientDivClick(name1, projekt1,id1) {
         loeschen.setAttribute("onclick", "customerDelate()");
         loeschen.setAttribute("id", "p1");
         divForm.appendChild(loeschen);
-        customerid=id1;
+        customerid = id1;
         let customerdiv1 = document.getElementById(customerid);
-        customerdiv1.style.border="4px solid red";
+        customerdiv1.style.border = "4px solid red";
         a = false;
 
     } else {
         divForm.lastChild.remove();
         let customerdiv1 = document.getElementById(customerid);
-        customerdiv1.style.border="4px solid black";
+        customerdiv1.style.border = "4px solid black";
         a = true;
     }
 
@@ -171,6 +176,7 @@ function clientDivClick(name1, projekt1,id1) {
 
 
 }
+
 
 //Handler für den Dialog da manche Browser nicht kompatibel sind
 function toggleDialog() {
@@ -185,3 +191,6 @@ function toggleDialog() {
 
     }
 }
+
+
+

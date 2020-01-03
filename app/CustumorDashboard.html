@@ -6,7 +6,7 @@
     <title>CusumorDasboard</title>
     <link href="../files/css/CustomerDashboard..css" rel="stylesheet">
     <script src="../files/js/CustumorDashboard.js"></script>
-    <link rel="icon" href="../files/img/favicon.ico" type="image/x-icon">
+    <link href="../files/img/favicon.ico" rel="icon" type="image/x-icon">
 
 </head>
 <body>
@@ -16,9 +16,9 @@
          width="100">
 </div>
 <div class="topform">
-    <form enctype="multipart/form-data" id="Search" method="post">
+    <form enctype="multipart/form-data" id="search1" >
         <label>
-            <input id="searchform" name="searchform" placeholder="Kundenname" required type="text">
+            <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Kundenname" required type="text">
         </label>
     </form>
 </div>
@@ -47,6 +47,7 @@
     <button onclick="closeNo()">Nein</button>
 </dialog>
 <p onclick="generate()"> Hello World</p>
+<h1 style="color: red;text-align: center;display: none" id="message">Keine Treffer</h1>
 <script>
     //Muss hier stehen da das form sonst nicht gekannt wird
     let dashMail = document.getElementById("CustumorDashForm");
@@ -59,6 +60,49 @@
         }
 
     });
+    window.onload = function () {
+        for (let i = 0; i <= 5; i++) {
+            generate();
+        }
+    };
+    let bool1 = false;
+    function showRes() {
+        let content = document.querySelectorAll('[data-test');
+        let arrayLength = content.length;
+        let value = document.getElementById("searchform").value;
+        value=value.toLowerCase();
+        let message=document.getElementById("message");
+        let dis=[];
+        if (bool1) {
+            message.style.display="none";
+            bool1 = false;
+        }
+
+
+        for (let i = 0; i < arrayLength; i++) {
+            let help = content[i].getAttribute("data-test");
+            help=help.toLowerCase();
+            if (help.match(value)) {
+                content[i].style.display = "block";
+                dis[i]="block";
+
+            } else {
+                content[i].style.display = "none";
+                dis[i]="none";
+            }
+
+        }
+        //schaut ob mindestens ein div angeziegt wird
+        if (!(dis.includes("block"))) {
+            message.style.display="block";
+            bool1 = true;
+
+        }
+    }
+    document.getElementById('search1').onsubmit = function (evt) {
+        evt.preventDefault();
+    };
+
 </script>
 </body>
 </html>
