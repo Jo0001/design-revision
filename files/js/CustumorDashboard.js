@@ -1,5 +1,5 @@
-let a = true;
-var counter = 1;
+var a = true;
+let counter = 1;
 let customerid;
 
 function emailIsValid(email) {
@@ -105,6 +105,7 @@ function generate() {
     //Status erstellem
     statusDiv.appendChild(textStatus);
     //Abfrage für den Status
+    let boolStatus;
     if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
         statusImg.setAttribute("src", "../files/img/XBereit.png");
         boolStatus = true;
@@ -113,15 +114,15 @@ function generate() {
         boolStatus = false;
     }
     //Abfrage ob der Kunden gelöscht werden kann
-    if (boolStatus) {
-        customerdiv.onclick = function () {
-            let id1 = clientname.innerHTML + projektname.innerHTML;
-            customerdiv.setAttribute("id", id1);
-            clientDivClick(clientname.innerHTML, projektname.innerHTML, id1);
 
+    customerdiv.onclick = function () {
+        let id1 = clientname.innerHTML + projektname.innerHTML;
+        customerdiv.setAttribute("id", id1);
+        clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus);
 
-        };
     }
+
+
 }
 
 function customerDelate() {
@@ -151,21 +152,29 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(name1, projekt1, id1) {
+function clientDivClick(name1, projekt1, id1, boolStatus) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
     if (a) {
-        loeschen.innerHTML = "Kunde löschen";
-        loeschen.setAttribute("onclick", "customerDelate()");
-        loeschen.setAttribute("id", "p1");
-        divForm.appendChild(loeschen);
         customerid = id1;
         let customerdiv1 = document.getElementById(customerid);
-        customerdiv1.style.border = "4px solid red";
+        //Abfrage ob der Kunde gelöscht werden kann
+        if (boolStatus) {
+            loeschen.innerHTML = "Kunde löschen";
+            loeschen.setAttribute("onclick", "customerDelate()");
+            loeschen.setAttribute("id", "p1");
+            divForm.appendChild(loeschen);
+            customerdiv1.style.border = "4px solid red";
+        } else {
+            customerdiv1.style.border = "4px solid blue";
+        }
         a = false;
 
     } else {
-        divForm.lastChild.remove();
+        //Abfrage ob der Kunde gelöscht werden kann
+        if (boolStatus) {
+            divForm.lastChild.remove();
+        }
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.border = "4px solid black";
         a = true;
