@@ -1,15 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 //Setup-Libraries
-var pdfjsLib = require('pdfjs-dist/build/pdf');
-var pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
+        let pdfjsLib = require('pdfjs-dist/build/pdf');
+        let pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-
-        /*
-        global variables.
-         */
-        let renderTask = "No Rendering";
-        pdfFileOrUrl = "../user-content/test.pdf";
-        pdfPageNumber = 2;
 
         class TargetScaleHandlerClass {
             constructor() {
@@ -24,16 +17,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
                     this.innerTargetScale = this.round(this.innerTargetScale);
                     if (this.scale > this.innerTargetScale) {
                         this.scale = parseFloat(this.scale + "") - 0.01;
-                        renderPageFromPdf(pdfFileOrUrl, pdfPageNumber, this.scale);
+                        renderPageFromPdf(this.scale);
                     } else if (this.scale < this.innerTargetScale) {
                         this.scale = parseFloat(this.scale + "") + 0.01;
-                        renderPageFromPdf(pdfFileOrUrl, pdfPageNumber, this.scale);
+                        renderPageFromPdf(this.scale);
                     } else if (this.scale === this.innerTargetScale) {
                         if (this.handlerId > 0) {
                             clearInterval(this.handlerId);
                             //console.log("Removed Listener. " + this.handlerId + " " + (this.scale === this.innerTargetScale) + " " + this.scale + " " + this.innerTargetScale);
                             this.handlerId = -1;
-                            renderPageFromPdf(pdfFileOrUrl, pdfPageNumber, this.scale);
+                            renderPageFromPdf(this.scale);
                         } else {
                             console.log("We should not get here ever.")
                         }
@@ -59,21 +52,54 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
             };
         }
 
-        var targetScaleHandler = new TargetScaleHandlerClass();
+        let renderTask = "No Rendering";
+        let pdfFileOrUrl = "../user-content/test.pdf";
+        let pdfPageNumber = 2;
+        let canvas;
 
-//Prevent a contextmenu on page, so people cant download the design.
-document.body.addEventListener("contextmenu", function (e) {
-    console.log("don't you dare download.");
-    e.preventDefault();
-    return false;
-});
+        let request = new XMLHttpRequest();
+        let targetScaleHandler = new TargetScaleHandlerClass();
 
-var canvas = document.getElementById('pdf');
-        canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
-        canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-        renderPageFromPdf(pdfFileOrUrl, pdfPageNumber, 1);
-dragElementWhenBtnIsDown(canvas, 1);
+        function setup() {
+            //Prevent a contextmenu on page, so people cant download the design.
+            document.body.addEventListener("contextmenu", function (e) {
+                console.log("don't you dare download.");
+                e.preventDefault();
+                return false;
+            });
 
+            canvas = document.getElementById('pdf');
+            canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+            canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
+            dragElementWhenBtnIsDown(canvas, 1);
+
+            let projectId = getURLParameter('id');
+            if (projectId == undefined) {
+                projectId = 2;
+                window.alert("Using demo Project, because I received no parameter projectId.")
+            }
+            //Json user Object aus Api hohlen
+            let requestURL = "http://localhost/design-revision/api/?getproject=data&id=" + projectId;
+            request.open('GET', requestURL);
+            request.send();
+            request.onreadystatechange = function (e) {
+                if (request.readyState === 4 && request.status === 200) {
+                    let projectObject = JSON.parse(request.response);
+                    pdfFileOrUrl = projectObject.link;
+                    window.alert(projectObject.link);
+                    renderPageFromPdf(1);
+                } else if (request.readyState === 4 && request.status === 403) {
+                    window.alert("Forbidden");
+                } else if (request.readyState === 4 && request.status === 404) {
+                    window.alert("Nichts gefunden");
+                }
+            };
+        }
+
+        function getURLParameter(name) {
+            var value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+            return (value !== 'null') ? value : false;
+        }
 
 function dragElementWhenBtnIsDown(elmnt, btn) {
     let pos1 = 0, pos2 = 0, cursorXinView = 0, cursorYinView = 0;
@@ -122,23 +148,23 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
             }
         }
 
-        function renderPageFromPdf(pdfFileOrLink, pageNumber, scale) {
-            if (renderTask == "No Rendering") {
+        function renderPageFromPdf(scale) {
+            if (renderTask === "No Rendering") {
                 renderTask = "In Progress";
-        var loadingTask = pdfjsLib.getDocument(pdfFileOrLink);
+                var loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
         loadingTask.promise.then(function (pdf) {
             //console.log('PDF loaded');
             // Fetch the first page
-            pdf.getPage(pageNumber).then(function (page) {
-                var viewport = page.getViewport({scale: scale});
+            pdf.getPage(pdfPageNumber).then(function (page) {
+                let viewport = page.getViewport({scale: scale});
 
                 // Prepare canvas using PDF page dimensions
-                var context = canvas.getContext('2d');
+                let context = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
                 // Render PDF page into canvas context
-                var renderContext = {
+                let renderContext = {
                     canvasContext: context,
                     viewport: viewport
                 };
@@ -155,6 +181,13 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
         //console.log("Trying a render call without the previous one being done.")
     }
 }
+
+        let readyStateCheckInterval = setInterval(function () {
+            if (document.readyState === "complete") {
+                clearInterval(readyStateCheckInterval);
+                setup();
+            }
+        }, 10);
 },{"pdfjs-dist/build/pdf":7,"pdfjs-dist/build/pdf.worker.entry":8}],2:[function(require,module,exports){
 'use strict'
 
