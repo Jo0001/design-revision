@@ -38,11 +38,16 @@
         }
     });
     window.onload=function mailOrPass() {
-        var err = getURLParameter('err');
+        let err = getURLParameter('err');
         if (err === "1") {
             let feedback = document.getElementById("statusEmail");
             feedback.style.color = "red";
             feedback.innerHTML = "<strong>E-Mail oder Passwort falsch</strong>"
+        }
+        let success =  getURLParameter('success');
+        if(success==="logout"){
+            window.location="../login/logout.html"
+
         }
     };
 

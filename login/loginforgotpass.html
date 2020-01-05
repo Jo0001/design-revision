@@ -39,5 +39,17 @@
         statusEmail.innerHTML = "";
 
     }
+    function getURLParameter(name) {
+        let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+        return (value !== 'null') ? value : false;
+    }
+    window.onload=function mailOrPass() {
+        let err = getURLParameter('err');
+        if (err === "login") {
+            let feedback = document.getElementById("statusEmail");
+            feedback.style.color = "red";
+            feedback.innerHTML = "<strong>E-Mail nicht vorhanden</strong>"
+        }
+    };
 </script>
 </html>

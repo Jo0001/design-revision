@@ -125,5 +125,23 @@
 
     }
 
+
+    function getURLParameter(name) {
+        let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+        return (value !== 'null') ? value : false;
+    }
+    window.onload=function mailOrPass() {
+        let err = getURLParameter('err');
+        if (err === "pswd") {
+            let feedback = document.getElementById("feedback");
+            feedback.style.color = "red";
+            feedback.innerHTML = "<strong>Ung&uuml;ltiges Passwort</strong>"
+        }
+        let success=getURLParameter('success');
+        if (success === "pswd"){
+            document.location="../login/verifizieren.html"
+        }
+    };
+
 </script>
 </html>
