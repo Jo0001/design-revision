@@ -19,8 +19,23 @@ if (!empty($_POST['email'])) {
         $link = "http://localhost/design-revision/simulate/setpassword.php?token=" . $hash;
 
         sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
-        die(" done");
+
+        die("<!DOCTYPE html>
+<html lang=\"en\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Kennwort vergessen</title>
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"../files/css/layout.css\">
+    <link rel=\"icon\" href=\"../files/img/favicon.ico\" type=\"image/x-icon\">
+</head>
+<body>
+<div id=\"verifyBox\" class=\"middle success\">
+    <h3>Bitte schauen Sie in Ihr Postfach</h3>
+    <p>Wenn Sie die E-Mal nicht in Ihrem Posteingang finden,<br> überprüfen Sie bitte auch Ihren Spam-Ordner.</p>
+</div>
+</body>
+</html>");
 
     }
 }
-

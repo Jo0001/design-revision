@@ -2,7 +2,7 @@
 require "util.php";
 session_start();
 
-function logIn($email, $password)
+function logIn($email, $password, $location)
 {
     $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
     $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
@@ -15,7 +15,10 @@ function logIn($email, $password)
         $_SESSION['user-id'] = $user['pk_id'];
         date_default_timezone_set('Europe/Berlin');
         $_SESSION['user-time'] = date("Y-m-d H:i:s");
-        header("Location: ../simulate/dashboard.php");
+        if (is_null($location)) {
+            $location = "../simulate/dashboard.php";
+        }
+        header("Location: $location");
         die;
     } else {
         header("Location: ../login/login.html?err=1");
@@ -44,6 +47,6 @@ function logOut()
 {
     session_unset();
     session_destroy();
-    header("Location: ../login/login.html?logout=true");
+    header("Location: ../login/login.html?success=logout");
     die;
 }
