@@ -33,14 +33,14 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
             $result = $statement->execute(array($name, $company, $email, $pswd, "registered", $hash));
             $user = $statement->fetch();
             $link = "http://localhost/design-revision/app/verify.php?token=" . $hash;
-            $content = parseHTML("../libs/templates/welcome.html", $name, $link, null, null);
+            $content = parseHTML("../libs/templates/emailverify.html", $name, $link, null, null);
             sendMail($email, $name, "Willkommen bei Design Revison", $content);
 
-            logIn($email, $password);
+            logIn($email, $password,"../simulate/dashboard.php?success=signup");
         } else {
-            header("Location: loginNewAccount.html?err=1");
+            header("Location: loginNewAccount.html?err=pswd");
         }
     } else {
-        header("Location: loginNewAccount.html?err=1");
+        header("Location: loginNewAccount.html?err=pswd");
     }
 }

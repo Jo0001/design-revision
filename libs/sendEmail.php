@@ -35,6 +35,7 @@ function sendMail($toAdr, $toName, $subject, $content)
         //TODO Output just for development!
         echo 'Message has been sent';
     } catch (Exception $e) {
+        header("HTTP/1.1 500 Internal Server Error");
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }

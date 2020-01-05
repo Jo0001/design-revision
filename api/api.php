@@ -40,8 +40,8 @@ if (!empty($_GET['getuser'])) {
     $target_file = $target_dir . basename($filename);
 
     $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-    //TODO Check file size (in Bytes)
-    if ($_FILES["file"]["type"] == "application/pdf" && $imageFileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 524288000) {
+
+    if ($_FILES["file"]["type"] == "application/pdf" && $imageFileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001) {
         if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
             header("HTTP/1.1 201 Created ");
             handleOutput("Successful uploaded file");
@@ -74,8 +74,8 @@ if (!empty($_GET['getuser'])) {
             $target_file = $target_dir . basename($filename);
 
             $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-            //TODO Check file size (in Bytes)
-            if ($_FILES["file"]["type"] == "application/pdf" && $imageFileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 524288000) {
+
+            if ($_FILES["file"]["type"] == "application/pdf" && $imageFileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001) {
                 if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                     header("HTTP/1.1 201 Created ");
                     handleOutput("Successful uploaded file");
@@ -125,7 +125,7 @@ function showError($error, $code)
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-ersion" => 1.3));
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 1.4));
     handleOutput($err);
     die;
 }

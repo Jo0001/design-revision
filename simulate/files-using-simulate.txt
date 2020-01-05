@@ -2,3 +2,4 @@ login.php
 reset.php
 auth.php
 signup.php
+setpassword.php
