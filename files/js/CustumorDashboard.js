@@ -1,5 +1,5 @@
-var a = true;
-let counter = 1;
+let a = true;
+let counter = 0;
 let customerid;
 let bool1 = false;
 
@@ -14,6 +14,8 @@ function generate() {
     let requestURL;
     let projectid = 2;
     let b = document.body;
+    let arrayMember;
+    let arrayRole;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
     let statusImg = document.createElement("img");
@@ -24,6 +26,8 @@ function generate() {
     let company = document.createElement("p");
     let statusDiv = document.createElement("div");
     let textStatus = document.createElement("p");
+    let members =document.createElement("p");
+    let role =document.createElement("p");
     //custumordiv generieren
     customerdiv.className = "clients";
     b.appendChild(customerdiv);
@@ -46,6 +50,30 @@ function generate() {
             projektname.innerHTML = projectObejct.project.name;
             versionen.innerHTML = projectObejct.project.version;
             textStatus.innerHTML = projectObejct.project.status;
+            let members1 = projectObejct.project.members;
+            //members bekommen
+            let help=members1[0].id;
+            let helpRole=members1[0].role;
+            let length= members1.length;
+            for (let i=1;i<length;i++){
+                help = help+","+members1[i].id;
+                helpRole= helpRole+","+members1[i].role;
+            }
+            //members generieren
+            members.innerHTML=help;
+            members.style.display="none";
+            members.id="members";
+            customerdiv.appendChild(members);
+            arrayMember = members.innerHTML;
+            arrayMember=arrayMember.split(",");
+            //role generiern
+            role.innerHTML=helpRole;
+            role.style.display="none";
+            customerdiv.appendChild(role);
+            arrayRole=role.innerHTML;
+            arrayRole=arrayRole.split(",");
+            members.remove();
+            role.remove();
             //window.location als ersatz zu a da man sonst dedign ändern muss
             projektname.onclick = function () {
                 window.location = projectObejct.project.link;
@@ -62,7 +90,6 @@ function generate() {
             window.alert("Unbekannter Anfrageparameter");
         }
     };
-
     //Projectname erstellen
     projektname.setAttribute("style", "text-align:center");
     customerdiv.appendChild(projektname);
@@ -80,6 +107,8 @@ function generate() {
             nameimg.setAttribute("src", userObject.user.avatar);
             clientemail.innerHTML = userObject.user.email;
             company.innerHTML = userObject.user.company;
+            //customerdiv id geben
+            customerdiv.setAttribute('data-id',counter);
             counter++;
         } else if (request.readyState === 4 && request.status === 403) {
             window.alert("Forbidden");
@@ -119,11 +148,9 @@ function generate() {
     customerdiv.onclick = function () {
         let id1 = clientname.innerHTML + projektname.innerHTML;
         customerdiv.setAttribute("id", id1);
-        clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus);
+        clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus,arrayMember,arrayRole);
 
-    }
-
-
+    };
 }
 
 function customerDelate() {
@@ -153,10 +180,34 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(name1, projekt1, id1, boolStatus) {
+function clientDivClick(name1, projekt1, id1, boolStatus,members,role) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
+    let content = document.querySelectorAll('[data-id');
+    let arrayLength = content.length;
+    let help;
     if (a) {
+        for (let i = 0; i < arrayLength; i++) {
+            help = content[i].getAttribute("data-id");
+            if(members.includes(help)){
+                let help1 = members.indexOf(help);
+                if(role[help1]==0){
+                    let messageMember=document.createElement("p");
+                    messageMember.innerHTML="Ist Mitglied in dem Gew&auml;hlten project";
+                    messageMember.style.paddingLeft="10px";
+                    content[i].style.background="#00FF66";
+                    content[i].appendChild(messageMember);
+                }
+                if(role[help1]==1){
+                    let messageMember=document.createElement("p");
+                    messageMember.innerHTML="Ist Admin in dem Gew&auml;hlten project";
+                    messageMember.style.paddingLeft="10px";
+                    content[i].style.background="orange";
+                    content[i].appendChild(messageMember);
+                }
+            }
+
+        }
         customerid = id1;
         let customerdiv1 = document.getElementById(customerid);
         //Abfrage ob der Kunde gelöscht werden kann
@@ -167,7 +218,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus) {
             divForm.appendChild(loeschen);
             customerdiv1.style.border = "4px solid red";
         } else {
-            customerdiv1.style.border = "4px solid blue";
+            customerdiv1.style.background= "#0cfad6";
         }
         a = false;
 
@@ -177,8 +228,16 @@ function clientDivClick(name1, projekt1, id1, boolStatus) {
             divForm.lastChild.remove();
         }
         let customerdiv1 = document.getElementById(customerid);
-        customerdiv1.style.border = "4px solid black";
+        customerdiv1.style.background = "white";
         a = true;
+        for (let i = 0; i < arrayLength; i++) {
+            help = content[i].getAttribute("data-id");
+            if (members.includes(help)) {
+                content[i].style.background= "white";
+                content[i].lastChild.remove();
+
+            }
+        }
     }
 
     document.getElementById("pName").innerHTML = name1;
@@ -241,7 +300,7 @@ let readyStateCheckInterval = setInterval(function() {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
         //generirt 3 User
-        for (let i = 0; i <= 5; i++) {
+        for (let i = 0; i <= 10; i++) {
             generate();
         }
         //E-Mail validierung
