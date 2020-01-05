@@ -11,12 +11,13 @@
 </head>
 <body>
 <div class="topimg">
-    <img alt="tick" height="100"
+    <img style="float: left" alt="tick" height="100"
          src="../files/img/logo.png"
          width="100">
 </div>
 <div class="topform">
-    <form enctype="multipart/form-data" id="search1" >
+    <a href="../login/login.php?logout">Log Out</a>
+    <form enctype="multipart/form-data" id="search1">
         <label>
             <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Kundenname" required type="text">
         </label>
@@ -46,6 +47,6 @@
     <button onclick="closeYes()">Ja</button>
     <button onclick="closeNo()">Nein</button>
 </dialog>
-<h1 style="color: red;text-align: center;display: none" id="message">Keine Treffer</h1>
+<h1 id="message" style="color: red;text-align: center;display: none">Keine Treffer</h1>
 </body>
 </html>

@@ -26,18 +26,17 @@ function generate() {
     let company = document.createElement("p");
     let statusDiv = document.createElement("div");
     let textStatus = document.createElement("p");
-    let members =document.createElement("p");
-    let role =document.createElement("p");
+    let members = document.createElement("p");
+    let role = document.createElement("p");
     //custumordiv generieren
     customerdiv.className = "clients";
     b.appendChild(customerdiv);
     nameimg.setAttribute("alt", "tick");
     nameimg.style.borderRadius = "200px";
-    nameimg.style.padding = "50px";
+    nameimg.style.padding = "40px";
     customerdiv.appendChild(nameimg);
     //statusImg genereiren
     statusImg.setAttribute("alt", "tick");
-    statusImg.style.padding = "20px";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
     requestURL = "http://localhost/design-revision/api/?getproject&id=" + projectid;
@@ -52,26 +51,26 @@ function generate() {
             textStatus.innerHTML = projectObejct.project.status;
             let members1 = projectObejct.project.members;
             //members bekommen
-            let help=members1[0].id;
-            let helpRole=members1[0].role;
-            let length= members1.length;
-            for (let i=1;i<length;i++){
-                help = help+","+members1[i].id;
-                helpRole= helpRole+","+members1[i].role;
+            let help = members1[0].id;
+            let helpRole = members1[0].role;
+            let length = members1.length;
+            for (let i = 1; i < length; i++) {
+                help = help + "," + members1[i].id;
+                helpRole = helpRole + "," + members1[i].role;
             }
             //members generieren
-            members.innerHTML=help;
-            members.style.display="none";
-            members.id="members";
+            members.innerHTML = help;
+            members.style.display = "none";
+            members.id = "members";
             customerdiv.appendChild(members);
             arrayMember = members.innerHTML;
-            arrayMember=arrayMember.split(",");
+            arrayMember = arrayMember.split(",");
             //role generiern
-            role.innerHTML=helpRole;
-            role.style.display="none";
+            role.innerHTML = helpRole;
+            role.style.display = "none";
             customerdiv.appendChild(role);
-            arrayRole=role.innerHTML;
-            arrayRole=arrayRole.split(",");
+            arrayRole = role.innerHTML;
+            arrayRole = arrayRole.split(",");
             members.remove();
             role.remove();
             //window.location als ersatz zu a da man sonst dedign ändern muss
@@ -91,7 +90,6 @@ function generate() {
         }
     };
     //Projectname erstellen
-    projektname.setAttribute("style", "text-align:center");
     customerdiv.appendChild(projektname);
 
     //Jason user Object aus Api holen
@@ -108,7 +106,7 @@ function generate() {
             clientemail.innerHTML = userObject.user.email;
             company.innerHTML = userObject.user.company;
             //customerdiv id geben
-            customerdiv.setAttribute('data-id',counter);
+            customerdiv.setAttribute('data-id', counter);
             counter++;
         } else if (request.readyState === 4 && request.status === 403) {
             window.alert("Forbidden");
@@ -118,16 +116,13 @@ function generate() {
             window.alert("Unbekannter AnfrageParameter");
         }
     };
-    clientname.setAttribute("style", "text-align:center");
     customerdiv.appendChild(clientname);
     //fertig
-    clientemail.setAttribute("style", "text-align:center");
     customerdiv.appendChild(clientemail);
     //Versionen erstellen
-    versionen.setAttribute("style", "text-align:center");
+
     customerdiv.appendChild(versionen);
     //Company erstellen
-    company.setAttribute("style", "text-align:center");
     customerdiv.appendChild(company);
     //StatusDiv erstellen
     statusDiv.className = "status";
@@ -148,7 +143,7 @@ function generate() {
     customerdiv.onclick = function () {
         let id1 = clientname.innerHTML + projektname.innerHTML;
         customerdiv.setAttribute("id", id1);
-        clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus,arrayMember,arrayRole);
+        clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus, arrayMember, arrayRole);
 
     };
 }
@@ -180,7 +175,7 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(name1, projekt1, id1, boolStatus,members,role) {
+function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
     let content = document.querySelectorAll('[data-id');
@@ -189,20 +184,20 @@ function clientDivClick(name1, projekt1, id1, boolStatus,members,role) {
     if (a) {
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-id");
-            if(members.includes(help)){
+            if (members.includes(help)) {
                 let help1 = members.indexOf(help);
-                if(role[help1]==0){
-                    let messageMember=document.createElement("p");
-                    messageMember.innerHTML="Ist Mitglied in dem Gew&auml;hlten project";
-                    messageMember.style.paddingLeft="10px";
-                    content[i].style.background="#00FF66";
+                if (role[help1] == 0) {
+                    let messageMember = document.createElement("p");
+                    messageMember.innerHTML = "Ist Mitglied in dem Gew&auml;hlten project";
+                    messageMember.style.paddingLeft = "10px";
+                    content[i].style.background = "#00FF66";
                     content[i].appendChild(messageMember);
                 }
-                if(role[help1]==1){
-                    let messageMember=document.createElement("p");
-                    messageMember.innerHTML="Ist Admin in dem Gew&auml;hlten project";
-                    messageMember.style.paddingLeft="10px";
-                    content[i].style.background="orange";
+                if (role[help1] == 1) {
+                    let messageMember = document.createElement("p");
+                    messageMember.innerHTML = "Ist Admin in dem Gew&auml;hlten project";
+                    messageMember.style.paddingLeft = "10px";
+                    content[i].style.background = "orange";
                     content[i].appendChild(messageMember);
                 }
             }
@@ -218,7 +213,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus,members,role) {
             divForm.appendChild(loeschen);
             customerdiv1.style.border = "4px solid red";
         } else {
-            customerdiv1.style.background= "#0cfad6";
+            customerdiv1.style.background = "#0cfad6";
         }
         a = false;
 
@@ -233,7 +228,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus,members,role) {
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-id");
             if (members.includes(help)) {
-                content[i].style.background= "white";
+                content[i].style.background = "white";
                 content[i].lastChild.remove();
 
             }
@@ -266,37 +261,38 @@ function showRes() {
     let content = document.querySelectorAll('[data-test');
     let arrayLength = content.length;
     let value = document.getElementById("searchform").value;
-    value=value.toLowerCase();
-    let message=document.getElementById("message");
-    let dis=[];
+    value = value.toLowerCase();
+    let message = document.getElementById("message");
+    let dis = [];
     if (bool1) {
-        message.style.display="none";
+        message.style.display = "none";
         bool1 = false;
     }
 //sucht nach CustomerDivs die Datatest haben un macht sie in ein Array
     for (let i = 0; i < arrayLength; i++) {
         let help = content[i].getAttribute("data-test");
-        help=help.toLowerCase();
+        help = help.toLowerCase();
         //schaut ob die inhalte desvon data-test mit dem Suchbegriff übereinstimmen
         if (help.match(value)) {
             content[i].style.display = "block";
-            dis[i]="block";
+            dis[i] = "block";
             //die Div werden entwieder sichtbar oder unsichtbar
         } else {
             content[i].style.display = "none";
-            dis[i]="none";
+            dis[i] = "none";
         }
 
     }
     //schaut ob mindestens ein div angeziegt wird
     if (!(dis.includes("block"))) {
-        message.style.display="block";
+        message.style.display = "block";
         bool1 = true;
 
     }
 }
+
 //Wartet bis die Seite geladen ist
-let readyStateCheckInterval = setInterval(function() {
+let readyStateCheckInterval = setInterval(function () {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
         //generirt 3 User
