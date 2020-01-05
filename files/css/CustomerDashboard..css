@@ -65,24 +65,28 @@ body {
 }
 
 .topimg {
-    position: relative;
-    margin: 0;
-    float: left;
+    position: fixed;
+    margin-top: -8.4%;
+    z-index: 6;
     background-color: rgba(128, 128, 128, 0.2);
     box-sizing: border-box;
     width: 50%;
 }
 
 .topform {
-    position: relative;
-    margin: 0;
-    float: right;
+    position: fixed;
+    margin-top: -8.4%;
+    margin-left: 50%;
+    z-index: 6;
     background-color: rgba(128, 128, 128, 0.2);
     box-sizing: border-box;
     width: 50%;
     height: 104px;
 }
-
+.space{
+    margin-top: 8.5%;
+    position: relative;
+}
 .topform input[type="text"] {
     float: right;
     margin-top: 25px;
