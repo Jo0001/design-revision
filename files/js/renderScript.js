@@ -16,15 +16,18 @@ class TargetScaleHandlerClass {
             this.innerTargetScale = this.round(this.innerTargetScale);
             if (this.scale > this.innerTargetScale) {
                 this.scale = parseFloat(this.scale + "") - 0.01;
+                this.scale = this.round(this.scale);
                 renderPageFromPdf(this.scale);
             } else if (this.scale < this.innerTargetScale) {
                 this.scale = parseFloat(this.scale + "") + 0.01;
+                this.scale = this.round(this.scale);
                 renderPageFromPdf(this.scale);
             } else if (this.scale === this.innerTargetScale) {
                 if (this.handlerId > 0) {
                     clearInterval(this.handlerId);
                     //console.log("Removed Listener. " + this.handlerId + " " + (this.scale === this.innerTargetScale) + " " + this.scale + " " + this.innerTargetScale);
                     this.handlerId = -1;
+                    this.scale = this.round(this.scale);
                     renderPageFromPdf(this.scale);
                 } else {
                     console.log("We should not get here ever.")
@@ -51,10 +54,11 @@ class TargetScaleHandlerClass {
     };
 }
 
-let pdfFileOrUrl = "../user-content/test.pdf";
-let pdfPageNumber = 3;
+let pdfFileOrUrl = "../user-content/test4.pdf";
+let pdfPageNumber = 101;
 let canvas;
-let pdf = undefined;
+let pdfPage = undefined;
+let isRendering = false;
 
 let request = new XMLHttpRequest();
 let targetScaleHandler = new TargetScaleHandlerClass();
@@ -62,7 +66,6 @@ let targetScaleHandler = new TargetScaleHandlerClass();
 function setup() {
     //Prevent a contextmenu on page, so people cant download the design.
     document.body.addEventListener("contextmenu", function (e) {
-        console.log("don't you dare download.");
         e.preventDefault();
         return false;
     });
@@ -84,9 +87,9 @@ function setup() {
     request.onreadystatechange = function (e) {
         if (request.readyState === 4 && request.status === 200) {
             let projectObject = JSON.parse(request.response);
-            pdfFileOrUrl = projectObject.link;
-            window.alert(projectObject.link);
-            loadPDFAndRender(1);
+            //pdfFileOrUrl = projectObject.link;
+            window.alert(pdfFileOrUrl);
+            loadPDFAndRender(1, pdfFileOrUrl);
         } else if (request.readyState === 4 && request.status === 401) {
             window.alert("keine Berechtigung");
         } else if (request.readyState === 4 && request.status === 403) {
@@ -149,39 +152,61 @@ function listenForMouseWheelTurn(e) {
     }
 }
 
-function loadPDFAndRender(scale) {
+function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
     loadingTask.promise.then(function (localPdf) {
         //console.log('PDF loaded');
-        pdf = localPdf;
-        renderPageFromPdf(scale);
+        let pdf = localPdf;
+        loadPdfPage(pdf, scale);
     }, function (reason) {
         // PDF loading error
         console.error(reason);
     });
 }
 
+function loadPdfPage(pdf, scale) {
+    pdf.getPage(pdfPageNumber).then(function (localPage) {
+        pdfPage = localPage;
+        renderPageFromPdf(scale);
+    });
+}
+
 function renderPageFromPdf(scale) {
-    pdf.getPage(pdfPageNumber).then(function (page) {
-
-        // Get viewport (dimensions)
-        var viewport = page.getViewport(scale);
-
-
-        // Set dimensions
-        canvas.style.width = viewport.width + 'px';
+    if (!isRendering) {
+        isRendering = true;
+        let viewport = pdfPage.getViewport({scale: scale});
+        // Prepare canvas using PDF page dimensions
+        let context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        // Render PDF page into canvas context
+        let renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+        let renderTask = pdfPage.render(renderContext);
+        renderTask.promise.then(function () {
+            isRendering = false;
+        });
+        /* SVG-Rendering-Code but not all Graphic
+        Sates have been implemented in the library + convas needs to be div
+        let viewport = page.getViewport({scale: scale});
         canvas.style.height = viewport.height + 'px';
-
+        canvas.style.width = viewport.width + 'px';
+        //Make sure Div is clean
+        while (canvas.firstChild) {
+            canvas.removeChild(canvas.firstChild);
+        }
         page.getOperatorList()
             .then(function (opList) {
-                var svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
+                let svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
                 return svgGfx.getSVG(opList, viewport);
             })
             .then(function (svg) {
                 canvas.appendChild(svg);
             });
-
-    });
+         */
+    }
 }
 
 let readyStateCheckInterval = setInterval(function () {
