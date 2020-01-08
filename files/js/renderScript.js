@@ -51,10 +51,10 @@ class TargetScaleHandlerClass {
     };
 }
 
-let renderTask = "No Rendering";
 let pdfFileOrUrl = "../user-content/test.pdf";
-let pdfPageNumber = 2;
+let pdfPageNumber = 3;
 let canvas;
+let pdf = undefined;
 
 let request = new XMLHttpRequest();
 let targetScaleHandler = new TargetScaleHandlerClass();
@@ -86,7 +86,7 @@ function setup() {
             let projectObject = JSON.parse(request.response);
             pdfFileOrUrl = projectObject.link;
             window.alert(projectObject.link);
-            renderPageFromPdf(1);
+            loadPDFAndRender(1);
         } else if (request.readyState === 4 && request.status === 401) {
             window.alert("keine Berechtigung");
         } else if (request.readyState === 4 && request.status === 403) {
@@ -98,7 +98,7 @@ function setup() {
 }
 
 function getURLParameter(name) {
-    var value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+    let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
     return (value !== 'null') ? value : false;
 }
 
@@ -140,7 +140,7 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
 function listenForMouseWheelTurn(e) {
     var e = window.event || e;
     e.preventDefault()
-    var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+    let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
     //console.log(delta);
     if (delta == 1) {
         targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
@@ -149,38 +149,39 @@ function listenForMouseWheelTurn(e) {
     }
 }
 
+function loadPDFAndRender(scale) {
+    let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+    loadingTask.promise.then(function (localPdf) {
+        //console.log('PDF loaded');
+        pdf = localPdf;
+        renderPageFromPdf(scale);
+    }, function (reason) {
+        // PDF loading error
+        console.error(reason);
+    });
+}
+
 function renderPageFromPdf(scale) {
-    if (renderTask === "No Rendering") {
-        renderTask = "In Progress";
-        var loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
-        loadingTask.promise.then(function (pdf) {
-            //console.log('PDF loaded');
-            // Fetch the first page
-            pdf.getPage(pdfPageNumber).then(function (page) {
-                let viewport = page.getViewport({scale: scale});
+    pdf.getPage(pdfPageNumber).then(function (page) {
 
-                // Prepare canvas using PDF page dimensions
-                let context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+        // Get viewport (dimensions)
+        var viewport = page.getViewport(scale);
 
-                // Render PDF page into canvas context
-                let renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                renderTask = page.render(renderContext);
-                renderTask.promise.then(function () {
-                    renderTask = "No Rendering";
-                });
+
+        // Set dimensions
+        canvas.style.width = viewport.width + 'px';
+        canvas.style.height = viewport.height + 'px';
+
+        page.getOperatorList()
+            .then(function (opList) {
+                var svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
+                return svgGfx.getSVG(opList, viewport);
+            })
+            .then(function (svg) {
+                canvas.appendChild(svg);
             });
-        }, function (reason) {
-            // PDF loading error
-            console.error(reason);
-        });
-    } else {
-        //console.log("Trying a render call without the previous one being done.")
-    }
+
+    });
 }
 
 let readyStateCheckInterval = setInterval(function () {
