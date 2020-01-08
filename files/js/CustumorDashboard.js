@@ -131,7 +131,7 @@ function generate() {
     statusDiv.appendChild(textStatus);
     //Abfrage für den Status
     let boolStatus;
-    if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
+    if (textStatus.innerHTML=== "Fertig/Druckfreigabe") {
         statusImg.setAttribute("src", "../files/img/XBereit.png");
         boolStatus = true;
     } else {
@@ -224,6 +224,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
         }
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.background = "white";
+        customerdiv1.style.border = "4px solid black";
         a = true;
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-id");
