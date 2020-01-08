@@ -5,10 +5,8 @@
   "dependencies": {
     "browserify": "^16.5.0",
     "dep-linker": "^1.0.24",
+    "pdfjs-dist": "github:mozilla/pdfjs-dist#master",
     "webworkify": "^1.5.0"
-  },
-  "devDependencies": {
-    "pdfjs-dist": "^2.2.228"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
