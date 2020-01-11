@@ -32,7 +32,6 @@ function sendMail($toAdr, $toName, $subject, $content)
         //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
         $mail->send();
-        //TODO Output just for development!
         echo 'Message has been sent';
     } catch (Exception $e) {
         header("HTTP/1.1 500 Internal Server Error");
