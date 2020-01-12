@@ -2,9 +2,12 @@ let a = true;
 let counter = 0;
 let customerid;
 let bool1 = false;
+let boolStatus;
 let select = true;
-let sendArray=[];
+let doubleClickSelect = true;
+let sendArray = [];
 let sendFile;
+let updateOrCreate = true;
 
 
 function generate() {
@@ -131,7 +134,7 @@ function generate() {
     //Status erstellem
     statusDiv.appendChild(textStatus);
     //Abfrage für den Status
-    let boolStatus;
+
     //zum test != sonst ===
     if (textStatus.innerHTML != "Fertig/Druckfreigabe") {
         statusImg.setAttribute("src", "../files/img/XBereit.png");
@@ -146,9 +149,63 @@ function generate() {
         if (select) {
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
+            customerdiv.style.background="white";
             clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus, arrayMember, arrayRole);
+            let btnAddMember = document.getElementById("btnAddMember");
+            let projektErsellen = document.getElementById("projektErstellen");
+            let projektName = document.getElementById("projectname");
+            projektName.required = true;
+            projektName.style.display = "block";
+            projektErsellen.innerHTML = "Erstellen Projekt ";
+            btnAddMember.onclick = function () {
+                addMember();
+            };
+            updateOrCreate = true;
+            doubleClickSelect = true;
         }
     };
+    //Client Doppel Click
+    customerdiv.addEventListener('dblclick', function (e) {
+        let btnAddMember = document.getElementById("btnAddMember");
+        let projektErsellen = document.getElementById("projektErstellen");
+        let projektName = document.getElementById("projectname");
+        let content = document.querySelectorAll('[data-id');
+        let arrayLength = content.length;
+        if (doubleClickSelect) {
+            for (let i = 0; i < arrayLength; i++) {
+                content[i].style.background = "white";
+                content[i].style.border = "4px solid black";
+            }
+            if (a === false) {
+                for (let i = 0; i < arrayLength; i++) {
+                    let temp = content[i].lastChild;
+                    if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                        temp.style.display = "none";
+                    }
+                }
+                //löschen nachricht verstecken
+                if(boolStatus) {
+                    let delet = document.getElementById("form1");
+                    //messageMember verstecken
+                    delet.lastChild.style.display = "none";
+                }
+                a = true;
+            }
+            if (select) {
+                projektName.required = false;
+                projektName.style.display = "none";
+                projektErsellen.innerHTML = "Projekt ändern";
+                customerdiv.style.background = "#FFFF99";
+                btnAddMember.onclick = function () {
+                    changeClientState(arrayMember, arrayRole);
+                    customerdiv.style.background = "#FFFF99";
+                };
+                updateOrCreate = false;
+                doubleClickSelect = false;
+                a=false;
+            }
+        }
+    });
 }
 
 function customerDelate(members, content, arrayLength) {
@@ -239,7 +296,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
     } else {
         //Abfrage ob der Kunde gelöscht werden kann
         if (boolStatus) {
-            divForm.lastChild.remove();
+            divForm.lastChild.style.display="none";
         }
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.background = "white";
@@ -249,7 +306,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
             help = content[i].getAttribute("data-id");
             if (members.includes(help)) {
                 content[i].style.background = "white";
-                content[i].lastChild.remove();
+                content[i].lastChild.style.display="none";
 
             }
         }
@@ -320,12 +377,16 @@ let readyStateCheckInterval = setInterval(function () {
             generate();
         }
 
-        let CustumorDashForm  = document.getElementById("CustumorDashForm");
+        let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile===undefined||sendArray[0]===undefined){
-
+            if (sendFile === undefined || sendArray[0] === undefined) {
+                console.log(Error);
             } else {
-                sendNewProject();
+                if (updateOrCreate) {
+                    sendNewProject();
+                } else {
+                    sendUpdateProject()
+                }
             }
             evt.preventDefault();
         });
@@ -358,7 +419,7 @@ let readyStateCheckInterval = setInterval(function () {
 
     inputFile.addEventListener("change", function () {
         const file = this.files[0];
-        sendFile=file;
+        sendFile = file;
         console.log(file);
         if (file) {
             pdfIcon.style.display = "block";
@@ -381,7 +442,7 @@ function dateiauswahl(evt) {
     evt.preventDefault();
     let file = evt.dataTransfer.files;
     let f = file[0];
-    sendFile=f;
+    sendFile = f;
     let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
     const previewContainer = document.getElementById("imagePreview");
     const previewFile = previewContainer.querySelector(".image-preview__file");
@@ -427,7 +488,7 @@ function addMember() {
             content[i].style.border = "4px solid black";
             let buttonAdmin = document.createElement("button");
             buttonAdmin.innerHTML = "Admin";
-            //Butto Click event
+            //Button Click event
             buttonAdmin.addEventListener('click', function () {
                 let parent = buttonAdmin.parentNode;
                 let id = parent.getAttribute("data-id");
@@ -448,7 +509,7 @@ function addMember() {
                 }
                 jasonmembers.sort();
                 console.log(jasonmembers);
-                sendArray=jasonmembers;
+                sendArray = jasonmembers;
                 parent.style.background = "#FFA500";
             });
             content[i].appendChild(buttonAdmin);
@@ -475,7 +536,7 @@ function addMember() {
                 }
                 jasonmembers.sort();
                 console.log(jasonmembers);
-                sendArray=jasonmembers;
+                sendArray = jasonmembers;
                 parent.style.background = "#00FF66"
             });
             buttonMember.innerHTML = "Member";
@@ -495,7 +556,7 @@ function addMember() {
                 }
                 jasonmembers.sort();
                 console.log(jasonmembers);
-                sendArray=jasonmembers;
+                sendArray = jasonmembers;
                 parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
@@ -503,7 +564,7 @@ function addMember() {
         }
     } else {
 
-       console.log(sendArray);
+        console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
         for (let i = 0; i < arrayLength; i++) {
@@ -515,9 +576,145 @@ function addMember() {
     }
 
 }
+
+function changeClientState(members, role) {
+    let content = document.querySelectorAll('[data-id');
+    let arrayLength = content.length;
+    let addButton = document.getElementById("btnAddMember");
+    let jasonmembers = [];
+    if (select) {
+        if (a === false) {
+            for (let i = 0; i < arrayLength; i++) {
+                content[i].style.background = "white";
+                content[i].style.border = "4px solid black";
+                let temp = content[i].lastChild;
+                if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                    temp.style.display = "none";
+                }
+            }
+            //löschen nachricht verstecken
+            let delet = document.getElementById("form1");
+            //messageMember verstecken
+            if(boolStatus)
+            delet.lastChild.style.display = "none";
+            a = true;
+        }
+        for (let i = 0; i < arrayLength; i++) {
+            let help = content[i].getAttribute("data-id");
+            if (members.includes(help)) {
+                let help1 = members.indexOf(help);
+                if (role[help1] == 0) {
+                    content[i].style.background = "#00FF66";
+                    console.log("Yes");
+                }
+                if (role[help1] == 1) {
+                    content[i].style.background = "#FFA500";
+                    console.log("2*Yes")
+                }
+            }
+        }
+        for (let i = 0; i < members.length; i++) {
+            let member = {"id": members[i], "role": role[i]};
+            jasonmembers.push(member);
+            console.log(jasonmembers);
+        }
+        addButton.value = "Zu Projekt hinzufügen";
+        for (let i = 0; i < arrayLength; i++) {
+            let buttonAdmin = document.createElement("button");
+            buttonAdmin.innerHTML = "Admin";
+            //Button Click event
+            buttonAdmin.addEventListener('click', function () {
+                let parent = buttonAdmin.parentNode;
+                let id = parent.getAttribute("data-id");
+                let role = 1;
+                let include = true;
+                //Schauen ob es den Member schon gibt un Rolle anpassen
+                for (let j = 0; j < jasonmembers.length; j++) {
+                    if (jasonmembers[i]) {
+                        if (jasonmembers[i].id === id) {
+                            jasonmembers[i].role = 1;
+                            include = false;
+                        }
+                    }
+                }
+                if (include) {
+                    let member = {"id": id, "role": role};
+                    jasonmembers.push(member);
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "#FFA500";
+            });
+            content[i].appendChild(buttonAdmin);
+            let buttonMember = document.createElement("button");
+            //Butto Click event
+            buttonMember.addEventListener('click', function () {
+                let parent = buttonMember.parentNode;
+                let id = parent.getAttribute("data-id");
+                let role = 0;
+                let include = true;
+                //Schauen ob es den Member schon gibt un Rolle anpassen
+                for (let j = 0; j < jasonmembers.length; j++) {
+                    if (jasonmembers[i]) {
+                        if (jasonmembers[i].id === id) {
+                            jasonmembers[i].role = 0;
+                            include = false;
+                        }
+                    }
+                }
+
+                if (include) {
+                    let member = {"id": id, "role": role};
+                    jasonmembers.push(member);
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "#00FF66"
+            });
+            buttonMember.innerHTML = "Member";
+            content[i].appendChild(buttonMember);
+            let buttonDeletMember = document.createElement("button");
+            buttonDeletMember.innerHTML = "Entfehrnen";
+            buttonDeletMember.addEventListener('click', function () {
+                let parent = buttonDeletMember.parentNode;
+                let id = parent.getAttribute("data-id");
+                for (let k in jasonmembers) {
+                    if (jasonmembers.hasOwnProperty(k)) {
+                        if (jasonmembers[k].id == id) {
+                            jasonmembers.splice(k, 1);
+                        }
+                    }
+
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "white";
+            });
+            content[i].appendChild(buttonDeletMember);
+            select = false;
+        }
+    } else {
+        console.log(sendArray);
+        addButton.value = "Member auswählen";
+        select = true;
+        for (let i = 0; i < arrayLength; i++) {
+            content[i].style.background = "white";
+            content[i].style.border="4px solid black";
+            content[i].lastChild.remove();
+            content[i].lastChild.remove();
+            content[i].lastChild.remove();
+        }
+    }
+
+
+}
+
 function sendNewProject() {
     let data = new FormData();
-    let projectname =document.getElementById("projectname").value;
+    let projectname = document.getElementById("projectname").value;
     data.append("createproject", "");
     data.append("name", projectname);
     data.append("members", sendArray);
@@ -526,8 +723,8 @@ function sendNewProject() {
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             console.log(this.responseText);
         }
     });
@@ -543,13 +740,35 @@ function sendDelet(id) {
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             console.log(this.responseText);
         }
     });
 
     xhr.open("DELETE", "http://localhost/design-revision/api/");
+
+    xhr.send(data);
+
+}
+
+function sendUpdateProject() {
+    let data = new FormData();
+    //Daten in Api sollten auf Member Array und File geändert werden
+    data.append("updateproject", "addmember");
+    data.append("id", "value");
+    data.append("role", "value");
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("PUT", "http://localhost/design-revision/api/");
 
     xhr.send(data);
 

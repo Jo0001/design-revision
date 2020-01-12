@@ -25,6 +25,7 @@
 </div>
 <div class="space"></div>
 <div class="form" id="form1">
+    <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
         <label>
             <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
@@ -32,12 +33,12 @@
         <input type="file" accept="application/pdf"name="inputFile"  id="inputFile" style="display: none;" />
         <input type="button" value="Datei suchen" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin: 15px 15px 15px 90px;border: none;cursor: pointer" onclick="document.getElementById('inputFile').click();" />
         <div class="image-preview" id="imagePreview" >
-            <img src="../files/img/pdf.icon.png" id="pdfIcon" style="display:none;width: 15%;height: 15%" alt="PDF"/><br>
+            <img src="../files/img/pdf.icon.png" id="pdfIcon" style="display:none;width: 10%;height: 10%" alt="PDF"/><br>
             <span class="image-preview__file"></span>
             <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>
         </div>
         <input type="button" id="btnAddMember" value="Member ausw&#228;hlen" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;justify-content:center;border: none;margin-left:60px;margin-top:10px;cursor: pointer" onclick="addMember()" />
-        <input onclick="window.alert('Hello World')" type="submit" value="Speichern">
+        <input type="submit" value="Speichern">
     </form>
 </div>
 <dialog aria-labelledby="dialog-heading" id="dialog">
