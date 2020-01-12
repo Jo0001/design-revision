@@ -418,34 +418,35 @@ let readyStateCheckInterval = setInterval(function () {
     const previewContainer = document.getElementById("imagePreview");
     const previewFile = previewContainer.querySelector(".image-preview__file");
     const pdfIcon = document.getElementById("pdfIcon");
-    previewFile.onclick = function () {
-        pdfIcon.style.display = "none";
-        previewDefaulText.style.display = "block";
-        previewFile.style.display = "none";
-    };
-    pdfIcon.onclick = function () {
-        pdfIcon.style.display = "none";
-        previewDefaulText.style.display = "block";
-        previewFile.style.display = "none";
-    };
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     previewContainer.addEventListener('dragover', handleDragOver, false);
     previewContainer.addEventListener('drop', dateiauswahl, false);
 
     inputFile.addEventListener("change", function () {
         const file = this.files[0];
-        sendFile = file;
         console.log(file);
+        previewFile.style.fontSize = "12px";
         if (file) {
-            pdfIcon.style.display = "block";
-            previewDefaulText.style.display = "none";
-            previewFile.style.display = "block";
-            previewFile.style.color = "black";
-            previewFile.style.fontSize = "12px";
-            previewFile.innerHTML = file.name + " (" + file.type + ")- " + file.size + " bytes,zuletzt Bearbeitet " + file.lastModifiedDate;
+            if(file.type==="application/pdf") {
+                sendFile = file;
+                pdfIcon.style.display = "block";
+                previewDefaulText.style.display = "none";
+                previewFile.style.display = "block";
+                previewFile.style.color = "black";
+                previewFile.style.fontSize = "12px";
+                previewFile.innerHTML = file.name + " (" + file.type + ")- " + file.size + " bytes,zuletzt Bearbeitet " + file.lastModifiedDate;
+
+            }else {
+                previewFile.style.fontSize = "16px";
+                previewFile.innerHTML ="Bitte PDF hinzufügen!";
+                previewFile.style.color = "#cccccc";
+                previewDefaulText.style.display = "none";
+                pdfIcon.style.display="none";
+            }
         } else {
             pdfIcon.style.display = "none";
             previewDefaulText.style.display = "block";
+            previewFile.innerHTML ="Keine Datei ausgewählt";
             previewFile.style.display = "none";
         }
     });
@@ -457,18 +458,28 @@ function dateiauswahl(evt) {
     evt.preventDefault();
     let file = evt.dataTransfer.files;
     let f = file[0];
-    sendFile = f;
-    let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
     const previewContainer = document.getElementById("imagePreview");
     const previewFile = previewContainer.querySelector(".image-preview__file");
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     const pdfIcon = document.getElementById("pdfIcon");
-    pdfIcon.style.display = "block";
-    previewFile.innerHTML = output;
-    previewDefaulText.style.display = "none";
-    previewFile.style.display = "block";
-    previewFile.style.color = "black";
-    previewFile.style.fontSize = "12px";
+
+    if(f.type==="application/pdf") {
+        sendFile = f;
+        let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
+        pdfIcon.style.display = "block";
+        previewFile.innerHTML = output;
+        previewDefaulText.style.display = "none";
+        previewFile.style.display = "block";
+        previewFile.style.color = "black";
+        previewFile.style.fontSize = "12px";
+    }else {
+        previewFile.style.fontSize = "16px";
+        previewFile.style.display = "block";
+        pdfIcon.style.display="none";
+        previewFile.style.color = "#cccccc";
+        previewFile.innerHTML ="Bitte PDF hinzufügen!";
+        previewDefaulText.style.display = "none";
+    }
 }
 
 function handleDragOver(evt) {
@@ -759,11 +770,12 @@ function sendDelet(id) {
     let data = new FormData();
     data.append("id", id);
 
+
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
             console.log(this.responseText);
         }
     });
