@@ -198,7 +198,7 @@ function generate() {
                 projektErsellen.innerHTML = "Projekt ändern";
                 customerdiv.style.background = "#FFFF99";
                 btnAddMember.onclick = function () {
-                    changeClientState(arrayMember, arrayRole);
+                    changeClientState(arrayMember, arrayRole,customerdiv.getAttribute("data-id"));
                     customerdiv.style.background = "#FFFF99";
                 };
                 updateOrCreate = false;
@@ -592,7 +592,7 @@ function addMember() {
 
 }
 
-function changeClientState(members, role) {
+function changeClientState(members, role,id) {
     let content = document.querySelectorAll('[data-id');
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
@@ -709,6 +709,11 @@ function changeClientState(members, role) {
                 parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
+            if(i==id){
+                buttonMember.style.display="none";
+                buttonAdmin.style.display="none";
+                buttonDeletMember.style.display="none"
+            }
             select = false;
         }
     } else {
