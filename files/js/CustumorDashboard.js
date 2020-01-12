@@ -8,6 +8,7 @@ let doubleClickSelect = true;
 let sendArray = [];
 let sendFile;
 let updateOrCreate = true;
+let nameLenght=false;
 
 
 function generate() {
@@ -43,7 +44,7 @@ function generate() {
     statusImg.style.zIndex = "2";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = "http://localhost/design-revision/api/?getproject&id=" + projectid;
+    requestURL = window.location.origin+"/design-revision/api/?getproject&id=" + projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
@@ -97,7 +98,7 @@ function generate() {
     customerdiv.appendChild(projektname);
 
     //Jason user Object aus Api holen
-    requestURL = "http://localhost/design-revision/api/?getuser";
+    requestURL = window.location.origin + "/design-revision/api/?getuser";
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function () {
@@ -376,10 +377,24 @@ let readyStateCheckInterval = setInterval(function () {
         for (let i = 0; i <= 10; i++) {
             generate();
         }
+            let projectName = document.getElementById("projectname");
+            projectName.addEventListener("keyup",function () {
+            let feedback= document.getElementById("nameToLong");
+            console.log(projectName.value.length);
+            if(projectName.value.length>=80){
+                feedback.style.color = "red";
+                feedback.style.paddingLeft="100px";
+                feedback.innerHTML = "<strong>Name zu lang!</strong>"
+                nameLenght=true;
+            }else {
+                feedback.innerHTML="";
+                nameLenght=false;
+            }
+        });
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile === undefined || sendArray[0] === undefined) {
+            if (sendFile === undefined || sendArray[0] === undefined||nameLenght) {
                 console.log(Error);
             } else {
                 if (updateOrCreate) {

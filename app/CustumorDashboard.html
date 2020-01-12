@@ -29,7 +29,8 @@
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
         <label>
             <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
-        </label><br><br>
+        </label><br>
+        <span id="nameToLong"></span><br>
         <input type="file" accept="application/pdf"name="inputFile"  id="inputFile" style="display: none;" />
         <input type="button" value="Datei suchen" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin: 15px 15px 15px 90px;border: none;cursor: pointer" onclick="document.getElementById('inputFile').click();" />
         <div class="image-preview" id="imagePreview" >
