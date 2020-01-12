@@ -394,7 +394,7 @@ let readyStateCheckInterval = setInterval(function () {
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile === undefined || sendArray[0] === undefined) {
+            if (sendFile === undefined || sendArray[0] === undefined||nameLenght) {
                 console.log(Error);
             } else {
                 if (updateOrCreate) {
