@@ -735,9 +735,11 @@ function changeClientState(members, role,id) {
 function sendNewProject() {
     let data = new FormData();
     let projectname = document.getElementById("projectname").value;
+    //TODO rename tmp
+    let tmp = JSON.stringify(sendArray);
     data.append("createproject", "");
     data.append("name", projectname);
-    data.append("members", sendArray);
+    data.append("members", tmp);
     data.append("file", sendFile);
 
     let xhr = new XMLHttpRequest();

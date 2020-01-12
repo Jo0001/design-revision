@@ -135,7 +135,7 @@ function createProject()
 {
     if (isLoggedIn()) {
         $name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
-        $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING);
+        $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING,FILTER_FLAG_NO_ENCODE_QUOTES);
         $target_dir = "../user-content/";
         $hash = bin2hex(openssl_random_pseudo_bytes(4));
         $filename = $hash . time() . $hash . ".pdf";
