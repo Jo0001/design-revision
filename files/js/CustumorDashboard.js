@@ -8,6 +8,7 @@ let doubleClickSelect = true;
 let sendArray = [];
 let sendFile;
 let updateOrCreate = true;
+let nameLenght=false;
 
 
 function generate() {
@@ -376,10 +377,24 @@ let readyStateCheckInterval = setInterval(function () {
         for (let i = 0; i <= 10; i++) {
             generate();
         }
+            let projectName = document.getElementById("projectname");
+            projectName.addEventListener("keyup",function () {
+            let feedback= document.getElementById("nameToLong");
+            console.log(projectName.value.length);
+            if(projectName.value.length>=80){
+                feedback.style.color = "red";
+                feedback.style.paddingLeft="100px";
+                feedback.innerHTML = "<strong>Name zu lang!</strong>"
+                nameLenght=true;
+            }else {
+                feedback.innerHTML="";
+                nameLenght=false;
+            }
+        });
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile === undefined || sendArray[0] === undefined) {
+            if (sendFile === undefined || sendArray[0] === undefined||nameLenght) {
                 console.log(Error);
             } else {
                 if (updateOrCreate) {
