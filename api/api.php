@@ -135,14 +135,14 @@ function createProject()
 {
     if (isLoggedIn()) {
         $name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
-        $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING,FILTER_FLAG_NO_ENCODE_QUOTES);
+        $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
         $target_dir = "../user-content/";
         $hash = bin2hex(openssl_random_pseudo_bytes(4));
         $filename = $hash . time() . $hash . ".pdf";
         $target_file = $target_dir . basename($filename);
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($name)<81) {
+        if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($name) < 81) {
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                 //Generate Table
                 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
@@ -214,18 +214,34 @@ function deleteProject()
 {
     $_DELETE = null;
     parse_str(file_get_contents('php://input'), $_DELETE);
-    $id = filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
-    //TODO Check Permission and delete all files from the disk
+    if (isset($_DELETE['id'])) {
+        $id = filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-    if (isValidProject($id, $pdo)) {
-        $statement = $pdo->prepare("DROP TABLE `" . $id . "`");
-        $statement->execute();
+        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        if (isValidProject($id, $pdo)) {
+            //TODO Check Permission
+            $statement = $pdo->prepare("SELECT members FROM " . $id);
+            $statement->execute();
+            $link = $statement->fetchAll();
 
-        handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
-        //header("HTTP/1.1 204 No Content ");
+            $statement = $pdo->prepare("SELECT link FROM " . $id);
+            $statement->execute();
+            $link = $statement->fetchAll();
+            $target_dir = "../user-content/";
+            for ($i = 0; $i < count($link); $i++) {
+                //deletes all project files
+                unlink($target_dir . $link[$i][0]);
+            }
+            $statement = $pdo->prepare("DROP TABLE `" . $id . "`");
+            $statement->execute();
+
+            handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
+            //header("HTTP/1.1 204 No Content ");
+        } else {
+            showError("Invalid Request", 400);
+        }
     } else {
-        showError("Invalid Request", 400);
+        showError("Missing id, please specify it with &id=value", 400);
     }
 }
 
