@@ -1,5 +1,6 @@
 <?php
 require "../libs/auth.php";
+header("Access-Control-Allow-Origin: http://bungeecord-test19.ddns.net");
 $method = filter_var($_SERVER['REQUEST_METHOD'], FILTER_SANITIZE_STRING);
 
 function check_id()

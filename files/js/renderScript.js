@@ -81,7 +81,7 @@ function setup() {
         window.alert("Using demo Project, because I received no parameter projectId.")
     }
     //Json user Object aus Api hohlen
-    let requestURL = "/design-revision/api/?getproject=data&id=" + projectId;
+    let requestURL = window.location.hostname + "/design-revision/api/?getproject=data&id=" + projectId;
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function (e) {

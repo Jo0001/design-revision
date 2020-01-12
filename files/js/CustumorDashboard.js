@@ -44,7 +44,7 @@ function generate() {
     statusImg.style.zIndex = "2";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = "/design-revision/api/?getproject&id=" + projectid;
+    requestURL = window.location.hostname + "/design-revision/api/?getproject&id=" + projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
@@ -98,7 +98,7 @@ function generate() {
     customerdiv.appendChild(projektname);
 
     //Jason user Object aus Api holen
-    requestURL = "/design-revision/api/?getuser";
+    requestURL = window.location.hostname + "/design-revision/api/?getuser";
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function () {
