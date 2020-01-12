@@ -44,7 +44,7 @@ function generate() {
     statusImg.style.zIndex = "2";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = window.location.origin+"/design-revision/api/?getproject&id=" + projectid;
+    requestURL = window.location.host + "/design-revision/api/?getproject&id=" + projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
