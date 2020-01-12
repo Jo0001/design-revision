@@ -377,6 +377,7 @@ let readyStateCheckInterval = setInterval(function () {
         for (let i = 0; i <= 10; i++) {
             generate();
         }
+        //Schaue nach der Lenge des Namens
             let projectName = document.getElementById("projectname");
             projectName.addEventListener("keyup",function () {
             let feedback= document.getElementById("nameToLong");
