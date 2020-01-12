@@ -39,7 +39,7 @@ function generate() {
     statusImg.setAttribute("alt", "tick");
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = window.location.host + "/design-revision/api/?getproject&id=" + projectid;
+    requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
@@ -93,7 +93,7 @@ function generate() {
     customerdiv.appendChild(projektname);
 
     //Jason user Object aus Api holen
-    requestURL = window.location.host + "/design-revision/api/?getuser";
+    requestURL = window.location.origin + "/design-revision/api/?getuser";
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function () {
