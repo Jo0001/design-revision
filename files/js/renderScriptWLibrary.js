@@ -82,7 +82,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
                 window.alert("Using demo Project, because I received no parameter projectId.")
             }
             //Json user Object aus Api hohlen
-            let requestURL = "http://localhost/design-revision/api/?getproject=data&id=" + projectId;
+            let requestURL = "/design-revision/api/?getproject=data&id=" + projectId;
             request.open('GET', requestURL);
             request.send();
             request.onreadystatechange = function (e) {
@@ -190,23 +190,23 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
                     isRendering = false;
                 });
                 /* SVG-Rendering-Code but not all Graphic
-            Sates have been implemented in the library + convas needs to be div
-            let viewport = page.getViewport({scale: scale});
-            canvas.style.height = viewport.height + 'px';
-            canvas.style.width = viewport.width + 'px';
-            //Make sure Div is clean
-            while (canvas.firstChild) {
-                canvas.removeChild(canvas.firstChild);
-            }
-            page.getOperatorList()
-                .then(function (opList) {
-                    let svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
-                    return svgGfx.getSVG(opList, viewport);
-                })
-                .then(function (svg) {
-                    canvas.appendChild(svg);
-                });
-             */
+        Sates have been implemented in the library + convas needs to be div
+        let viewport = page.getViewport({scale: scale});
+        canvas.style.height = viewport.height + 'px';
+        canvas.style.width = viewport.width + 'px';
+        //Make sure Div is clean
+        while (canvas.firstChild) {
+            canvas.removeChild(canvas.firstChild);
+        }
+        page.getOperatorList()
+            .then(function (opList) {
+                let svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
+                return svgGfx.getSVG(opList, viewport);
+            })
+            .then(function (svg) {
+                canvas.appendChild(svg);
+            });
+         */
     }
 }
 
@@ -5154,7 +5154,8 @@ module.exports = function (index, length) {
             }
         });
 
-        /***/ }),
+        /***/
+    }),
     /* 59 */
     /***/ (function (module, exports, __w_pdfjs_require__) {
 
@@ -6869,9 +6870,10 @@ module.exports.f = function (C) {
                     value: error
                 };
             }
-};
+        };
 
-        /***/ }),
+        /***/
+    }),
     /* 119 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -31118,7 +31120,8 @@ module.exports = function (it, key) {
             }).a != 7;
         });
 
-        /***/ }),
+        /***/
+    }),
 /* 26 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -31845,7 +31848,8 @@ module.exports = Object.create || function create(O, Properties) {
 };
         hiddenKeys[IE_PROTO] = true;
 
-        /***/ }),
+        /***/
+    }),
     /* 69 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -32223,7 +32227,8 @@ module.exports = function (it) {
     return it;
 };
 
-        /***/ }),
+        /***/
+    }),
     /* 85 */
     /***/ (function (module, exports, __w_pdfjs_require__) {
 
@@ -33437,9 +33442,10 @@ module.exports.f = function (C) {
                     value: error
                 };
             }
-};
+        };
 
-        /***/ }),
+        /***/
+    }),
     /* 123 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -36019,7 +36025,8 @@ var QObject = global.QObject;
 
         exports.f = __w_pdfjs_require__(55);
 
-        /***/ }),
+        /***/
+    }),
     /* 154 */
     /***/ (function (module, exports, __w_pdfjs_require__) {
 
@@ -36206,7 +36213,8 @@ var QObject = global.QObject;
         var entryUnbind = __w_pdfjs_require__(58);
         module.exports = entryUnbind('String', 'padStart');
 
-        /***/ }),
+        /***/
+    }),
     /* 172 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
