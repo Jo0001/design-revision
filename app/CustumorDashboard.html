@@ -25,27 +25,29 @@
 </div>
 <div class="space"></div>
 <div class="form" id="form1">
+    <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
         <label>
-            <input id="customername" name="customername" placeholder="Kundenname" required type="text">
-        </label><br><br>
-        <label>
             <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
-        </label><br><br>
-        <label>
-            <input id="email" name="email" placeholder="E-mail" required type="text">
-        </label><br><br>
-        <input accept="application/pdf" name="datei" type="file">
-        <br><br>
-        <input onclick="window.alert('Hello World')" type="submit" value="Speichern">
+        </label><br>
+        <span id="nameToLong"></span><br>
+        <input type="file" accept="application/pdf"name="inputFile"  id="inputFile" style="display: none;" />
+        <input type="button" value="Datei suchen" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin: 15px 15px 15px 90px;border: none;cursor: pointer" onclick="document.getElementById('inputFile').click();" />
+        <div class="image-preview" id="imagePreview" >
+            <img src="../files/img/pdf.icon.png" id="pdfIcon" style="display:none;width: 10%;height: 10%" alt="PDF"/><br>
+            <span class="image-preview__file"></span>
+            <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>
+        </div>
+        <input type="button" id="btnAddMember" value="Member ausw&#228;hlen" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;justify-content:center;border: none;margin-left:60px;margin-top:10px;cursor: pointer" onclick="addMember()" />
+        <input type="submit" value="Speichern">
     </form>
 </div>
 <dialog aria-labelledby="dialog-heading" id="dialog">
     <p> Wollen sie den Kunden wirklich löschen?</p>
     <p id="pName">Name</p>
     <p id="pProjekt">Projekt</p>
-    <button onclick="closeYes()">Ja</button>
-    <button onclick="closeNo()">Nein</button>
+    <button class="Dialog_button" id="btnYes">Ja</button>
+    <button class="Dialog_button" onclick="closeNo()">Nein</button>
 </dialog>
 <h1 id="message" style="color: red;text-align: center;display: none">Keine Treffer</h1>
 </body>
