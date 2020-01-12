@@ -44,7 +44,7 @@ function generate() {
     statusImg.style.zIndex = "2";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = window.location.host + "/design-revision/api/?getproject&id=" + projectid;
+    requestURL = window.location.origin+"/design-revision/api/?getproject&id=" + projectid;
     request1.open('GET', requestURL, true);
     request1.send();
     request1.onreadystatechange = function () {
@@ -98,7 +98,7 @@ function generate() {
     customerdiv.appendChild(projektname);
 
     //Jason user Object aus Api holen
-    requestURL = window.location.host + "/design-revision/api/?getuser";
+    requestURL = window.location.origin + "/design-revision/api/?getuser";
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function () {
@@ -377,7 +377,6 @@ let readyStateCheckInterval = setInterval(function () {
         for (let i = 0; i <= 10; i++) {
             generate();
         }
-        //Schaue nach der Lenge des Namens
             let projectName = document.getElementById("projectname");
             projectName.addEventListener("keyup",function () {
             let feedback= document.getElementById("nameToLong");
@@ -395,7 +394,7 @@ let readyStateCheckInterval = setInterval(function () {
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile === undefined || sendArray[0] === undefined||nameLenght) {
+            if (sendFile === undefined || sendArray[0] === undefined) {
                 console.log(Error);
             } else {
                 if (updateOrCreate) {
@@ -413,7 +412,379 @@ let readyStateCheckInterval = setInterval(function () {
         // führt die Methode showRes beim Keyup_Event aus
         document.getElementById("searchform").addEventListener('keyup', showRes);
     }
+
+    //Datei Upload
+    const inputFile = document.getElementById("inputFile");
+    const previewContainer = document.getElementById("imagePreview");
+    const previewFile = previewContainer.querySelector(".image-preview__file");
+    const pdfIcon = document.getElementById("pdfIcon");
+    previewFile.onclick = function () {
+        pdfIcon.style.display = "none";
+        previewDefaulText.style.display = "block";
+        previewFile.style.display = "none";
+    };
+    pdfIcon.onclick = function () {
+        pdfIcon.style.display = "none";
+        previewDefaulText.style.display = "block";
+        previewFile.style.display = "none";
+    };
+    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+    previewContainer.addEventListener('dragover', handleDragOver, false);
+    previewContainer.addEventListener('drop', dateiauswahl, false);
+
+    inputFile.addEventListener("change", function () {
+        const file = this.files[0];
+        sendFile = file;
+        console.log(file);
+        if (file) {
+            pdfIcon.style.display = "block";
+            previewDefaulText.style.display = "none";
+            previewFile.style.display = "block";
+            previewFile.style.color = "black";
+            previewFile.style.fontSize = "12px";
+            previewFile.innerHTML = file.name + " (" + file.type + ")- " + file.size + " bytes,zuletzt Bearbeitet " + file.lastModifiedDate;
+        } else {
+            pdfIcon.style.display = "none";
+            previewDefaulText.style.display = "block";
+            previewFile.style.display = "none";
+        }
+    });
 }, 10);
 
+//Drag and Drop
+function dateiauswahl(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    let file = evt.dataTransfer.files;
+    let f = file[0];
+    sendFile = f;
+    let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
+    const previewContainer = document.getElementById("imagePreview");
+    const previewFile = previewContainer.querySelector(".image-preview__file");
+    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+    const pdfIcon = document.getElementById("pdfIcon");
+    pdfIcon.style.display = "block";
+    previewFile.innerHTML = output;
+    previewDefaulText.style.display = "none";
+    previewFile.style.display = "block";
+    previewFile.style.color = "black";
+    previewFile.style.fontSize = "12px";
+}
+
+function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy';
+}
+
+function addMember() {
+    let content = document.querySelectorAll('[data-id');
+    let arrayLength = content.length;
+    let addButton = document.getElementById("btnAddMember");
+    let jasonmembers = [];
+
+    if (select) {
+        if (a === false) {
+            //löschen nachricht verstecken
+            let delet = document.getElementById("form1");
+            //messageMember verstecken
+            delet.lastChild.style.display = "none";
+            for (let i = 0; i < arrayLength; i++) {
+                let temp = content[i].lastChild;
+                if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                    temp.style.display = "none";
+                }
+            }
+            a = true;
+        }
+        addButton.value = "Zu Projekt hinzufügen";
+        for (let i = 0; i < arrayLength; i++) {
+            content[i].style.background = "white";
+            content[i].style.border = "4px solid black";
+            let buttonAdmin = document.createElement("button");
+            buttonAdmin.innerHTML = "Admin";
+            //Button Click event
+            buttonAdmin.addEventListener('click', function () {
+                let parent = buttonAdmin.parentNode;
+                let id = parent.getAttribute("data-id");
+                let role = 1;
+                let include = true;
+                //Schauen ob es den Member schon gibt un Rolle anpassen
+                for (let j = 0; j < jasonmembers.length; j++) {
+                    if (jasonmembers[i]) {
+                        if (jasonmembers[i].id === id) {
+                            jasonmembers[i].role = 1;
+                            include = false;
+                        }
+                    }
+                }
+                if (include) {
+                    let member = {"id": id, "role": role};
+                    jasonmembers.push(member);
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "#FFA500";
+            });
+            content[i].appendChild(buttonAdmin);
+            let buttonMember = document.createElement("button");
+            //Butto Click event
+            buttonMember.addEventListener('click', function () {
+                let parent = buttonMember.parentNode;
+                let id = parent.getAttribute("data-id");
+                let role = 0;
+                let include = true;
+                //Schauen ob es den Member schon gibt un Rolle anpassen
+                for (let j = 0; j < jasonmembers.length; j++) {
+                    if (jasonmembers[i]) {
+                        if (jasonmembers[i].id === id) {
+                            jasonmembers[i].role = 0;
+                            include = false;
+                        }
+                    }
+                }
+
+                if (include) {
+                    let member = {"id": id, "role": role};
+                    jasonmembers.push(member);
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "#00FF66"
+            });
+            buttonMember.innerHTML = "Member";
+            content[i].appendChild(buttonMember);
+            let buttonDeletMember = document.createElement("button");
+            buttonDeletMember.innerHTML = "Entfehrnen";
+            buttonDeletMember.addEventListener('click', function () {
+                let parent = buttonDeletMember.parentNode;
+                let id = parent.getAttribute("data-id");
+                for (let k in jasonmembers) {
+                    if (jasonmembers.hasOwnProperty(k)) {
+                        if (jasonmembers[k].id == id) {
+                            jasonmembers.splice(k, 1);
+                        }
+                    }
+
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "white";
+            });
+            content[i].appendChild(buttonDeletMember);
+            select = false;
+        }
+    } else {
+
+        console.log(sendArray);
+        addButton.value = "Member auswählen";
+        select = true;
+        for (let i = 0; i < arrayLength; i++) {
+            content[i].style.background = "white";
+            content[i].lastChild.remove();
+            content[i].lastChild.remove();
+            content[i].lastChild.remove();
+        }
+    }
+
+}
+
+function changeClientState(members, role) {
+    let content = document.querySelectorAll('[data-id');
+    let arrayLength = content.length;
+    let addButton = document.getElementById("btnAddMember");
+    let jasonmembers = [];
+    if (select) {
+        if (a === false) {
+            for (let i = 0; i < arrayLength; i++) {
+                content[i].style.background = "white";
+                content[i].style.border = "4px solid black";
+                let temp = content[i].lastChild;
+                if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                    temp.style.display = "none";
+                }
+            }
+            //löschen nachricht verstecken
+            let delet = document.getElementById("form1");
+            //messageMember verstecken
+            if(boolStatus)
+            delet.lastChild.style.display = "none";
+            a = true;
+        }
+        for (let i = 0; i < arrayLength; i++) {
+            let help = content[i].getAttribute("data-id");
+            if (members.includes(help)) {
+                let help1 = members.indexOf(help);
+                if (role[help1] == 0) {
+                    content[i].style.background = "#00FF66";
+                    console.log("Yes");
+                }
+                if (role[help1] == 1) {
+                    content[i].style.background = "#FFA500";
+                    console.log("2*Yes")
+                }
+            }
+        }
+        for (let i = 0; i < members.length; i++) {
+            let member = {"id": members[i], "role": role[i]};
+            jasonmembers.push(member);
+            console.log(jasonmembers);
+        }
+        addButton.value = "Zu Projekt hinzufügen";
+        for (let i = 0; i < arrayLength; i++) {
+            let buttonAdmin = document.createElement("button");
+            buttonAdmin.innerHTML = "Admin";
+            //Button Click event
+            buttonAdmin.addEventListener('click', function () {
+                let parent = buttonAdmin.parentNode;
+                let id = parent.getAttribute("data-id");
+                let role = 1;
+                let include = true;
+                //Schauen ob es den Member schon gibt un Rolle anpassen
+                for (let j = 0; j < jasonmembers.length; j++) {
+                    if (jasonmembers[i]) {
+                        if (jasonmembers[i].id === id) {
+                            jasonmembers[i].role = 1;
+                            include = false;
+                        }
+                    }
+                }
+                if (include) {
+                    let member = {"id": id, "role": role};
+                    jasonmembers.push(member);
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "#FFA500";
+            });
+            content[i].appendChild(buttonAdmin);
+            let buttonMember = document.createElement("button");
+            //Butto Click event
+            buttonMember.addEventListener('click', function () {
+                let parent = buttonMember.parentNode;
+                let id = parent.getAttribute("data-id");
+                let role = 0;
+                let include = true;
+                //Schauen ob es den Member schon gibt un Rolle anpassen
+                for (let j = 0; j < jasonmembers.length; j++) {
+                    if (jasonmembers[i]) {
+                        if (jasonmembers[i].id === id) {
+                            jasonmembers[i].role = 0;
+                            include = false;
+                        }
+                    }
+                }
+
+                if (include) {
+                    let member = {"id": id, "role": role};
+                    jasonmembers.push(member);
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "#00FF66"
+            });
+            buttonMember.innerHTML = "Member";
+            content[i].appendChild(buttonMember);
+            let buttonDeletMember = document.createElement("button");
+            buttonDeletMember.innerHTML = "Entfehrnen";
+            buttonDeletMember.addEventListener('click', function () {
+                let parent = buttonDeletMember.parentNode;
+                let id = parent.getAttribute("data-id");
+                for (let k in jasonmembers) {
+                    if (jasonmembers.hasOwnProperty(k)) {
+                        if (jasonmembers[k].id == id) {
+                            jasonmembers.splice(k, 1);
+                        }
+                    }
+
+                }
+                jasonmembers.sort();
+                console.log(jasonmembers);
+                sendArray = jasonmembers;
+                parent.style.background = "white";
+            });
+            content[i].appendChild(buttonDeletMember);
+            select = false;
+        }
+    } else {
+        console.log(sendArray);
+        addButton.value = "Member auswählen";
+        select = true;
+        for (let i = 0; i < arrayLength; i++) {
+            content[i].style.background = "white";
+            content[i].style.border="4px solid black";
+            content[i].lastChild.remove();
+            content[i].lastChild.remove();
+            content[i].lastChild.remove();
+        }
+    }
 
 
+}
+
+function sendNewProject() {
+    let data = new FormData();
+    let projectname = document.getElementById("projectname").value;
+    data.append("createproject", "");
+    data.append("name", projectname);
+    data.append("members", sendArray);
+    data.append("file", sendFile);
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+    xhr.open("POST", "http://localhost/design-revision/api/");
+    xhr.send(data);
+
+}
+
+function sendDelet(id) {
+    let data = new FormData();
+    data.append("id", id);
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("DELETE", "http://localhost/design-revision/api/");
+
+    xhr.send(data);
+
+}
+
+function sendUpdateProject() {
+    let data = new FormData();
+    //Daten in Api sollten auf Member Array und File geändert werden
+    data.append("updateproject", "addmember");
+    data.append("id", "value");
+    data.append("role", "value");
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("PUT", "http://localhost/design-revision/api/");
+
+    xhr.send(data);
+
+}
