@@ -1,6 +1,6 @@
 <?php
 require "../libs/auth.php";
-header("Access-Control-Allow-Origin: http://design-revision.sytes.net");
+header("Access-Control-Allow-Origin: http://design-revision.ddns.net");
 $method = filter_var($_SERVER['REQUEST_METHOD'], FILTER_SANITIZE_STRING);
 
 function check_id()
@@ -142,7 +142,7 @@ function createProject()
         $target_file = $target_dir . basename($filename);
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001) {
+        if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($name)<81) {
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                 //Generate Table
                 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
