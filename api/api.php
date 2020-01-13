@@ -1,6 +1,6 @@
 <?php
 require "../libs/auth.php";
-header("Access-Control-Allow-Origin: http://design-revision.ddns.net");
+//header("Access-Control-Allow-Origin: http://design-revision.ddns.net");
 $method = filter_var($_SERVER['REQUEST_METHOD'], FILTER_SANITIZE_STRING);
 
 function check_id()
@@ -69,7 +69,7 @@ function showError($error, $code)
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 1.5));
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 1.6));
     handleOutput($err);
     die;
 }
@@ -143,6 +143,7 @@ function createProject()
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
         if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($name) < 81) {
+            //TODO Check if member is verified
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                 //Generate Table
                 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
@@ -150,7 +151,7 @@ function createProject()
                 do {
                     $t_name = "project_" . bin2hex(openssl_random_pseudo_bytes(4));
                     try {
-                        $statement = $pdo->prepare("CREATE TABLE `design_revision`.`" . $t_name . "` ( `p_name` VARCHAR(80) NOT NULL , `version` INT(10) UNSIGNED NOT NULL DEFAULT '1', `link` VARCHAR(30) NOT NULL , `members` VARCHAR(181) NOT NULL , `status` VARCHAR(20) NOT NULL , `lastedit` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `data` VARCHAR(255) NULL , PRIMARY KEY (`version`)) ENGINE = InnoDB");
+                        $statement = $pdo->prepare("CREATE TABLE `design_revision`.`" . $t_name . "` ( `p_name` VARCHAR(80) NOT NULL , `version` INT(10) UNSIGNED NOT NULL DEFAULT '1', `link` VARCHAR(30) NOT NULL , `members` VARCHAR(221) NOT NULL , `status` VARCHAR(20) NOT NULL , `lastedit` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `data` VARCHAR(255) NULL , PRIMARY KEY (`version`)) ENGINE = InnoDB");
                         $result = $statement->execute();
                     } catch (PDOException $e) {
                     }
@@ -219,24 +220,25 @@ function deleteProject()
 
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
         if (isValidProject($id, $pdo)) {
-            //TODO Check Permission
-            $statement = $pdo->prepare("SELECT members FROM " . $id);
-            $statement->execute();
-            $link = $statement->fetchAll();
+            //TODO UserStatus getUser('status')=="VERIFIED"
+            $userid = $_SESSION['user-id'];
+            if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {
+                $statement = $pdo->prepare("SELECT link FROM " . $id);
+                $statement->execute();
+                $link = $statement->fetchAll();
+                $target_dir = "../user-content/";
+                for ($i = 0; $i < count($link); $i++) {
+                    //deletes all project files
+                    unlink($target_dir . $link[$i][0]);
+                }
+                $statement = $pdo->prepare("DROP TABLE `" . $id . "`");
+                $statement->execute();
 
-            $statement = $pdo->prepare("SELECT link FROM " . $id);
-            $statement->execute();
-            $link = $statement->fetchAll();
-            $target_dir = "../user-content/";
-            for ($i = 0; $i < count($link); $i++) {
-                //deletes all project files
-                unlink($target_dir . $link[$i][0]);
+                handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
+                //header("HTTP/1.1 204 No Content ");
+            } else {
+                showError("You are not allowed to delete this", 403);
             }
-            $statement = $pdo->prepare("DROP TABLE `" . $id . "`");
-            $statement->execute();
-
-            handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
-            //header("HTTP/1.1 204 No Content ");
         } else {
             showError("Invalid Request", 400);
         }
@@ -259,5 +261,26 @@ function isValidProject($id, $pdo)
         return true;
     } else {
         return false;
+    }
+}
+
+//Make sure you validate the id before calling this method
+function getLatestProjectData($id, $pdo)
+{
+    $statement = $pdo->prepare("SELECT * FROM " . $id . " ORDER BY version DESC LIMIT 1 ");
+    $statement->execute();
+    return $statement->fetch();
+}
+
+function isAdmin($lastrow, $userid)
+{
+    $members = json_decode($lastrow['members'], true);
+    foreach ($members as $member) {
+        if ($member['id'] == $userid && $member['role'] == 1) {
+            return true;
+            break;
+        } else {
+            return false;
+        }
     }
 }
