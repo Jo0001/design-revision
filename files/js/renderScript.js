@@ -5,6 +5,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 class TargetScaleHandlerClass {
     constructor() {
+        this.isScalingATM = false;
         this.innerTargetScale = 1;
         this.scale = 0.9;
         this.handlerId = -1;
@@ -12,19 +13,23 @@ class TargetScaleHandlerClass {
             return parseFloat(num + "").toFixed(6);
         }
         this.check = function check() {
+            this.isScalingATM = true;
             this.scale = this.round(this.scale);
             this.innerTargetScale = this.round(this.innerTargetScale);
-            if (this.scale > this.innerTargetScale) {
+            if (this.scale > this.innerTargetScale && !preventZoomAndMovement) {
                 this.scale = parseFloat(this.scale + "") - 0.01;
                 this.scale = this.round(this.scale);
+                this.isScalingATM = true;
                 renderPageFromPdf(this.scale);
-            } else if (this.scale < this.innerTargetScale) {
+            } else if (this.scale < this.innerTargetScale && !preventZoomAndMovement) {
                 this.scale = parseFloat(this.scale + "") + 0.01;
                 this.scale = this.round(this.scale);
+                this.isScalingATM = true;
                 renderPageFromPdf(this.scale);
-            } else if (this.scale === this.innerTargetScale) {
+            } else if (this.scale === this.innerTargetScale && !preventZoomAndMovement) {
                 if (this.handlerId > 0) {
                     clearInterval(this.handlerId);
+                    this.isScalingATM = false;
                     //console.log("Removed Listener. " + this.handlerId + " " + (this.scale === this.innerTargetScale) + " " + this.scale + " " + this.innerTargetScale);
                     this.handlerId = -1;
                     this.scale = this.round(this.scale);
@@ -57,11 +62,78 @@ class TargetScaleHandlerClass {
 let pdfFileOrUrl = "../user-content/test4.pdf";
 let pdfPageNumber = 101;
 let canvas;
+let commentArea;
 let pdfPage = undefined;
 let isRendering = false;
+let commentMode = false;
+let preventZoomAndMovement = false;
 
-let request = new XMLHttpRequest();
 let targetScaleHandler = new TargetScaleHandlerClass();
+let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+
+let canvasObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutationRecord) {
+        let attribute = canvas.getAttribute(mutationRecord.attributeName);
+        commentArea.setAttribute(mutationRecord.attributeName, attribute);
+    });
+});
+
+function startDragHandler(event) {
+    let eventDoc, doc, body;
+
+    event = event || window.event; // IE-ism
+
+    if (event.button === 0) {
+        preventZoomAndMovement = true;
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        commentAreaData.sX = event.pageX - canvas.style.left;
+        commentAreaData.sY = event.pageY - canvas.style.top;
+    }
+};
+
+function endDragHandler(event) {
+    let eventDoc, doc, body;
+
+    event = event || window.event; // IE-ism
+
+    if (event.button === 0) {
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        commentAreaData.eX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
+        commentAreaData.eY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
+        commentAreaData.widthPdf = parseInt(canvas.getAttribute("width"));
+        commentAreaData.heightPdf = parseInt(canvas.getAttribute("height"));
+
+        window.alert(commentAreaData.widthPdf + " " + commentAreaData.heightPdf);
+        commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+        preventZoomAndMovement = false;
+    }
+};
 
 function setup() {
     //Prevent a contextmenu on page, so people cant download the design.
@@ -70,25 +142,60 @@ function setup() {
         return false;
     });
 
+    commentArea = document.getElementById('commentArea');
+    let titlecard = document.getElementById("titlecard");
+    let createCommentBtn = document.getElementById("createComment");
+    createCommentBtn.addEventListener("click", function (e) {
+        commentMode = !commentMode;
+        if (commentMode) {
+            //COMMENTMODE ON
+            createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
+            canvas.addEventListener("mousedown", startDragHandler, true);
+            canvas.addEventListener("mouseup", endDragHandler, true);
+        } else {
+            createCommentBtn.innerHTML = "Kommentarmodus einschalten";
+            canvas.removeEventListener("mousedown", startDragHandler, true);
+            canvas.removeEventListener("mouseup", endDragHandler, true);
+        }
+    });
+
     canvas = document.getElementById('pdf');
+    canvasObserver.observe(canvas, {attributes: true});
     canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
     dragElementWhenBtnIsDown(canvas, 1);
 
     let projectId = getURLParameter('id');
-    if (projectId == undefined) {
+    if (projectId === undefined || projectId === false || projectId === "") {
         projectId = 2;
-        window.alert("Using demo Project, because I received no parameter projectId.")
+        window.alert("Using demo Project id=2, because I received no parameter projectId.")
     }
-    //Json user Object aus Api hohlen
-    let requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+    let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
+    let request = new XMLHttpRequest();
     request.open('GET', requestURL);
     request.send();
     request.onreadystatechange = function (e) {
         if (request.readyState === 4 && request.status === 200) {
+            let projectContainer = JSON.parse(request.response);
+            titlecard.innerText = titlecard.innerHTML.replace("/", projectContainer.project.name);
+        } else if (request.readyState === 4 && request.status === 401) {
+            window.alert("keine Berechtigung");
+        } else if (request.readyState === 4 && request.status === 403) {
+            window.alert("Forbidden");
+        } else if (request.readyState === 4 && request.status === 404) {
+            window.alert("Nichts gefunden");
+        }
+    };
+
+    //Json Kommentare aus Api hohlen
+    let request2 = new XMLHttpRequest();
+    requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+    request2.open('GET', requestURL);
+    request2.send();
+    request2.onreadystatechange = function (e) {
+        if (request.readyState === 4 && request.status === 200) {
             let projectObject = JSON.parse(request.response);
             //pdfFileOrUrl = projectObject.link;
-            window.alert(pdfFileOrUrl);
             loadPDFAndRender(1, pdfFileOrUrl);
         } else if (request.readyState === 4 && request.status === 401) {
             window.alert("keine Berechtigung");
@@ -102,7 +209,7 @@ function setup() {
 
 function getURLParameter(name) {
     let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
-    return (value !== 'null') ? value : false;
+    return (value !== 'null') ? value : undefined;
 }
 
 function dragElementWhenBtnIsDown(elmnt, btn) {
@@ -122,14 +229,16 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
 
     function drag(e) {
         e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = cursorXinView - e.clientX;
-        pos2 = cursorYinView - e.clientY;
-        cursorXinView = e.clientX;
-        cursorYinView = e.clientY;
-        // set the element's new position:
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        if (!preventZoomAndMovement) {
+            // calculate the new cursor position:
+            pos1 = cursorXinView - e.clientX;
+            pos2 = cursorYinView - e.clientY;
+            cursorXinView = e.clientX;
+            cursorYinView = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
     }
 
     function stopDragging(e) {

@@ -5,7 +5,8 @@
   "dependencies": {
     "browserify": "^16.5.0",
     "dep-linker": "^1.0.24",
-    "webworkify": "^1.5.0"
+    "webworkify": "^1.5.0",
+    "pdfjs-dist": "latest"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
