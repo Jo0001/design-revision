@@ -12,16 +12,20 @@ if (!empty($_POST['email'])) {
     if ($user) {
         date_default_timezone_set('Europe/Berlin');
         $timestamp = date("Y-m-d H:i:s");
-        $statement = $pdo->prepare("UPDATE users SET token = ?, token_timestamp=? WHERE email = ?");
-        $hash = generateHash($pdo);
-        $statement->execute(array($hash, $timestamp, $email));
 
-        $link = "http://localhost/design-revision/simulate/setpassword.php?token=" . $hash;
+        if (dateDifference($timestamp, $user['token_timestamp']) > 120) {
 
-        sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
 
-        die("<!DOCTYPE html>
-<html lang=\"en\">
+            $statement = $pdo->prepare("UPDATE users SET token = ?, token_timestamp=? WHERE email = ?");
+            $hash = generateHash($pdo);
+            $statement->execute(array($hash, $timestamp, $email));
+
+            $link = "http://localhost/design-revision/simulate/setpassword.php?token=" . $hash;
+
+            sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
+
+            die("<!DOCTYPE html>
+<html lang=\"de\">
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
@@ -36,6 +40,23 @@ if (!empty($_POST['email'])) {
 </div>
 </body>
 </html>");
-
+        } else {
+            die("<!DOCTYPE html>
+<html lang=\"de\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Kennwort vergessen</title>
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"../files/css/layout.css\">
+    <link rel=\"icon\" href=\"../files/img/favicon.ico\" type=\"image/x-icon\">
+</head>
+<body>
+<div id=\"verifyBox\" class=\"middle error\">
+    <h3>Bitte schauen Sie in Ihr Postfach</h3>
+    <p>Wir haben Ihnen bereits eine E-Mail geschickt. <br>Wenn Sie die E-Mal nicht in Ihrem Posteingang finden,<br> überprüfen Sie bitte auch Ihren Spam-Ordner.</p>
+</div>
+</body>
+</html>");
+        }
     }
 }

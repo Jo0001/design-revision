@@ -21,6 +21,9 @@ function parseHTML($file_path, $name, $link, $project_name, $project_version)
     return $template;
 }
 
+/**
+ * @return time-difference in seconds
+ */
 function dateDifference($d1, $d2)
 {
     $date1 = strtotime($d1);
