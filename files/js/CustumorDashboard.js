@@ -10,6 +10,9 @@ let sendFile;
 let updateOrCreate = true;
 let nameLenght=false;
 
+function emailIsValid(email) {
+    return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+}
 
 function generate() {
     //Variablen erstellen
