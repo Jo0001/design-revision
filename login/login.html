@@ -45,7 +45,7 @@
 
         function umleiten() {
                 window.alert("Sie werden auf die Mobile Seite umgeleitet");
-                window.location = "../login/mobileSeite";
+                window.location =window.location.origin + "/login/mobileSeite.html";
         }
 
         let err = getURLParameter('err');
