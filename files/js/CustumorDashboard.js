@@ -59,18 +59,17 @@ function generate() {
             textStatus.innerHTML = projectObejct.project.status;
             let members1 = projectObejct.project.members;
             //members bekommen
-            let help = members1[0].id;
+            //todo email ändern
+            let help = members1[0].email;
             let helpRole = members1[0].role;
             let length = members1.length;
             for (let i = 1; i < length; i++) {
-                //todo email ändern
-                help = help + "," + members1[i].id;
+                help = help + "," + members1[i].email;
                 helpRole = helpRole + "," + members1[i].role;
             }
             //members generieren
             members.innerHTML = help;
             members.style.display = "none";
-            members.id = "members";
             customerdiv.appendChild(members);
             arrayMember = members.innerHTML;
             arrayMember = arrayMember.split(",");
@@ -238,7 +237,7 @@ function closeYes(members, content, arrayLength) {
     sendDelet(id);
     //Daten der Cusomer löschen
     for (let i = 0; i < arrayLength; i++) {
-        let help = content[i].getAttribute("data-id");
+        let help = content[i].getAttribute("data-email");
         if (members.includes(help)) {
             content[i].style.background = "white";
             content[i].lastChild.remove();
@@ -258,12 +257,12 @@ function closeNo() {
 function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
-    let content = document.querySelectorAll('[data-id');
+    let content = document.querySelectorAll('[data-email');
     let arrayLength = content.length;
     let help;
     if (a) {
         for (let i = 0; i < arrayLength; i++) {
-            help = content[i].getAttribute("data-id");
+            help = content[i].getAttribute("data-email");
             if (members.includes(help)) {
                 let help1 = members.indexOf(help);
                 if (role[help1] == 0) {
@@ -309,7 +308,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
         customerdiv1.style.border = "4px solid black";
         a = true;
         for (let i = 0; i < arrayLength; i++) {
-            help = content[i].getAttribute("data-id");
+            help = content[i].getAttribute("data-email");
             if (members.includes(help)) {
                 content[i].style.background = "white";
                 content[i].lastChild.style.display="none";
@@ -539,6 +538,7 @@ function addMember() {
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
+                console.log(jasonmembers);
                 sendArray = jasonmembers;
                 parent.style.background = "#FFA500";
             });
@@ -553,7 +553,6 @@ function addMember() {
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-
                         if (jasonmembers[i].email == email) {
                             jasonmembers[i].role = 0;
                             include = false;
@@ -585,6 +584,7 @@ function addMember() {
                     }
 
                 }
+                console.log(jasonmembers);
                 jasonmembers.sort();
                 console.log(jasonmembers);
                 sendArray = jasonmembers;
@@ -631,7 +631,7 @@ function changeClientState(members, role,id) {
         }
         //todo muss noch geändert werden, wenn die ich von api email bekomme
         for (let i = 0; i < arrayLength; i++) {
-            let help = content[i].getAttribute("data-id");
+            let help = content[i].getAttribute("data-email");
             if (members.includes(help)) {
                 let help1 = members.indexOf(help);
                 if (role[help1] == 0) {
@@ -645,8 +645,8 @@ function changeClientState(members, role,id) {
         for (let i = 0; i < members.length; i++) {
             let member = {"email": members[i], "role": role[i]};
             jasonmembers.push(member);
-            console.log(jasonmembers);
         }
+
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < arrayLength; i++) {
             let buttonAdmin = document.createElement("button");
@@ -660,7 +660,7 @@ function changeClientState(members, role,id) {
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[i].email == email) {
+                        if (jasonmembers[j].email== email) {
                             jasonmembers[i].role = 1;
                             include = false;
                         }
@@ -681,12 +681,14 @@ function changeClientState(members, role,id) {
             buttonMember.addEventListener('click', function () {
                 let parent = buttonMember.parentNode;
                 let email = parent.getAttribute("data-email");
-                let role = 0;
+                console.log(email);
+                let role = "0";
                 let include = true;
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[i].email === email) {
+                        if (jasonmembers[j].email== email) {
+
                             jasonmembers[i].role = 0;
                             include = false;
                         }
