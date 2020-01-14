@@ -20,7 +20,7 @@ if (!empty($_POST['email'])) {
             $hash = generateHash($pdo);
             $statement->execute(array($hash, $timestamp, $email));
 
-            $link = "http://localhost/design-revision/simulate/setpassword.php?token=" . $hash;
+            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://".filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING)."/design-revision/simulate/setpassword.php?token=" . $hash;
 
             sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
 
