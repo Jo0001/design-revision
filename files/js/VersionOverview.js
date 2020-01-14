@@ -39,7 +39,6 @@ function generate() {
         }
 
     };
-
     tableNummer.appendChild(nummer);
     tableLink.appendChild(link);
     tableLastModified.appendChild(lastModified);

@@ -11,6 +11,7 @@ body {
     margin-left: 80%;
     background: #0cfad6;
     width: 20%;
+    transform: scale(0.9);
 }
 
 .form h1 {

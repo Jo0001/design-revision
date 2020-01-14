@@ -55,7 +55,7 @@ function generate() {
         if (request1.readyState === 4 && request1.status === 200) {
             let projectObejct = JSON.parse(request1.response);
             projektname.innerHTML = projectObejct.project.name;
-            versionen.innerHTML = projectObejct.project.version;
+            versionen.innerHTML = "Versionen: "+projectObejct.project.version;
             textStatus.innerHTML = projectObejct.project.status;
             let members1 = projectObejct.project.members;
             //members bekommen
@@ -63,6 +63,7 @@ function generate() {
             let helpRole = members1[0].role;
             let length = members1.length;
             for (let i = 1; i < length; i++) {
+                //todo email ändern
                 help = help + "," + members1[i].id;
                 helpRole = helpRole + "," + members1[i].role;
             }
@@ -111,7 +112,8 @@ function generate() {
             let help = userObject.user.name + counter;
             customerdiv.setAttribute('data-test', help);
             nameimg.setAttribute("src", userObject.user.avatar);
-            clientemail.innerHTML = userObject.user.email;
+            clientemail.innerHTML = userObject.user.email+" "+counter;
+            customerdiv.setAttribute('data-email',userObject.user.email+counter);
             company.innerHTML = userObject.user.company;
             //customerdiv id geben
             customerdiv.setAttribute('data-id', counter);
@@ -139,7 +141,7 @@ function generate() {
     statusDiv.appendChild(textStatus);
     //Abfrage für den Status
 
-    //zum test != sonst ===
+    //todo zum test != sonst ===
     if (textStatus.innerHTML != "Fertig/Druckfreigabe") {
         statusImg.setAttribute("src", "../files/img/XBereit.png");
         boolStatus = true;
@@ -492,7 +494,7 @@ function handleDragOver(evt) {
 }
 
 function addMember() {
-    let content = document.querySelectorAll('[data-id');
+    let content = document.querySelectorAll('[data-email');
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
@@ -520,24 +522,23 @@ function addMember() {
             //Button Click event
             buttonAdmin.addEventListener('click', function () {
                 let parent = buttonAdmin.parentNode;
-                let id = parent.getAttribute("data-id");
+                let email = parent.getAttribute("data-email");
                 let role = 1;
                 let include = true;
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[i].id === id) {
+                        if (jasonmembers[i].email == email) {
                             jasonmembers[i].role = 1;
                             include = false;
                         }
                     }
                 }
                 if (include) {
-                    let member = {"id": id, "role": role};
+                    let member = {"email": email, "role": role};
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
-                console.log(jasonmembers);
                 sendArray = jasonmembers;
                 parent.style.background = "#FFA500";
             });
@@ -546,13 +547,14 @@ function addMember() {
             //Butto Click event
             buttonMember.addEventListener('click', function () {
                 let parent = buttonMember.parentNode;
-                let id = parent.getAttribute("data-id");
+                let email = parent.getAttribute("data-email");
                 let role = 0;
                 let include = true;
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[i].id === id) {
+
+                        if (jasonmembers[i].email == email) {
                             jasonmembers[i].role = 0;
                             include = false;
                         }
@@ -560,7 +562,7 @@ function addMember() {
                 }
 
                 if (include) {
-                    let member = {"id": id, "role": role};
+                    let member = {"email": email, "role": role};
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
@@ -574,10 +576,10 @@ function addMember() {
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
                 let parent = buttonDeletMember.parentNode;
-                let id = parent.getAttribute("data-id");
+                let email = parent.getAttribute("data-email");
                 for (let k in jasonmembers) {
                     if (jasonmembers.hasOwnProperty(k)) {
-                        if (jasonmembers[k].id == id) {
+                        if (jasonmembers[k].email == email) {
                             jasonmembers.splice(k, 1);
                         }
                     }
@@ -592,7 +594,6 @@ function addMember() {
             select = false;
         }
     } else {
-
         console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
@@ -607,7 +608,7 @@ function addMember() {
 }
 
 function changeClientState(members, role,id) {
-    let content = document.querySelectorAll('[data-id');
+    let content = document.querySelectorAll('[data-email');
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
@@ -628,22 +629,21 @@ function changeClientState(members, role,id) {
             delet.lastChild.style.display = "none";
             a = true;
         }
+        //todo muss noch geändert werden, wenn die ich von api email bekomme
         for (let i = 0; i < arrayLength; i++) {
             let help = content[i].getAttribute("data-id");
             if (members.includes(help)) {
                 let help1 = members.indexOf(help);
                 if (role[help1] == 0) {
                     content[i].style.background = "#00FF66";
-                    console.log("Yes");
                 }
                 if (role[help1] == 1) {
                     content[i].style.background = "#FFA500";
-                    console.log("2*Yes")
                 }
             }
         }
         for (let i = 0; i < members.length; i++) {
-            let member = {"id": members[i], "role": role[i]};
+            let member = {"email": members[i], "role": role[i]};
             jasonmembers.push(member);
             console.log(jasonmembers);
         }
@@ -654,20 +654,20 @@ function changeClientState(members, role,id) {
             //Button Click event
             buttonAdmin.addEventListener('click', function () {
                 let parent = buttonAdmin.parentNode;
-                let id = parent.getAttribute("data-id");
+                let email = parent.getAttribute("data-email");
                 let role = 1;
                 let include = true;
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[i].id === id) {
+                        if (jasonmembers[i].email == email) {
                             jasonmembers[i].role = 1;
                             include = false;
                         }
                     }
                 }
                 if (include) {
-                    let member = {"id": id, "role": role};
+                    let member = {"email": email, "role": role};
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
@@ -680,13 +680,13 @@ function changeClientState(members, role,id) {
             //Butto Click event
             buttonMember.addEventListener('click', function () {
                 let parent = buttonMember.parentNode;
-                let id = parent.getAttribute("data-id");
+                let email = parent.getAttribute("data-email");
                 let role = 0;
                 let include = true;
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[i].id === id) {
+                        if (jasonmembers[i].email === email) {
                             jasonmembers[i].role = 0;
                             include = false;
                         }
@@ -694,7 +694,7 @@ function changeClientState(members, role,id) {
                 }
 
                 if (include) {
-                    let member = {"id": id, "role": role};
+                    let member = {"email": email, "role": role};
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
@@ -708,10 +708,10 @@ function changeClientState(members, role,id) {
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
                 let parent = buttonDeletMember.parentNode;
-                let id = parent.getAttribute("data-id");
+                let email = parent.getAttribute("data-email");
                 for (let k in jasonmembers) {
                     if (jasonmembers.hasOwnProperty(k)) {
-                        if (jasonmembers[k].id == id) {
+                        if (jasonmembers[k].email == email) {
                             jasonmembers.splice(k, 1);
                         }
                     }
@@ -749,11 +749,11 @@ function changeClientState(members, role,id) {
 function sendNewProject() {
     let data = new FormData();
     let projectname = document.getElementById("projectname").value;
-    //TODO rename tmp
-    let tmp = JSON.stringify(sendArray);
+    let tmpArray = JSON.stringify(sendArray);
+    let sendURL= window.location.origin+"/design-revision/api/";
     data.append("createproject", "");
     data.append("name", projectname);
-    data.append("members", tmp);
+    data.append("members", tmpArray);
     data.append("file", sendFile);
 
     let xhr = new XMLHttpRequest();
@@ -764,14 +764,15 @@ function sendNewProject() {
             console.log(this.responseText);
         }
     });
-    xhr.open("POST", "http://localhost/design-revision/api/");
+    xhr.open("POST", sendURL);
     xhr.send(data);
 
 }
 
 function sendDelet(id) {
     let data = new FormData();
-    data.append("id", id);
+    let sendURL= window.location.origin+"/design-revision/api/";
+    data.append("id", "id");
 
 
     let xhr = new XMLHttpRequest();
@@ -783,7 +784,7 @@ function sendDelet(id) {
         }
     });
 
-    xhr.open("DELETE", "http://localhost/design-revision/api/");
+    xhr.open("DELETE", sendURL);
 
     xhr.send(data);
 
@@ -791,6 +792,7 @@ function sendDelet(id) {
 //Hello
 function sendUpdateProject() {
     let data = new FormData();
+    let sendURL= window.location.origin+"/design-revision/api/";
     //Daten in Api sollten auf Member Array und File geändert werden
     data.append("updateproject", "addmember");
     data.append("id", "value");
@@ -805,7 +807,7 @@ function sendUpdateProject() {
         }
     });
 
-    xhr.open("PUT", "http://localhost/design-revision/api/");
+    xhr.open("PUT", sendURL);
 
     xhr.send(data);
 
