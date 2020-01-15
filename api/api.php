@@ -159,16 +159,17 @@ function createProject()
                 //Save the default data
                 date_default_timezone_set('Europe/Berlin');
                 $date = date("Y-m-d H:i:s");
-                $statement = $pdo->prepare("INSERT INTO " . $t_name . " (p_name, link, members,status,lastedit) VALUES (?, ?, ?,?,?)");
-                //TODO Check member data and inform sendMail to new members
 
+                //TODO Check member data and inform sendMail to new members
                 $statement = $pdo->prepare("SELECT email FROM `users` ");
                 $statement->execute();
                 $useremails = $statement->fetchAll();
                 //demo data
                 $memberids = array();
 
-                $statement->execute(array($name, $filename, $members, 'WAITING_FOR_RESPONSE', $date));
+
+                $statement = $pdo->prepare("INSERT INTO " . $t_name . " (p_name, link, members,status,lastedit) VALUES (?, ?, ?,?,?)");
+                $statement->execute(array($name, $filename, json_encode($memberids), 'WAITING_FOR_RESPONSE', $date));
 
                 header("HTTP/1.1 201 Created ");
                 //Just for development
