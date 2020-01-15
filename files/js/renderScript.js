@@ -59,10 +59,21 @@ class TargetScaleHandlerClass {
     };
 }
 
+class Comment {
+    constructor() {
+        this.page = -1;
+        this.x = -1;
+        this.y = -1;
+        this.w = -1;
+        this.h = -1;
+    }
+}
+
 let pdfFileOrUrl = "../user-content/test4.pdf";
 let pdfPageNumber = 101;
 let canvas;
-let commentArea;
+let commentContainer;
+let pdf;
 let pdfPage = undefined;
 let isRendering = false;
 let commentMode = false;
@@ -74,7 +85,13 @@ let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: 
 let canvasObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutationRecord) {
         let attribute = canvas.getAttribute(mutationRecord.attributeName);
-        commentArea.setAttribute(mutationRecord.attributeName, attribute);
+        commentContainer.setAttribute(mutationRecord.attributeName, attribute.replace("z-index: -5; ", "z-index: -4; "));
+    });
+});
+
+let commentContainerObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutationRecord) {
+
     });
 });
 
@@ -82,7 +99,7 @@ function startDragHandler(event) {
     let eventDoc, doc, body;
 
     event = event || window.event; // IE-ism
-
+    event.preventDefault();
     if (event.button === 0) {
         preventZoomAndMovement = true;
         // If pageX/Y aren't available and clientX/Y are,
@@ -99,8 +116,8 @@ function startDragHandler(event) {
                 (doc && doc.scrollTop || body && body.scrollTop || 0) -
                 (doc && doc.clientTop || body && body.clientTop || 0);
         }
-        commentAreaData.sX = event.pageX - canvas.style.left;
-        commentAreaData.sY = event.pageY - canvas.style.top;
+        commentAreaData.sX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
+        commentAreaData.sY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
     }
 };
 
@@ -108,7 +125,7 @@ function endDragHandler(event) {
     let eventDoc, doc, body;
 
     event = event || window.event; // IE-ism
-
+    event.preventDefault();
     if (event.button === 0) {
         // If pageX/Y aren't available and clientX/Y are,
         // calculate pageX/Y - logic taken from jQuery.
@@ -129,7 +146,21 @@ function endDragHandler(event) {
         commentAreaData.widthPdf = parseInt(canvas.getAttribute("width"));
         commentAreaData.heightPdf = parseInt(canvas.getAttribute("height"));
 
-        window.alert(commentAreaData.widthPdf + " " + commentAreaData.heightPdf);
+        if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
+            commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
+            let commentArea = document.createElement("div");
+            commentArea.style.position = "absolute";
+            commentArea.style.top = commentAreaData.sY + "px";
+            commentArea.style.left = commentAreaData.sX + "px";
+            let w = Math.abs(commentAreaData.sX - commentAreaData.eX);
+            let h = Math.abs(commentAreaData.sY - commentAreaData.eY);
+            window.alert(w + " " + h);
+            commentArea.style.width = w + "px";
+            commentArea.style.height = h + "px";
+            commentArea.style.backgroundColor = "red";
+            commentContainer.appendChild(commentArea);
+        }
+
         commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
         preventZoomAndMovement = false;
     }
@@ -142,7 +173,8 @@ function setup() {
         return false;
     });
 
-    commentArea = document.getElementById('commentArea');
+    commentContainer = document.getElementById('commentContainer');
+    commentContainerObserver.observe(commentContainer, {attributes: true});
     let titlecard = document.getElementById("titlecard");
     let createCommentBtn = document.getElementById("createComment");
     createCommentBtn.addEventListener("click", function (e) {
@@ -150,12 +182,12 @@ function setup() {
         if (commentMode) {
             //COMMENTMODE ON
             createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
-            canvas.addEventListener("mousedown", startDragHandler, true);
-            canvas.addEventListener("mouseup", endDragHandler, true);
+            canvas.addEventListener("mousedown", startDragHandler, false);
+            canvas.addEventListener("mouseup", endDragHandler, false);
         } else {
             createCommentBtn.innerHTML = "Kommentarmodus einschalten";
-            canvas.removeEventListener("mousedown", startDragHandler, true);
-            canvas.removeEventListener("mouseup", endDragHandler, true);
+            canvas.removeEventListener("mousedown", startDragHandler, false);
+            canvas.removeEventListener("mouseup", endDragHandler, false);
         }
     });
 
@@ -263,9 +295,12 @@ function listenForMouseWheelTurn(e) {
 
 function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+    loadingTask.onProgress = function (progress) {
+        let percentLoaded = Math.round(progress.loaded / progress.total);
+        document.getElementById("loading").style.width = percentLoaded * (document.documentElement.clientWidth - 20) + "px";
+    };
     loadingTask.promise.then(function (localPdf) {
-        //console.log('PDF loaded');
-        let pdf = localPdf;
+        pdf = localPdf;
         loadPdfPage(pdf, scale);
     }, function (reason) {
         // PDF loading error
