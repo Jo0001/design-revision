@@ -25,7 +25,7 @@ if (!empty($_GET['token'])) {
         $diff = dateDifference($timestamp, $currentdate);
         if ($diff <= 7200) {
             $statement = $pdo->prepare("UPDATE users SET status = ?, token = NULL WHERE token = ?");
-            $statement->execute(array("verified", $token));
+            $statement->execute(array("VERIFIED", $token));
             $verified = true;
         }
     }

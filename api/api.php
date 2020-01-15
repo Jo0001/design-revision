@@ -133,7 +133,7 @@ function getProject($value)
 
 function createProject()
 {
-    if (isLoggedIn()) {
+    if (isLoggedIn() && getUser('status')== "VERIFIED") {
         $name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
         $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
         $target_dir = "../user-content/";
@@ -143,7 +143,7 @@ function createProject()
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
         if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($name) < 81) {
-            //TODO Check if member is verified
+
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                 //Generate Table
                 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
@@ -179,7 +179,8 @@ function updateProject()
 {
     $_PUT = null;
     parse_str(file_get_contents('php://input'), $_PUT);
-    if (isset($_PUT['updateproject'])) {
+    if (isset($_PUT['updateproject'])  && getUser('status')== "VERIFIED") {
+
         if ($_PUT['updateproject'] == "addmember" && !empty(($_PUT['id'])) && !empty(($_PUT['role']))) {
             handleOutput("Success");
             //TODO error http code
@@ -219,8 +220,7 @@ function deleteProject()
         $id = filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-        if (isValidProject($id, $pdo)) {
-            //TODO UserStatus getUser('status')=="VERIFIED"
+        if (isValidProject($id, $pdo) && getUser('status')== "VERIFIED") {
             $userid = $_SESSION['user-id'];
             if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {
                 $statement = $pdo->prepare("SELECT link FROM " . $id);
