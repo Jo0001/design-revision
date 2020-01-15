@@ -133,7 +133,7 @@ function getProject($value)
 
 function createProject()
 {
-    if (isLoggedIn() && getUser('status')== "VERIFIED") {
+    if (isLoggedIn() && getUser('status') == "VERIFIED") {
         $name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
         $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
         $target_dir = "../user-content/";
@@ -161,6 +161,13 @@ function createProject()
                 $date = date("Y-m-d H:i:s");
                 $statement = $pdo->prepare("INSERT INTO " . $t_name . " (p_name, link, members,status,lastedit) VALUES (?, ?, ?,?,?)");
                 //TODO Check member data and inform sendMail to new members
+
+                $statement = $pdo->prepare("SELECT email FROM `users` ");
+                $statement->execute();
+                $useremails = $statement->fetchAll();
+                //demo data
+                $memberids = array();
+
                 $statement->execute(array($name, $filename, $members, 'WAITING_FOR_RESPONSE', $date));
 
                 header("HTTP/1.1 201 Created ");
@@ -179,7 +186,7 @@ function updateProject()
 {
     $_PUT = null;
     parse_str(file_get_contents('php://input'), $_PUT);
-    if (isset($_PUT['updateproject'])  && getUser('status')== "VERIFIED") {
+    if (isset($_PUT['updateproject']) && getUser('status') == "VERIFIED") {
 
         if ($_PUT['updateproject'] == "addmember" && !empty(($_PUT['id'])) && !empty(($_PUT['role']))) {
             handleOutput("Success");
@@ -220,7 +227,7 @@ function deleteProject()
         $id = filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-        if (isValidProject($id, $pdo) && getUser('status')== "VERIFIED") {
+        if (isValidProject($id, $pdo) && getUser('status') == "VERIFIED") {
             $userid = $_SESSION['user-id'];
             if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {
                 $statement = $pdo->prepare("SELECT link FROM " . $id);
