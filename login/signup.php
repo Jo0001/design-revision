@@ -30,7 +30,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
             $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
             $hash = generateHash($pdo);
             $statement = $pdo->prepare("INSERT INTO users (name, company, email, pswd,status,token) VALUES (?,?,?,?,?,?)");
-            $result = $statement->execute(array($name, $company, $email, $pswd, "registered", $hash));
+            $result = $statement->execute(array($name, $company, $email, $pswd, "REGISTERED", $hash));
             $user = $statement->fetch();
             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://".filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING)."/design-revision/app/verify.php?token=" . $hash;
             $content = parseHTML("../libs/templates/emailverify.html", $name, $link, null, null);
