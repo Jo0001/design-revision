@@ -8,7 +8,7 @@ if (isLoggedIn()) {
 if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['againPassword'])) {
     $firstname = filter_var($_POST['firstName'], FILTER_SANITIZE_STRING);
     $lastname = filter_var($_POST['lastName'], FILTER_SANITIZE_STRING);
-    $email = strtolower(filter_var($_POST['email'], FILTER_SANITIZE_STRING));
+    $email = strtolower(filter_var($_POST['email'], FILTER_SANITIZE_EMAIL));
     $company = null;
     if (!empty($_POST['company'])) {
         $company = filter_var($_POST['company'], FILTER_SANITIZE_STRING);
