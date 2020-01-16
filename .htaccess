@@ -1,2 +1,3 @@
 #Disable directory browsing
+DirectoryIndex login
 Options -Indexes

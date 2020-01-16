@@ -292,3 +292,11 @@ function isAdmin($lastrow, $userid)
         }
     }
 }
+
+function emailToId($email){
+    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $statement = $pdo->prepare("SELECT pk_id FROM `users` WHERE email = ?");
+    $statement->execute(array($email));
+    $tmpid = $statement->fetch();
+    return $tmpid[0];
+}
