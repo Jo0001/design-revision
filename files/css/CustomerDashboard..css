@@ -8,10 +8,11 @@ body {
 .form {
     border-radius: 30px;
     position: fixed;
-    margin-left: 80%;
+    margin-left: 70%;
     background: #0cfad6;
-    width: 20%;
-    transform: scale(0.9);
+    width: 30%;
+    transform: scale(0.6);
+
 }
 
 .form h1 {

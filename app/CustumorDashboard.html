@@ -28,22 +28,26 @@
     <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
         <label>
-            <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
+            <input id="projectname" name="projectname" placeholder="Projektname" type="text" required>
         </label><br>
         <span id="nameToLong"></span><br>
+        <span id="emailSpan">
         <label>
-            <input style="width: 60%" id="email" name="email" placeholder="E-mail" required type="text">
+            <input id="email" name="email" placeholder="E-mail" style="width: 55%" type="text">
         </label>
-            <select name="AdminOrMember" required>
-                <option>Auswählen</option>
-                <option>Member</option>
-                <option>Admin</option>
-            </select><br>
-        <input  style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:25px;border: none;cursor: pointer"
-               type="button"
-               value="Weiterer Nutzer auswählen"/>
+            <select id="AdminOrMember" name="AdminOrMember" required>
+                <option disabled hidden selected value="">Auswählen</option>
+                <option value="Member">Member</option>
+                <option value="Admin">Admin</option>
+            </select></span>
+            <span id="messageRole"></span><br><span id="messageEmail"></span><br>
+            <span id="messageDoubleSelected"></span>
+        <input onclick="addEmailField()"
+               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:25px;border: none;cursor: pointer"
+               type="button" value="Weiterer Nutzer auswählen"/>
         <input accept="application/pdf" id="inputFile" name="inputFile" style="display: none;" type="file"/>
-        <input onclick="document.getElementById('inputFile').click();" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin: 15px 15px 15px 90px;border: none;cursor: pointer"
+        <input onclick="document.getElementById('inputFile').click();"
+               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin: 15px 15px 15px 90px;border: none;cursor: pointer"
                type="button"
                value="Datei suchen"/>
         <div class="image-preview" id="imagePreview">
@@ -52,7 +56,8 @@
             <span class="image-preview__file"></span>
             <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>
         </div>
-        <input id="btnAddMember" onclick="addMember()" style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;justify-content:center;border: none;margin-left:60px;margin-top:10px;cursor: pointer"
+        <input id="btnAddMember" onclick="addMember()"
+               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;justify-content:center;border: none;margin-left:60px;margin-top:10px;cursor: pointer"
                type="button"
                value="Member ausw&#228;hlen"/>
         <input type="submit" value="Speichern">

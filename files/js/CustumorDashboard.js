@@ -7,8 +7,10 @@ let select = true;
 let doubleClickSelect = true;
 let sendArray = [];
 let sendFile;
+let sendArrayFields=[];
 let updateOrCreate = true;
 let nameLenght=false;
+let moreMember=1;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -23,6 +25,7 @@ function generate() {
     let b = document.body;
     let arrayMember;
     let arrayRole;
+    let projectsArray;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
     let statusImg = document.createElement("img");
@@ -35,6 +38,7 @@ function generate() {
     let textStatus = document.createElement("p");
     let members = document.createElement("p");
     let role = document.createElement("p");
+    let includedPorjects= document.createElement("p");
     //custumordiv generieren
     customerdiv.className = "clients";
     b.appendChild(customerdiv);
@@ -59,7 +63,6 @@ function generate() {
             textStatus.innerHTML = projectObejct.project.status;
             let members1 = projectObejct.project.members;
             //members bekommen
-            //todo email ändern
             let help = members1[0].email;
             let helpRole = members1[0].role;
             let length = members1.length;
@@ -113,7 +116,23 @@ function generate() {
             nameimg.setAttribute("src", userObject.user.avatar);
             clientemail.innerHTML = userObject.user.email+" "+counter;
             customerdiv.setAttribute('data-email',userObject.user.email+counter);
+            customerdiv.setAttribute('data-id',""+counter);
             company.innerHTML = userObject.user.company;
+            if(!(userObject.user.status==="VERIFIED")){
+                window.location=window.location.origin+"/design-revision/verifizieren.html"
+            }
+            //Projects-array von Api holen
+            let tmp =userObject.user.projects;
+            let tmp1=tmp[0];
+            for (let i = 1; i <tmp.length ; i++) {
+                tmp1=tmp1+","+tmp[i];
+            }
+            includedPorjects.innerHTML=tmp1;
+            includedPorjects.style.display="none";
+            customerdiv.appendChild(includedPorjects);
+            projectsArray = includedPorjects.innerHTML;
+            projectsArray=projectsArray.split(",");
+            includedPorjects.remove();
             //customerdiv id geben
             customerdiv.setAttribute('data-id', counter);
             counter++;
@@ -381,6 +400,7 @@ let readyStateCheckInterval = setInterval(function () {
         for (let i = 0; i <= 10; i++) {
             generate();
         }
+        addMemberWithEmail();
             let projectName = document.getElementById("projectname");
             projectName.addEventListener("keyup",function () {
             let feedback= document.getElementById("nameToLong");
@@ -398,13 +418,17 @@ let readyStateCheckInterval = setInterval(function () {
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile === undefined || sendArray[0] === undefined||nameLenght) {
+            if (sendFile === undefined ||nameLenght) {
                 console.log(Error);
             } else {
-                if (updateOrCreate) {
-                    sendNewProject();
-                } else {
-                    sendUpdateProject()
+                let allRight=putArrayTogether();
+                if(allRight) {
+                    if (updateOrCreate) {
+                        sendNewProject();
+                    } else {
+                        sendUpdateProject();
+                    }
+                    cleraForm();
                 }
             }
             evt.preventDefault();
@@ -629,7 +653,6 @@ function changeClientState(members, role,id) {
             delet.lastChild.style.display = "none";
             a = true;
         }
-        //todo muss noch geändert werden, wenn die ich von api email bekomme
         for (let i = 0; i < arrayLength; i++) {
             let help = content[i].getAttribute("data-email");
             if (members.includes(help)) {
@@ -681,7 +704,6 @@ function changeClientState(members, role,id) {
             buttonMember.addEventListener('click', function () {
                 let parent = buttonMember.parentNode;
                 let email = parent.getAttribute("data-email");
-                console.log(email);
                 let role = "0";
                 let include = true;
                 //Schauen ob es den Member schon gibt un Rolle anpassen
@@ -752,6 +774,7 @@ function sendNewProject() {
     let data = new FormData();
     let projectname = document.getElementById("projectname").value;
     let tmpArray = JSON.stringify(sendArray);
+    console.log(tmpArray);
     let sendURL= window.location.origin+"/design-revision/api/";
     data.append("createproject", "");
     data.append("name", projectname);
@@ -814,3 +837,168 @@ function sendUpdateProject() {
     xhr.send(data);
 
 }
+function addMemberWithEmail() {
+    let adminOrMember = document.getElementById("AdminOrMember");
+    let emailFiled = document.getElementById("email");
+    let role = -1;
+    let member = "";
+    let objMember;
+    emailFiled.onblur = function () {
+        member = emailFiled.value;
+        objMember = {"email": member, "role": role};
+        sendArrayFields[0]=objMember;
+        console.log(sendArrayFields);
+    };
+    adminOrMember.onchange= function () {
+        let test = adminOrMember.value;
+        if (test === "Member") {
+            role = 0;
+            objMember = {"email": member, "role": role};
+            sendArrayFields[0]=objMember;
+            console.log(sendArrayFields);
+        }
+        if (test === "Admin") {
+            role = 1;
+            objMember = {"email": member, "role": role};
+            sendArrayFields[0]=objMember;
+            console.log(sendArrayFields);
+        }
+
+
+    };
+
+}
+function addEmailField() {
+    //limiteirt die Felder
+    if(moreMember!==3) {
+        let emailSpan = document.getElementById('emailSpan');
+        let childes = emailSpan.childNodes;
+        let role = -1;
+        let member = "";
+        let objMember;
+        let emailClone = document.createElement("input");
+        emailClone.setAttribute('data-emailFormId',""+moreMember);
+        emailClone.type = "email";
+        emailClone.required=true;
+        emailClone.placeholder = "E-mail";
+        emailClone.style.width = "55%";
+        //clont die beiden Elmente;
+        let selectClone = childes[3].cloneNode(true);
+        selectClone.setAttribute('data-emailFormId',""+moreMember);
+        emailSpan.appendChild(emailClone);
+        emailSpan.appendChild(selectClone);
+        let remove = document.createElement("b");
+        remove.setAttribute('data-emailFormId',""+moreMember);
+        moreMember++;
+        remove.innerHTML = " X";
+        emailSpan.appendChild(remove);
+        remove.onclick = function () {
+            let index= this.getAttribute("data-emailFormId");
+            sendArrayFields.splice(index, 1);
+            emailSpan.removeChild(emailClone);
+            emailSpan.removeChild(selectClone);
+            emailSpan.removeChild(remove);
+            moreMember--;
+            console.log(sendArrayFields);
+
+        };
+        emailClone.onblur = function () {
+            let index= this.getAttribute('data-emailFormId');
+            member = emailClone.value;
+            objMember = {"email": member, "role": role};
+            sendArrayFields[index]=objMember;
+            console.log(sendArrayFields);
+        };
+        selectClone.onchange = function () {
+            let index= this.getAttribute('data-emailFormId');
+            let test = selectClone.value;
+            if (test === "Member") {
+                role = 0;
+                objMember = {"email": member, "role": role};
+                sendArrayFields[index]=objMember;
+                console.log(sendArrayFields);
+            }
+            if (test === "Admin") {
+                role = 1;
+                objMember = {"email": member, "role": role};
+                sendArrayFields[index]=objMember;
+                console.log(sendArrayFields);
+            }
+
+        };
+    }
+}
+function putArrayTogether() {
+    let message=document.getElementById("messageDoubleSelected");
+    let messageValid = document.getElementById("messageEmail");
+    let messageRole=document.getElementById("messageRole");
+    let allRight= true;
+    if(sendArray.length<1){
+        for (let i = 0; i <sendArrayFields.length; i++) {
+            sendArray[i]=sendArrayFields[i];
+        }
+    }else {
+        for (let i = 0; i < sendArrayFields.length; i++) {
+            for (let j = 0; j < sendArray.length; j++) {
+                if (sendArrayFields[i].email === sendArray[j].email) {
+                    console.log("Same Email 2 times selected!");
+                    sendArray[j] = sendArrayFields[i];
+                    console.log(sendArray);
+                    message.innerHTML = "Zweimal gleiche E-Mail";
+                    allRight = false;
+                    i++;
+                }
+                if (j === (sendArray.length - 1) && !(sendArray[j].email === sendArray[i].email)) {
+                    sendArray.push(sendArrayFields[i]);
+                    j++;
+                }
+            }
+
+        }
+        for (let i = 0; i < sendArrayFields.length; i++) {
+            let valid = emailIsValid(sendArrayFields[i].email);
+            if (!valid) {
+                messageValid.innerHTML = "Eine Mail ist falsch!";
+                allRight = false;
+            }
+        }
+        for (let i = 0; i < sendArrayFields; i++) {
+            if (sendArrayFields[i].role === (-1)) {
+                messageRole.innerHTML = "Rollen auswählen";
+            }
+
+        }
+    }
+    if(allRight){
+        messageRole.innerHTML = "";
+        message.innerHTML = "";
+    }
+    return allRight;
+
+}
+
+function cleraForm() {
+    let emailSpan = document.getElementById('email');
+    let adminOrMember = document.getElementById("AdminOrMember");
+    let projectName= document.getElementById("projectname");
+    const previewContainer = document.getElementById("imagePreview");
+    const previewFile = previewContainer.querySelector(".image-preview__file");
+    const pdfIcon = document.getElementById("pdfIcon");
+    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+    pdfIcon.style.display = "none";
+    previewDefaulText.style.display = "block";
+    previewFile.innerHTML ="Keine Datei ausgewählt";
+    previewFile.style.display = "none";
+    projectName.value="";
+    emailSpan.value="";
+    adminOrMember.value="";
+    sendArray=[];
+    sendArrayFields=[];
+    sendFile=null;
+    let content = document.querySelectorAll('[data-emailFormId');
+    for (let i = 0; i <content.length ; i++) {
+        content[i].remove();
+    }
+
+}
+
