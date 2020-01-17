@@ -225,11 +225,12 @@ function deleteProject()
     $_DELETE = null;
     parse_str(file_get_contents('php://input'), $_DELETE);
     if (isset($_DELETE['id'])) {
-        $id = filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
+        //TODO Needs testing
+        $id = "project_".filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
         if (isValidProject($id, $pdo) && getUser('status') == "VERIFIED") {
-            $userid = $_SESSION['user-id'];
+            $userid = getUser("pk_id");
             if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {
                 $statement = $pdo->prepare("SELECT link FROM " . $id);
                 $statement->execute();
@@ -241,6 +242,7 @@ function deleteProject()
                 }
                 $statement = $pdo->prepare("DROP TABLE `" . $id . "`");
                 $statement->execute();
+                //TODO Delete project from users
 
                 handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
                 //header("HTTP/1.1 204 No Content ");
