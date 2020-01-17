@@ -937,6 +937,19 @@ function putArrayTogether() {
         for (let i = 0; i <sendArrayFields.length; i++) {
             sendArray[i]=sendArrayFields[i];
         }
+        for (let i = 0; i < sendArrayFields.length; i++) {
+            let valid = emailIsValid(sendArrayFields[i].email);
+            if (!valid) {
+                messageValid.innerHTML = "Eine Mail ist falsch!";
+                allRight = false;
+            }
+        }
+        for (let i = 0; i < sendArrayFields; i++) {
+            if (sendArrayFields[i].role === (-1)) {
+                messageRole.innerHTML = "Rollen auswählen";
+            }
+
+        }
     }else {
         for (let i = 0; i < sendArrayFields.length; i++) {
             for (let j = 0; j < sendArray.length; j++) {
