@@ -1,6 +1,6 @@
 //Setup-Libraries
-let pdfjsLib = require('pdfjs-dist/build/pdf');
-let pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
+let pdfjsLib = require("pdfjs-dist/build/pdf");
+let pdfjsWorker = require("pdfjs-dist/build/pdf.worker.entry");
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 class TargetScaleHandlerClass {
@@ -58,7 +58,6 @@ class TargetScaleHandlerClass {
         this.updateScale();
     };
 }
-
 class Comment {
     constructor(page, x, y, w, h, authorId, commentText) {
         this.page = page;
@@ -113,6 +112,7 @@ function setup() {
     canvas = document.getElementById('pdf');
     canvasObserver.observe(canvas, {attributes: true});
     canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+    canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
     dragElementWhenBtnIsDown(canvas, 1);
 
@@ -136,7 +136,7 @@ function setup() {
     });
 
     let projectId = getURLParameter('id');
-    if (projectId === undefined || projectId === false || projectId === "") {
+    if (projectId === "") {
         projectId = 2;
         window.alert("Using demo Project id=2, because I received no parameter projectId.")
     }
@@ -341,18 +341,19 @@ function getURLParameter(name) {
 }
 
 function redirectAllEvents(target, fromElement) {
+    redirect("mousewheel", target, fromElement);
+    redirect("wheel", target, fromElement);
+    redirect("DOMMouseScroll", target, fromElement);
     redirect("mousedown", target, fromElement);
     redirect("mouseup", target, fromElement);
     redirect("mousemove", target, fromElement);
-    redirect("mousewheel", target, fromElement);
-    redirect("DOMMouseScroll", target, fromElement);
 
     function redirect(eventType, target, fromElement) {
         fromElement.addEventListener(eventType, function (event) {
             target.dispatchEvent(new event.constructor(event.type, event));
             event.preventDefault();
             event.stopPropagation();
-        });
+        }, false);
     }
 }
 
@@ -394,18 +395,26 @@ function dragElementWhenBtnIsDown(elmnt, btn) {
 }
 
 function listenForMouseWheelTurn(e) {
-    var e = window.event || e;
-    e.preventDefault()
-    let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-    //console.log(delta);
-    if (delta == 1) {
-        targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+    let event = window.event || e;
+    event.preventDefault();
+    let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+        if (event.deltaY < 0) {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+        } else {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+        }
     } else {
-        targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+        if (delta == 1) {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+        } else {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+        }
     }
+    //console.log(delta);
 }
 
-function loadPDFAndRender(scale, pdfFileOrUrl) {
+async function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
     let loadingBar = document.getElementById("loading");
     loadingTask.onProgress = function (progress) {
@@ -423,7 +432,7 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
     });
 }
 
-function loadPdfPage(pdf, scale) {
+async function loadPdfPage(pdf, scale) {
     pdf.getPage(pdfPageNumber).then(function (localPage) {
         pdfPage = localPage;
         renderPageFromPdf(scale);
@@ -433,22 +442,20 @@ function loadPdfPage(pdf, scale) {
 function renderPageFromPdf(scale) {
     if (!isRendering) {
         isRendering = true;
-        let viewport = pdfPage.getViewport({scale: scale});
-        // Prepare canvas using PDF page dimensions
         let context = canvas.getContext('2d');
-        canvas.style.height = viewport.height + "px";
-        canvas.style.width = viewport.width + "px";
+        let viewport = pdfPage.getViewport({scale: scale});
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        // Render PDF page into canvas context
-        let renderContext = {
+        let renderTask = pdfPage.render({
             canvasContext: context,
             viewport: viewport
-        };
-        let renderTask = pdfPage.render(renderContext);
+        });
         renderTask.promise.then(function () {
             isRendering = false;
         });
+
+        canvas.style.height = canvas.height + "px";
+        canvas.style.width = canvas.width + "px";
         /* SVG-Rendering-Code but not all Graphic
         Sates have been implemented in the library + convas needs to be div
         let viewport = page.getViewport({scale: scale});
