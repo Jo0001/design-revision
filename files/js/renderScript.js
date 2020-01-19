@@ -60,12 +60,14 @@ class TargetScaleHandlerClass {
 }
 
 class Comment {
-    constructor() {
-        this.page = -1;
-        this.x = -1;
-        this.y = -1;
-        this.w = -1;
-        this.h = -1;
+    constructor(page, x, y, w, h, authorId, commentText) {
+        this.page = page;
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.authorId = authorId;
+        this.commentText = commentText;
     }
 }
 
@@ -99,141 +101,6 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
     });
 });
 
-function startDragHandler(event) {
-    let eventDoc, doc, body;
-
-    event = event || window.event; // IE-ism
-    event.preventDefault();
-    if (event.button === 0) {
-        preventZoomAndMovement = true;
-        // If pageX/Y aren't available and clientX/Y are,
-        // calculate pageX/Y - logic taken from jQuery.
-        if (event.pageX == null && event.clientX != null) {
-            eventDoc = (event.target && event.target.ownerDocument) || document;
-            doc = eventDoc.documentElement;
-            body = eventDoc.body;
-
-            event.pageX = event.clientX +
-                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                (doc && doc.clientLeft || body && body.clientLeft || 0);
-            event.pageY = event.clientY +
-                (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                (doc && doc.clientTop || body && body.clientTop || 0);
-        }
-        commentAreaData.sX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
-        commentAreaData.sY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
-
-        commentArea.style.top = parseInt(commentAreaData.sY) + "px";
-        commentArea.style.left = parseInt(commentAreaData.sX) + "px";
-        commentArea.style.width = 0 + "px";
-        commentArea.style.height = 0 + "px";
-        commentArea.style.display = "inherit";
-        commentContainer.addEventListener("mousemove", resizeCommentArea);
-    }
-};
-
-function resizeCommentArea(event) {
-    if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
-        // If pageX/Y aren't available and clientX/Y are,
-        // calculate pageX/Y - logic taken from jQuery.
-        let eventDoc;
-        let doc;
-        let body;
-        if (event.pageX == null && event.clientX != null) {
-            eventDoc = (event.target && event.target.ownerDocument) || document;
-            doc = eventDoc.documentElement;
-            body = eventDoc.body;
-
-            event.pageX = event.clientX +
-                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                (doc && doc.clientLeft || body && body.clientLeft || 0);
-            event.pageY = event.clientY +
-                (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                (doc && doc.clientTop || body && body.clientTop || 0);
-        }
-        let width = ((event.pageX - parseInt(canvas.style.left.replace("px", ""))) - commentAreaData.sX);
-        let height = ((event.pageY - parseInt(canvas.style.top.replace("px", ""))) - commentAreaData.sY);
-        if (commentAreaData.sX > (event.pageX - parseInt(canvas.style.left.replace("px", ""))) &&
-            commentAreaData.sX !== (event.pageX - parseInt(canvas.style.left.replace("px", "")))) {
-            //pageX is right cornor
-            commentArea.style.left = (event.pageX - parseInt(canvas.style.left.replace("px", ""))) + "px";
-            width = (commentAreaData.sX - (event.pageX - parseInt(canvas.style.left.replace("px", ""))));
-        } else {
-            //everything is Ok
-        }
-        if (commentAreaData.sY > (event.pageY - parseInt(canvas.style.top.replace("px", ""))) &&
-            commentAreaData.sY !== (event.pageY - parseInt(canvas.style.top.replace("px", "")))) {
-            //pageX is top cornor
-            commentArea.style.top = (event.pageY - parseInt(canvas.style.top.replace("px", ""))) + "px";
-            height = (commentAreaData.sY - (event.pageY - parseInt(canvas.style.top.replace("px", ""))));
-        } else {
-            //everything is ok
-        }
-        commentArea.style.width = width + "px";
-        commentArea.style.height = height + "px";
-    }
-}
-
-function endDragHandler(event) {
-    commentContainer.removeEventListener("mousemove", resizeCommentArea);
-    let eventDoc, doc, body;
-
-    event = event || window.event; // IE-ism
-    event.preventDefault();
-    if (event.button === 0) {
-        // If pageX/Y aren't available and clientX/Y are,
-        // calculate pageX/Y - logic taken from jQuery.
-        if (event.pageX == null && event.clientX != null) {
-            eventDoc = (event.target && event.target.ownerDocument) || document;
-            doc = eventDoc.documentElement;
-            body = eventDoc.body;
-
-            event.pageX = event.clientX +
-                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                (doc && doc.clientLeft || body && body.clientLeft || 0);
-            event.pageY = event.clientY +
-                (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                (doc && doc.clientTop || body && body.clientTop || 0);
-        }
-        commentAreaData.eX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
-        commentAreaData.eY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
-        commentAreaData.widthPdf = parseInt(canvas.getAttribute("width"));
-        commentAreaData.heightPdf = parseInt(canvas.getAttribute("height"));
-
-        if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
-            commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
-            createComment();
-        }
-
-        commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
-        commentArea.style.top = 10 + "px";
-        commentArea.style.left = 10 + "px";
-        commentArea.style.width = 10 + "px";
-        commentArea.style.height = 10 + "px";
-        commentArea.style.display = "none";
-        preventZoomAndMovement = false;
-    }
-};
-
-function createComment() {
-    console.log("createComment();")
-}
-
-function redirectAllEvents(target, fromElement) {
-    redirect("mousedown", target, fromElement);
-    redirect("mouseup", target, fromElement);
-    redirect("mousemove", target, fromElement);
-    redirect("mousewheel", target, fromElement);
-    redirect("DOMMouseScroll", target, fromElement);
-
-    function redirect(eventType, target, fromElement) {
-        fromElement.addEventListener(eventType, function (event) {
-            target.dispatchEvent(new event.constructor(event.type, event));
-            event.preventDefault();
-            event.stopPropagation();
-        });
-    }
-}
 
 function setup() {
     //Prevent a contextmenu on page, so people cant download the design.
@@ -310,13 +177,183 @@ function setup() {
     };
 }
 
+function startDragHandler(event) {
+    let eventDoc, doc, body;
+
+    event = event || window.event; // IE-ism
+    event.preventDefault();
+    if (event.button === 0) {
+        preventZoomAndMovement = true;
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        commentAreaData.sX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
+        commentAreaData.sY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
+
+        commentArea.style.top = parseInt(commentAreaData.sY) + "px";
+        commentArea.style.left = parseInt(commentAreaData.sX) + "px";
+        commentArea.style.width = 0 + "px";
+        commentArea.style.height = 0 + "px";
+        commentArea.style.display = "inherit";
+        commentContainer.addEventListener("mousemove", resizeCommentArea);
+    }
+}
+
+function endDragHandler(event) {
+    commentContainer.removeEventListener("mousemove", resizeCommentArea);
+    let eventDoc, doc, body;
+
+    event = event || window.event; // IE-ism
+    event.preventDefault();
+    if (event.button === 0) {
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        commentAreaData.eX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
+        commentAreaData.eY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
+        commentAreaData.widthPdf = parseFloat(canvas.getAttribute("width"));
+        commentAreaData.heightPdf = parseFloat(canvas.getAttribute("height"));
+
+        if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
+            commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
+            createComment(commentArea);
+        }
+
+        commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+        commentArea.style.top = 10 + "px";
+        commentArea.style.left = 10 + "px";
+        commentArea.style.width = 10 + "px";
+        commentArea.style.height = 10 + "px";
+        commentArea.style.display = "none";
+        preventZoomAndMovement = false;
+    }
+}
+
+function resizeCommentArea(event) {
+    if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        let eventDoc;
+        let doc;
+        let body;
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        //
+        let width = ((event.pageX - parseInt(canvas.style.left.replace("px", ""))) - commentAreaData.sX);
+        let height = ((event.pageY - parseInt(canvas.style.top.replace("px", ""))) - commentAreaData.sY);
+        if (commentAreaData.sX > (event.pageX - parseInt(canvas.style.left.replace("px", ""))) &&
+            commentAreaData.sX !== (event.pageX - parseInt(canvas.style.left.replace("px", "")))) {
+            //pageX is right cornor
+            commentArea.style.left = (event.pageX - parseInt(canvas.style.left.replace("px", ""))) + "px";
+            width = (commentAreaData.sX - (event.pageX - parseInt(canvas.style.left.replace("px", ""))));
+        } else {
+            //everything is Ok
+        }
+        if (commentAreaData.sY > (event.pageY - parseInt(canvas.style.top.replace("px", ""))) &&
+            commentAreaData.sY !== (event.pageY - parseInt(canvas.style.top.replace("px", "")))) {
+            //pageX is top cornor
+            commentArea.style.top = (event.pageY - parseInt(canvas.style.top.replace("px", ""))) + "px";
+            height = (commentAreaData.sY - (event.pageY - parseInt(canvas.style.top.replace("px", ""))));
+        } else {
+            //everything is ok
+        }
+        commentArea.style.width = width + "px";
+        commentArea.style.height = height + "px";
+    }
+}
+
+function createComment(commentArea) {
+    let xInPx = parseFloat(commentArea.style.left.replace("px", ""));
+    let yInPx = parseFloat(commentArea.style.top.replace("px", ""));
+    let wInPx = parseFloat(commentArea.style.width.replace("px", ""));
+    let hInPx = parseFloat(commentArea.style.height.replace("px", ""));
+
+    let xInCoords = (xInPx / commentAreaData.widthPdf).toPrecision(7);
+    let yInCoords = (yInPx / commentAreaData.heightPdf).toPrecision(7);
+    let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
+    let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
+
+    let commment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
+        "Somebody", "Message....");
+    comments.push(commment);
+    //TODO upload Data to API
+
+    let commentDiv = document.createElement("div");
+    commentDiv.setAttribute("id", "comment" + comments.indexOf(commment));
+    commentDiv.style.position = "absolute";
+    commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
+    commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
+    commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
+    commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
+    commentDiv.style.backgroundColor = "green";
+    commentContainer.appendChild(commentDiv);
+}
+
 function resizeComments() {
-    console.log("resizeComments();")
+    console.log("resizeComments();");
+    for (let index = 0; index < comments.length; index++) {
+        let commentDiv = document.getElementById("comment" + index);
+        let commment = comments[index];
+        commentDiv.style.position = "absolute";
+        commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
+        commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
+        commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
+        commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
+        commentDiv.style.backgroundColor = "green";
+    }
 }
 
 function getURLParameter(name) {
     let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
     return (value !== 'null') ? value : undefined;
+}
+
+function redirectAllEvents(target, fromElement) {
+    redirect("mousedown", target, fromElement);
+    redirect("mouseup", target, fromElement);
+    redirect("mousemove", target, fromElement);
+    redirect("mousewheel", target, fromElement);
+    redirect("DOMMouseScroll", target, fromElement);
+
+    function redirect(eventType, target, fromElement) {
+        fromElement.addEventListener(eventType, function (event) {
+            target.dispatchEvent(new event.constructor(event.type, event));
+            event.preventDefault();
+            event.stopPropagation();
+        });
+    }
 }
 
 function dragElementWhenBtnIsDown(elmnt, btn) {
