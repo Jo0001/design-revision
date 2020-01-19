@@ -1,17 +1,17 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 //Setup-Libraries
-let pdfjsLib = require('pdfjs-dist/build/pdf');
-let pdfjsWorker = require('pdfjs-dist/build/pdf.worker.entry');
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+        let pdfjsLib = require("pdfjs-dist/build/pdf");
+        let pdfjsWorker = require("pdfjs-dist/build/pdf.worker.entry");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-class TargetScaleHandlerClass {
-    constructor() {
-        this.isScalingATM = false;
-        this.innerTargetScale = 1;
-        this.scale = 0.9;
-        this.handlerId = -1;
-        this.round = function round(num) {
-            return parseFloat(num + "").toFixed(6);
+        class TargetScaleHandlerClass {
+            constructor() {
+                this.isScalingATM = false;
+                this.innerTargetScale = 1;
+                this.scale = 0.9;
+                this.handlerId = -1;
+                this.round = function round(num) {
+                    return parseFloat(num + "").toFixed(6);
         }
         this.check = function check() {
             this.isScalingATM = true;
@@ -59,7 +59,6 @@ class TargetScaleHandlerClass {
         this.updateScale();
     };
 }
-
 class Comment {
     constructor(page, x, y, w, h, authorId, commentText) {
         this.page = page;
@@ -114,6 +113,7 @@ class Comment {
             canvas = document.getElementById('pdf');
             canvasObserver.observe(canvas, {attributes: true});
             canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+            canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
             canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
             dragElementWhenBtnIsDown(canvas, 1);
 
@@ -137,7 +137,7 @@ class Comment {
             });
 
             let projectId = getURLParameter('id');
-            if (projectId === undefined || projectId === false || projectId === "") {
+            if (projectId === "") {
                 projectId = 2;
                 window.alert("Using demo Project id=2, because I received no parameter projectId.")
             }
@@ -342,18 +342,19 @@ class Comment {
         }
 
         function redirectAllEvents(target, fromElement) {
+            redirect("mousewheel", target, fromElement);
+            redirect("wheel", target, fromElement);
+            redirect("DOMMouseScroll", target, fromElement);
             redirect("mousedown", target, fromElement);
             redirect("mouseup", target, fromElement);
             redirect("mousemove", target, fromElement);
-            redirect("mousewheel", target, fromElement);
-            redirect("DOMMouseScroll", target, fromElement);
 
             function redirect(eventType, target, fromElement) {
                 fromElement.addEventListener(eventType, function (event) {
                     target.dispatchEvent(new event.constructor(event.type, event));
                     event.preventDefault();
                     event.stopPropagation();
-                });
+                }, false);
             }
         }
 
@@ -372,15 +373,15 @@ class Comment {
                 }
             });
 
-    function drag(e) {
-        e.preventDefault();
-        if (!preventZoomAndMovement) {
-            // calculate the new cursor position:
-            pos1 = cursorXinView - e.clientX;
-            pos2 = cursorYinView - e.clientY;
-            cursorXinView = e.clientX;
-            cursorYinView = e.clientY;
-            // set the element's new position:
+            function drag(e) {
+                e.preventDefault();
+                if (!preventZoomAndMovement) {
+                    // calculate the new cursor position:
+                    pos1 = cursorXinView - e.clientX;
+                    pos2 = cursorYinView - e.clientY;
+                    cursorXinView = e.clientX;
+                    cursorYinView = e.clientY;
+                    // set the element's new position:
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
         }
@@ -395,28 +396,36 @@ class Comment {
 }
 
 function listenForMouseWheelTurn(e) {
-    var e = window.event || e;
-    e.preventDefault()
-    let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-    //console.log(delta);
-    if (delta == 1) {
-        targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+    let event = window.event || e;
+    event.preventDefault();
+    let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
+    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+        if (event.deltaY < 0) {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+        } else {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+        }
     } else {
-        targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+        if (delta == 1) {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+        } else {
+            targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+        }
     }
+    //console.log(delta);
 }
 
-function loadPDFAndRender(scale, pdfFileOrUrl) {
-    let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
-    let loadingBar = document.getElementById("loading");
-    loadingTask.onProgress = function (progress) {
-        let percentLoaded = Math.round(progress.loaded / progress.total);
-        percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
-        percentLoaded = percentLoaded <= 1 ? percentLoaded : 1;
-        loadingBar.style.width = percentLoaded * (document.documentElement.clientWidth - 20) + "px";
-    };
-    loadingTask.promise.then(function (localPdf) {
-        pdf = localPdf;
+        async function loadPDFAndRender(scale, pdfFileOrUrl) {
+            let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+            let loadingBar = document.getElementById("loading");
+            loadingTask.onProgress = function (progress) {
+                let percentLoaded = Math.round(progress.loaded / progress.total);
+                percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
+                percentLoaded = percentLoaded <= 1 ? percentLoaded : 1;
+                loadingBar.style.width = percentLoaded * (document.documentElement.clientWidth - 20) + "px";
+            };
+            loadingTask.promise.then(function (localPdf) {
+                pdf = localPdf;
         loadPdfPage(pdf, scale);
     }, function (reason) {
         // PDF loading error
@@ -424,32 +433,31 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
     });
 }
 
-function loadPdfPage(pdf, scale) {
-    pdf.getPage(pdfPageNumber).then(function (localPage) {
-        pdfPage = localPage;
-        renderPageFromPdf(scale);
-    });
-}
+        async function loadPdfPage(pdf, scale) {
+            pdf.getPage(pdfPageNumber).then(function (localPage) {
+                pdfPage = localPage;
+                renderPageFromPdf(scale);
+            });
+        }
 
 function renderPageFromPdf(scale) {
     if (!isRendering) {
         isRendering = true;
-        let viewport = pdfPage.getViewport({scale: scale});
-        // Prepare canvas using PDF page dimensions
         let context = canvas.getContext('2d');
-        canvas.style.height = viewport.height + "px";
-        canvas.style.width = viewport.width + "px";
+        let viewport = pdfPage.getViewport({scale: scale});
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        // Render PDF page into canvas context
-        let renderContext = {
+        context.clearRect(0, 0, viewport.width, viewport.height);
+        let renderTask = pdfPage.render({
             canvasContext: context,
             viewport: viewport
-        };
-        let renderTask = pdfPage.render(renderContext);
+        });
         renderTask.promise.then(function () {
             isRendering = false;
         });
+
+        canvas.style.height = canvas.height + "px";
+        canvas.style.width = canvas.width + "px";
         /* SVG-Rendering-Code but not all Graphic
         Sates have been implemented in the library + convas needs to be div
         let viewport = page.getViewport({scale: scale});
