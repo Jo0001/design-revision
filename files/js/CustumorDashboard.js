@@ -93,7 +93,8 @@ function generate() {
             //window.alert("Nicht eingelogt");
             document.location = "../login/login.html";
         } else if (request1.readyState === 4 && request1.status === 403) {
-            window.alert("Forbidden");
+            window.alert("Sie sind noch in keinem Projekt warten sie bis wir sie zu einem hinzufügen!");
+            console.log("Forbidden");
         } else if (request1.readyState === 4 && request1.status === 404) {
             window.alert("Nichts gefunden");
         } else if (request1.readyState === 4 && request1.status === 400) {
@@ -119,7 +120,7 @@ function generate() {
             customerdiv.setAttribute('data-id',""+counter);
             company.innerHTML = userObject.user.company;
             if(!(userObject.user.status==="VERIFIED")){
-                window.location=window.location.origin+"/design-revision/verifizieren.html"
+                window.location=window.location.origin+"/design-revision/login/verifizieren.html"
             }
             //Projects-array von Api holen
             let tmp =userObject.user.projects;
@@ -134,10 +135,10 @@ function generate() {
             projectsArray=projectsArray.split(",");
             includedPorjects.remove();
             //customerdiv id geben
-            customerdiv.setAttribute('data-id', counter);
+            customerdiv.setAttribute('data-id',""+ counter);
             counter++;
         } else if (request.readyState === 4 && request.status === 403) {
-            window.alert("Forbidden");
+            console.log("Forbidden");
         } else if (request.readyState === 4 && request.status === 404) {
             window.alert("Nichts gefunden");
         } else if (request1.readyState === 4 && request1.status === 400) {
@@ -180,7 +181,7 @@ function generate() {
             let projektName = document.getElementById("projectname");
             projektName.required = true;
             projektName.style.display = "block";
-            projektErsellen.innerHTML = "Erstellen Projekt ";
+            projektErsellen.innerHTML = "Projekt erstellen";
             btnAddMember.onclick = function () {
                 addMember();
             };
@@ -262,6 +263,7 @@ function closeYes(members, content, arrayLength) {
             content[i].lastChild.remove();
         }
     }
+    loeschen.remove();
     div.remove();
     toggleDialog();
 }
@@ -350,9 +352,6 @@ function toggleDialog() {
         let div = document.createElement('div');
         div.id = 'backdrop';
         document.body.appendChild(div);
-    } else {
-        let div = document.querySelector('#backdrop');
-
     }
 }
 
@@ -773,6 +772,8 @@ function changeClientState(members, role,id) {
 function sendNewProject() {
     let data = new FormData();
     let projectname = document.getElementById("projectname").value;
+    let progressBar= document.getElementById("progressBar");
+    let progressBarBorder =document.getElementById("progressBarBorder");
     let tmpArray = JSON.stringify(sendArray);
     console.log(tmpArray);
     let sendURL= window.location.origin+"/design-revision/api/";
@@ -780,12 +781,25 @@ function sendNewProject() {
     data.append("name", projectname);
     data.append("members", tmpArray);
     data.append("file", sendFile);
-
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
+    xhr.upload.addEventListener("progress", function (event) {
+        if (event.lengthComputable) {
+            let complete = (event.loaded / event.total * 100 | 0);
+            progressBarBorder.style.display="block";
+            progressBar.style.width=""+complete+"%";
+            progressBar.innerHTML=""+complete+"%";
+
+        }
+    });
 
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
+            //wartet 6 sekunden
+            setTimeout(function() {
+                progressBarBorder.style.display="none";
+            }, 4000);
+
             console.log(this.responseText);
         }
     });
@@ -797,7 +811,7 @@ function sendNewProject() {
 function sendDelet(id) {
     let data = new FormData();
     let sendURL= window.location.origin+"/design-revision/api/";
-    data.append("id", "id");
+    data.append("id",id);
 
 
     let xhr = new XMLHttpRequest();
@@ -809,6 +823,7 @@ function sendDelet(id) {
         }
     });
 
+
     xhr.open("DELETE", sendURL);
 
     xhr.send(data);
@@ -818,6 +833,8 @@ function sendDelet(id) {
 function sendUpdateProject() {
     let data = new FormData();
     let sendURL= window.location.origin+"/design-revision/api/";
+    let progressBar= document.getElementById("progressBar");
+    let progressBarBorder =document.getElementById("progressBarBorder");
     //Daten in Api sollten auf Member Array und File geändert werden
     data.append("updateproject", "addmember");
     data.append("id", "value");
@@ -828,12 +845,24 @@ function sendUpdateProject() {
 
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
+            //wartet 6 sekunden
+            setTimeout(function() {
+                progressBarBorder.style.display="none";
+            }, 4000);
             console.log(this.responseText);
+        }
+    });
+    xhr.upload.addEventListener("progress", function (event) {
+        if (event.lengthComputable) {
+            let complete = (event.loaded / event.total * 100 | 0);
+            progressBarBorder.style.display="block";
+            progressBar.style.width=""+complete+"%";
+            progressBar.innerHTML=""+complete+"%";
+
         }
     });
 
     xhr.open("PUT", sendURL);
-
     xhr.send(data);
 
 }
