@@ -93,7 +93,7 @@ function getUser($value)
         $result = $statement->execute(array('pk_id' => $id));
         $user = $statement->fetch();
         if ($value == "all") {
-            return ["name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'][0], "projects" => json_decode($user['projects'])];
+            return ["id"=>(int)$user['pk_id'],"name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'][0], "projects" => json_decode($user['projects'])];
         } else {
             return $user[$value];
         }
