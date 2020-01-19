@@ -12,10 +12,10 @@ function sendMail($toAdr, $toName, $subject, $content)
         //debug-level
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = 'mail.gmx.de';
+        $mail->Host = 'smtp.sendgrid.net';
         $mail->SMTPAuth = true;
-        $mail->Username = 'design-revision@gmx.de';
-        $mail->Password = 'dsnRev-4D#2020';
+        $mail->Username = 'apikey';
+        $mail->Password = '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';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         // $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = 587;
