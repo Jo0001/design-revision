@@ -1,17 +1,17 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 //Setup-Libraries
-        let pdfjsLib = require("pdfjs-dist/build/pdf");
-        let pdfjsWorker = require("pdfjs-dist/build/pdf.worker.entry");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+let pdfjsLib = require("pdfjs-dist/build/pdf");
+let pdfjsWorker = require("pdfjs-dist/build/pdf.worker.entry");
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-        class TargetScaleHandlerClass {
-            constructor() {
-                this.isScalingATM = false;
-                this.innerTargetScale = 1;
-                this.scale = 0.9;
-                this.handlerId = -1;
-                this.round = function round(num) {
-                    return parseFloat(num + "").toFixed(6);
+class TargetScaleHandlerClass {
+    constructor() {
+        this.isScalingATM = false;
+        this.innerTargetScale = 1;
+        this.scale = 0.9;
+        this.handlerId = -1;
+        this.round = function round(num) {
+            return parseFloat(num + "").toFixed(6);
         }
         this.check = function check() {
             this.isScalingATM = true;
@@ -71,317 +71,317 @@ class Comment {
     }
 }
 
-        let pdfFileOrUrl = "../user-content/test4.pdf";
-        let pdfPageNumber = 101;
-        let canvas;
-        let commentContainer;
-        let commentArea;
-        let pdf;
-        let pdfPage = undefined;
-        let isRendering = false;
-        let commentMode = false;
-        let preventZoomAndMovement = false;
+let pdfFileOrUrl = "../user-content/test4.pdf";
+let pdfPageNumber = 101;
+let canvas;
+let commentContainer;
+let commentArea;
+let pdf;
+let pdfPage = undefined;
+let isRendering = false;
+let commentMode = false;
+let preventZoomAndMovement = false;
 
-        let targetScaleHandler = new TargetScaleHandlerClass();
-        let comments = new Array();
-        let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+let targetScaleHandler = new TargetScaleHandlerClass();
+let comments = new Array();
+let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
 
-        let canvasObserver = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutationRecord) {
-                let attribute = canvas.getAttribute(mutationRecord.attributeName);
-                if (mutationRecord.attributeName === "style") {
-                    commentContainer.setAttribute(mutationRecord.attributeName,
-                        attribute.replace("z-index: -5; ", "z-index: -4; "));
-                }
-            });
-        });
-        let commentContainerObserver = new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutationRecord) {
-                resizeComments();
-            });
-        });
+let canvasObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutationRecord) {
+        let attribute = canvas.getAttribute(mutationRecord.attributeName);
+        if (mutationRecord.attributeName === "style") {
+            commentContainer.setAttribute(mutationRecord.attributeName,
+                attribute.replace("z-index: -5; ", "z-index: -4; "));
+        }
+    });
+});
+let commentContainerObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutationRecord) {
+        resizeComments();
+    });
+});
 
 
-        function setup() {
-            //Prevent a contextmenu on page, so people cant download the design.
-            document.body.addEventListener("contextmenu", function (e) {
-                e.preventDefault();
-                return false;
-            });
-            commentArea = document.getElementById('commentArea');
+function setup() {
+    //Prevent a contextmenu on page, so people cant download the design.
+    document.body.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+        return false;
+    });
+    commentArea = document.getElementById('commentArea');
 
-            canvas = document.getElementById('pdf');
-            canvasObserver.observe(canvas, {attributes: true});
-            canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
-            canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
-            canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-            dragElementWhenBtnIsDown(canvas, 1);
+    canvas = document.getElementById('pdf');
+    canvasObserver.observe(canvas, {attributes: true});
+    canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
+    canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
+    canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
+    dragElementWhenBtnIsDown(canvas, 1);
 
-            commentContainer = document.getElementById('commentContainer');
-            redirectAllEvents(canvas, commentContainer);
-            commentContainerObserver.observe(commentContainer, {attributes: true});
-            let titlecard = document.getElementById("titlecard");
-            let createCommentBtn = document.getElementById("createComment");
-            createCommentBtn.addEventListener("click", function (e) {
-                commentMode = !commentMode;
-                if (commentMode) {
-                    //COMMENTMODE ON
-                    createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
-                    canvas.addEventListener("mousedown", startDragHandler, false);
-                    canvas.addEventListener("mouseup", endDragHandler, false);
-                } else {
-                    createCommentBtn.innerHTML = "Kommentarmodus einschalten";
-                    canvas.removeEventListener("mousedown", startDragHandler, false);
-                    canvas.removeEventListener("mouseup", endDragHandler, false);
-                }
-            });
+    commentContainer = document.getElementById('commentContainer');
+    redirectAllEvents(canvas, commentContainer);
+    commentContainerObserver.observe(commentContainer, {attributes: true});
+    let titlecard = document.getElementById("titlecard");
+    let createCommentBtn = document.getElementById("createComment");
+    createCommentBtn.addEventListener("click", function (e) {
+        commentMode = !commentMode;
+        if (commentMode) {
+            //COMMENTMODE ON
+            createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
+            canvas.addEventListener("mousedown", startDragHandler, false);
+            canvas.addEventListener("mouseup", endDragHandler, false);
+        } else {
+            createCommentBtn.innerHTML = "Kommentarmodus einschalten";
+            canvas.removeEventListener("mousedown", startDragHandler, false);
+            canvas.removeEventListener("mouseup", endDragHandler, false);
+        }
+    });
 
-            let projectId = getURLParameter('id');
-            if (projectId === "") {
-                projectId = 2;
-                window.alert("Using demo Project id=2, because I received no parameter projectId.")
-            }
-            let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
-            let request = new XMLHttpRequest();
-            request.open('GET', requestURL);
-            request.send();
-            request.onreadystatechange = function (e) {
-                if (request.readyState === 4 && request.status === 200) {
-                    let projectContainer = JSON.parse(request.response);
-                    titlecard.innerText = titlecard.innerHTML.replace("/", projectContainer.project.name);
-                } else if (request.readyState === 4 && request.status === 401) {
-                    window.alert("keine Berechtigung");
-                } else if (request.readyState === 4 && request.status === 403) {
-                    window.alert("Forbidden");
-                } else if (request.readyState === 4 && request.status === 404) {
-                    window.alert("Nichts gefunden");
-                }
-            };
+    let projectId = getURLParameter('id');
+    if (projectId === "") {
+        projectId = 2;
+        window.alert("Using demo Project id=2, because I received no parameter projectId.")
+    }
+    let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
+    let request = new XMLHttpRequest();
+    request.open('GET', requestURL);
+    request.send();
+    request.onreadystatechange = function (e) {
+        if (request.readyState === 4 && request.status === 200) {
+            let projectContainer = JSON.parse(request.response);
+            titlecard.innerText = titlecard.innerHTML.replace("/", projectContainer.project.name);
+        } else if (request.readyState === 4 && request.status === 401) {
+            window.alert("keine Berechtigung");
+        } else if (request.readyState === 4 && request.status === 403) {
+            window.alert("Forbidden");
+        } else if (request.readyState === 4 && request.status === 404) {
+            window.alert("Nichts gefunden");
+        }
+    };
 
-            //Json Kommentare aus Api hohlen
-            let request2 = new XMLHttpRequest();
-            requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
-            request2.open('GET', requestURL);
-            request2.send();
-            request2.onreadystatechange = function (e) {
-                if (request.readyState === 4 && request.status === 200) {
-                    let projectObject = JSON.parse(request.response);
-                    //pdfFileOrUrl = projectObject.link;
-                    loadPDFAndRender(1, pdfFileOrUrl);
-                } else if (request.readyState === 4 && request.status === 401) {
-                    window.alert("keine Berechtigung");
-                } else if (request.readyState === 4 && request.status === 403) {
-                    window.alert("Forbidden");
-                } else if (request.readyState === 4 && request.status === 404) {
-                    window.alert("Nichts gefunden");
-                }
-            };
+    //Json Kommentare aus Api hohlen
+    let request2 = new XMLHttpRequest();
+    requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+    request2.open('GET', requestURL);
+    request2.send();
+    request2.onreadystatechange = function (e) {
+        if (request.readyState === 4 && request.status === 200) {
+            let projectObject = JSON.parse(request.response);
+            //pdfFileOrUrl = projectObject.link;
+            loadPDFAndRender(1, pdfFileOrUrl);
+        } else if (request.readyState === 4 && request.status === 401) {
+            window.alert("keine Berechtigung");
+        } else if (request.readyState === 4 && request.status === 403) {
+            window.alert("Forbidden");
+        } else if (request.readyState === 4 && request.status === 404) {
+            window.alert("Nichts gefunden");
+        }
+    };
+}
+
+function startDragHandler(event) {
+    let eventDoc, doc, body;
+
+    event = event || window.event; // IE-ism
+    event.preventDefault();
+    if (event.button === 0) {
+        preventZoomAndMovement = true;
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        commentAreaData.sX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
+        commentAreaData.sY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
+
+        commentArea.style.top = parseInt(commentAreaData.sY) + "px";
+        commentArea.style.left = parseInt(commentAreaData.sX) + "px";
+        commentArea.style.width = 0 + "px";
+        commentArea.style.height = 0 + "px";
+        commentArea.style.display = "inherit";
+        commentContainer.addEventListener("mousemove", resizeCommentArea);
+    }
+}
+
+function endDragHandler(event) {
+    commentContainer.removeEventListener("mousemove", resizeCommentArea);
+    let eventDoc, doc, body;
+
+    event = event || window.event; // IE-ism
+    event.preventDefault();
+    if (event.button === 0) {
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        commentAreaData.eX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
+        commentAreaData.eY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
+        commentAreaData.widthPdf = parseFloat(canvas.getAttribute("width"));
+        commentAreaData.heightPdf = parseFloat(canvas.getAttribute("height"));
+
+        if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
+            commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
+            createComment(commentArea);
         }
 
-        function startDragHandler(event) {
-            let eventDoc, doc, body;
+        commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+        commentArea.style.top = 10 + "px";
+        commentArea.style.left = 10 + "px";
+        commentArea.style.width = 10 + "px";
+        commentArea.style.height = 10 + "px";
+        commentArea.style.display = "none";
+        preventZoomAndMovement = false;
+    }
+}
 
-            event = event || window.event; // IE-ism
+function resizeCommentArea(event) {
+    if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        let eventDoc;
+        let doc;
+        let body;
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX +
+                (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+                (doc && doc.clientLeft || body && body.clientLeft || 0);
+            event.pageY = event.clientY +
+                (doc && doc.scrollTop || body && body.scrollTop || 0) -
+                (doc && doc.clientTop || body && body.clientTop || 0);
+        }
+        //
+        let width = ((event.pageX - parseInt(canvas.style.left.replace("px", ""))) - commentAreaData.sX);
+        let height = ((event.pageY - parseInt(canvas.style.top.replace("px", ""))) - commentAreaData.sY);
+        if (commentAreaData.sX > (event.pageX - parseInt(canvas.style.left.replace("px", ""))) &&
+            commentAreaData.sX !== (event.pageX - parseInt(canvas.style.left.replace("px", "")))) {
+            //pageX is right cornor
+            commentArea.style.left = (event.pageX - parseInt(canvas.style.left.replace("px", ""))) + "px";
+            width = (commentAreaData.sX - (event.pageX - parseInt(canvas.style.left.replace("px", ""))));
+        } else {
+            //everything is Ok
+        }
+        if (commentAreaData.sY > (event.pageY - parseInt(canvas.style.top.replace("px", ""))) &&
+            commentAreaData.sY !== (event.pageY - parseInt(canvas.style.top.replace("px", "")))) {
+            //pageX is top cornor
+            commentArea.style.top = (event.pageY - parseInt(canvas.style.top.replace("px", ""))) + "px";
+            height = (commentAreaData.sY - (event.pageY - parseInt(canvas.style.top.replace("px", ""))));
+        } else {
+            //everything is ok
+        }
+        commentArea.style.width = width + "px";
+        commentArea.style.height = height + "px";
+    }
+}
+
+function createComment(commentArea) {
+    let xInPx = parseFloat(commentArea.style.left.replace("px", ""));
+    let yInPx = parseFloat(commentArea.style.top.replace("px", ""));
+    let wInPx = parseFloat(commentArea.style.width.replace("px", ""));
+    let hInPx = parseFloat(commentArea.style.height.replace("px", ""));
+
+    let xInCoords = (xInPx / commentAreaData.widthPdf).toPrecision(7);
+    let yInCoords = (yInPx / commentAreaData.heightPdf).toPrecision(7);
+    let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
+    let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
+
+    let commment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
+        "Somebody", "Message....");
+    comments.push(commment);
+    //TODO upload Data to API
+
+    let commentDiv = document.createElement("div");
+    commentDiv.setAttribute("id", "comment" + comments.indexOf(commment));
+    commentDiv.style.position = "absolute";
+    commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
+    commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
+    commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
+    commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
+    commentDiv.style.backgroundColor = "green";
+    commentContainer.appendChild(commentDiv);
+}
+
+function resizeComments() {
+    console.log("resizeComments();");
+    for (let index = 0; index < comments.length; index++) {
+        let commentDiv = document.getElementById("comment" + index);
+        let commment = comments[index];
+        commentDiv.style.position = "absolute";
+        commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
+        commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
+        commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
+        commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
+        commentDiv.style.backgroundColor = "green";
+    }
+}
+
+function getURLParameter(name) {
+    let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+    return (value !== 'null') ? value : undefined;
+}
+
+function redirectAllEvents(target, fromElement) {
+    redirect("mousewheel", target, fromElement);
+    redirect("wheel", target, fromElement);
+    redirect("DOMMouseScroll", target, fromElement);
+    redirect("mousedown", target, fromElement);
+    redirect("mouseup", target, fromElement);
+    redirect("mousemove", target, fromElement);
+
+    function redirect(eventType, target, fromElement) {
+        fromElement.addEventListener(eventType, function (event) {
+            target.dispatchEvent(new event.constructor(event.type, event));
             event.preventDefault();
-            if (event.button === 0) {
-                preventZoomAndMovement = true;
-                // If pageX/Y aren't available and clientX/Y are,
-                // calculate pageX/Y - logic taken from jQuery.
-                if (event.pageX == null && event.clientX != null) {
-                    eventDoc = (event.target && event.target.ownerDocument) || document;
-                    doc = eventDoc.documentElement;
-                    body = eventDoc.body;
+            event.stopPropagation();
+        }, false);
+    }
+}
 
-                    event.pageX = event.clientX +
-                        (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                        (doc && doc.clientLeft || body && body.clientLeft || 0);
-                    event.pageY = event.clientY +
-                        (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                        (doc && doc.clientTop || body && body.clientTop || 0);
-                }
-                commentAreaData.sX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
-                commentAreaData.sY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
-
-                commentArea.style.top = parseInt(commentAreaData.sY) + "px";
-                commentArea.style.left = parseInt(commentAreaData.sX) + "px";
-                commentArea.style.width = 0 + "px";
-                commentArea.style.height = 0 + "px";
-                commentArea.style.display = "inherit";
-                commentContainer.addEventListener("mousemove", resizeCommentArea);
-            }
+function dragElementWhenBtnIsDown(elmnt, btn) {
+    let pos1 = 0, pos2 = 0, cursorXinView = 0, cursorYinView = 0;
+    elmnt.addEventListener("mousedown", function (e) {
+        if (e.button === btn) {
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            cursorXinView = e.clientX;
+            cursorYinView = e.clientY;
+            // stop moving when mouse button is released:
+            document.addEventListener("mouseup", stopDragging);
+            // call a function whenever the cursor moves:
+            document.addEventListener("mousemove", drag);
         }
+    });
 
-        function endDragHandler(event) {
-            commentContainer.removeEventListener("mousemove", resizeCommentArea);
-            let eventDoc, doc, body;
-
-            event = event || window.event; // IE-ism
-            event.preventDefault();
-            if (event.button === 0) {
-                // If pageX/Y aren't available and clientX/Y are,
-                // calculate pageX/Y - logic taken from jQuery.
-                if (event.pageX == null && event.clientX != null) {
-                    eventDoc = (event.target && event.target.ownerDocument) || document;
-                    doc = eventDoc.documentElement;
-                    body = eventDoc.body;
-
-                    event.pageX = event.clientX +
-                        (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                        (doc && doc.clientLeft || body && body.clientLeft || 0);
-                    event.pageY = event.clientY +
-                        (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                        (doc && doc.clientTop || body && body.clientTop || 0);
-                }
-                commentAreaData.eX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
-                commentAreaData.eY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
-                commentAreaData.widthPdf = parseFloat(canvas.getAttribute("width"));
-                commentAreaData.heightPdf = parseFloat(canvas.getAttribute("height"));
-
-                if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
-                    commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
-                    createComment(commentArea);
-                }
-
-                commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
-                commentArea.style.top = 10 + "px";
-                commentArea.style.left = 10 + "px";
-                commentArea.style.width = 10 + "px";
-                commentArea.style.height = 10 + "px";
-                commentArea.style.display = "none";
-                preventZoomAndMovement = false;
-            }
-        }
-
-        function resizeCommentArea(event) {
-            if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
-                // If pageX/Y aren't available and clientX/Y are,
-                // calculate pageX/Y - logic taken from jQuery.
-                let eventDoc;
-                let doc;
-                let body;
-                if (event.pageX == null && event.clientX != null) {
-                    eventDoc = (event.target && event.target.ownerDocument) || document;
-                    doc = eventDoc.documentElement;
-                    body = eventDoc.body;
-
-                    event.pageX = event.clientX +
-                        (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                        (doc && doc.clientLeft || body && body.clientLeft || 0);
-                    event.pageY = event.clientY +
-                        (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                        (doc && doc.clientTop || body && body.clientTop || 0);
-                }
-                //
-                let width = ((event.pageX - parseInt(canvas.style.left.replace("px", ""))) - commentAreaData.sX);
-                let height = ((event.pageY - parseInt(canvas.style.top.replace("px", ""))) - commentAreaData.sY);
-                if (commentAreaData.sX > (event.pageX - parseInt(canvas.style.left.replace("px", ""))) &&
-                    commentAreaData.sX !== (event.pageX - parseInt(canvas.style.left.replace("px", "")))) {
-                    //pageX is right cornor
-                    commentArea.style.left = (event.pageX - parseInt(canvas.style.left.replace("px", ""))) + "px";
-                    width = (commentAreaData.sX - (event.pageX - parseInt(canvas.style.left.replace("px", ""))));
-                } else {
-                    //everything is Ok
-                }
-                if (commentAreaData.sY > (event.pageY - parseInt(canvas.style.top.replace("px", ""))) &&
-                    commentAreaData.sY !== (event.pageY - parseInt(canvas.style.top.replace("px", "")))) {
-                    //pageX is top cornor
-                    commentArea.style.top = (event.pageY - parseInt(canvas.style.top.replace("px", ""))) + "px";
-                    height = (commentAreaData.sY - (event.pageY - parseInt(canvas.style.top.replace("px", ""))));
-                } else {
-                    //everything is ok
-                }
-                commentArea.style.width = width + "px";
-                commentArea.style.height = height + "px";
-            }
-        }
-
-        function createComment(commentArea) {
-            let xInPx = parseFloat(commentArea.style.left.replace("px", ""));
-            let yInPx = parseFloat(commentArea.style.top.replace("px", ""));
-            let wInPx = parseFloat(commentArea.style.width.replace("px", ""));
-            let hInPx = parseFloat(commentArea.style.height.replace("px", ""));
-
-            let xInCoords = (xInPx / commentAreaData.widthPdf).toPrecision(7);
-            let yInCoords = (yInPx / commentAreaData.heightPdf).toPrecision(7);
-            let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
-            let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
-
-            let commment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
-                "Somebody", "Message....");
-            comments.push(commment);
-            //TODO upload Data to API
-
-            let commentDiv = document.createElement("div");
-            commentDiv.setAttribute("id", "comment" + comments.indexOf(commment));
-            commentDiv.style.position = "absolute";
-            commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
-            commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
-            commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
-            commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
-            commentDiv.style.backgroundColor = "green";
-            commentContainer.appendChild(commentDiv);
-        }
-
-        function resizeComments() {
-            console.log("resizeComments();");
-            for (let index = 0; index < comments.length; index++) {
-                let commentDiv = document.getElementById("comment" + index);
-                let commment = comments[index];
-                commentDiv.style.position = "absolute";
-                commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
-                commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
-                commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
-                commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
-                commentDiv.style.backgroundColor = "green";
-            }
-        }
-
-        function getURLParameter(name) {
-            let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
-            return (value !== 'null') ? value : undefined;
-        }
-
-        function redirectAllEvents(target, fromElement) {
-            redirect("mousewheel", target, fromElement);
-            redirect("wheel", target, fromElement);
-            redirect("DOMMouseScroll", target, fromElement);
-            redirect("mousedown", target, fromElement);
-            redirect("mouseup", target, fromElement);
-            redirect("mousemove", target, fromElement);
-
-            function redirect(eventType, target, fromElement) {
-                fromElement.addEventListener(eventType, function (event) {
-                    target.dispatchEvent(new event.constructor(event.type, event));
-                    event.preventDefault();
-                    event.stopPropagation();
-                }, false);
-            }
-        }
-
-        function dragElementWhenBtnIsDown(elmnt, btn) {
-            let pos1 = 0, pos2 = 0, cursorXinView = 0, cursorYinView = 0;
-            elmnt.addEventListener("mousedown", function (e) {
-                if (e.button === btn) {
-                    e.preventDefault();
-                    // get the mouse cursor position at startup:
-                    cursorXinView = e.clientX;
-                    cursorYinView = e.clientY;
-                    // stop moving when mouse button is released:
-                    document.addEventListener("mouseup", stopDragging);
-                    // call a function whenever the cursor moves:
-                    document.addEventListener("mousemove", drag);
-                }
-            });
-
-            function drag(e) {
-                e.preventDefault();
-                if (!preventZoomAndMovement) {
-                    // calculate the new cursor position:
-                    pos1 = cursorXinView - e.clientX;
-                    pos2 = cursorYinView - e.clientY;
-                    cursorXinView = e.clientX;
-                    cursorYinView = e.clientY;
-                    // set the element's new position:
+    function drag(e) {
+        e.preventDefault();
+        if (!preventZoomAndMovement) {
+            // calculate the new cursor position:
+            pos1 = cursorXinView - e.clientX;
+            pos2 = cursorYinView - e.clientY;
+            cursorXinView = e.clientX;
+            cursorYinView = e.clientY;
+            // set the element's new position:
             elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
             elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
         }
@@ -415,17 +415,17 @@ function listenForMouseWheelTurn(e) {
     //console.log(delta);
 }
 
-        async function loadPDFAndRender(scale, pdfFileOrUrl) {
-            let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
-            let loadingBar = document.getElementById("loading");
-            loadingTask.onProgress = function (progress) {
-                let percentLoaded = Math.round(progress.loaded / progress.total);
-                percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
-                percentLoaded = percentLoaded <= 1 ? percentLoaded : 1;
-                loadingBar.style.width = percentLoaded * (document.documentElement.clientWidth - 20) + "px";
-            };
-            loadingTask.promise.then(function (localPdf) {
-                pdf = localPdf;
+async function loadPDFAndRender(scale, pdfFileOrUrl) {
+    let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+    let loadingBar = document.getElementById("loading");
+    loadingTask.onProgress = function (progress) {
+        let percentLoaded = Math.round(progress.loaded / progress.total);
+        percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
+        percentLoaded = percentLoaded <= 1 ? percentLoaded : 1;
+        loadingBar.style.width = percentLoaded * (document.documentElement.clientWidth - 20) + "px";
+    };
+    loadingTask.promise.then(function (localPdf) {
+        pdf = localPdf;
         loadPdfPage(pdf, scale);
     }, function (reason) {
         // PDF loading error
@@ -433,12 +433,12 @@ function listenForMouseWheelTurn(e) {
     });
 }
 
-        async function loadPdfPage(pdf, scale) {
-            pdf.getPage(pdfPageNumber).then(function (localPage) {
-                pdfPage = localPage;
-                renderPageFromPdf(scale);
-            });
-        }
+async function loadPdfPage(pdf, scale) {
+    pdf.getPage(pdfPageNumber).then(function (localPage) {
+        pdfPage = localPage;
+        renderPageFromPdf(scale);
+    });
+}
 
 function renderPageFromPdf(scale) {
     if (!isRendering) {
@@ -447,7 +447,6 @@ function renderPageFromPdf(scale) {
         let viewport = pdfPage.getViewport({scale: scale});
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        context.clearRect(0, 0, viewport.width, viewport.height);
         let renderTask = pdfPage.render({
             canvasContext: context,
             viewport: viewport
