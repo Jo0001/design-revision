@@ -111,14 +111,13 @@ function setup() {
 
     canvas = document.getElementById('pdf');
     canvasObserver.observe(canvas, {attributes: true});
-    canvas.addEventListener("mousewheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
     dragElementWhenBtnIsDown(canvas, 1);
 
     commentContainer = document.getElementById('commentContainer');
-    redirectAllEvents(canvas, commentContainer);
     commentContainerObserver.observe(commentContainer, {attributes: true});
+    redirectAllEvents(canvas, commentContainer);
     let titlecard = document.getElementById("titlecard");
     let createCommentBtn = document.getElementById("createComment");
     createCommentBtn.addEventListener("click", function (e) {
@@ -322,7 +321,6 @@ function createComment(commentArea) {
 }
 
 function resizeComments() {
-    console.log("resizeComments();");
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
         let commment = comments[index];
@@ -341,7 +339,6 @@ function getURLParameter(name) {
 }
 
 function redirectAllEvents(target, fromElement) {
-    redirect("mousewheel", target, fromElement);
     redirect("wheel", target, fromElement);
     redirect("DOMMouseScroll", target, fromElement);
     redirect("mousedown", target, fromElement);
@@ -353,14 +350,14 @@ function redirectAllEvents(target, fromElement) {
             target.dispatchEvent(new event.constructor(event.type, event));
             event.preventDefault();
             event.stopPropagation();
-        }, false);
+        });
     }
 }
 
 function dragElementWhenBtnIsDown(elmnt, btn) {
     let pos1 = 0, pos2 = 0, cursorXinView = 0, cursorYinView = 0;
     elmnt.addEventListener("mousedown", function (e) {
-        if (e.button === btn) {
+        if (e.button == btn) {
             e.preventDefault();
             // get the mouse cursor position at startup:
             cursorXinView = e.clientX;
@@ -439,7 +436,7 @@ async function loadPdfPage(pdf, scale) {
     });
 }
 
-function renderPageFromPdf(scale) {
+async function renderPageFromPdf(scale) {
     if (!isRendering) {
         isRendering = true;
         let context = canvas.getContext('2d');
