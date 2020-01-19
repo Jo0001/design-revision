@@ -448,7 +448,6 @@ let readyStateCheckInterval = setInterval(function () {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     previewContainer.addEventListener('dragover', handleDragOver, false);
     previewContainer.addEventListener('drop', dateiauswahl, false);
-
     inputFile.addEventListener("change", function () {
         const file = this.files[0];
         console.log(file);
@@ -475,6 +474,7 @@ let readyStateCheckInterval = setInterval(function () {
             previewDefaulText.style.display = "block";
             previewFile.innerHTML ="Keine Datei ausgewählt";
             previewFile.style.display = "none";
+            sendFile=null;
         }
     });
 }, 10);
@@ -811,22 +811,21 @@ function sendNewProject() {
 function sendDelet(id) {
     let data = new FormData();
     let sendURL= window.location.origin+"/design-revision/api/";
-    data.append("id",id);
+    data.append("id","project_b46f15c0");
+    console.log(data);
 
-
-    let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
-            console.log(this.responseText);
-        }
+    let settings = {
+        "url": sendURL,
+        "method": "DELETE",
+        "timeout": 0,
+        "processData": false,
+        "mimeType": "multipart/form-data",
+        "contentType": false,
+        "data": data
+    };
+    $.ajax(settings).done(function (response) {
+        console.log(response);
     });
-
-
-    xhr.open("DELETE", sendURL);
-
-    xhr.send(data);
 
 }
 //Hello
@@ -1037,6 +1036,7 @@ function cleraForm() {
     sendArray=[];
     sendArrayFields=[];
     sendFile=null;
+    document.getElementById('inputFile').value = null;
     let content = document.querySelectorAll('[data-emailFormId');
     for (let i = 0; i <content.length ; i++) {
         content[i].remove();
