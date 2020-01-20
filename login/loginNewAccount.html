@@ -131,6 +131,9 @@
         return (value !== 'null') ? value : false;
     }
     window.onload=function mailOrPass() {
+        let mail = document.getElementById("email");
+        let tmp = getURLParameter("email");
+        mail.value=tmp;
         let err = getURLParameter('err');
         if (err === "pswd") {
             let feedback = document.getElementById("feedback");

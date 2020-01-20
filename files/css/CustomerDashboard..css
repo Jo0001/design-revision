@@ -63,23 +63,23 @@ body {
 
 .topimg {
     position: fixed;
-    margin-top: -8.4%;
+    margin-top: -11%;
     z-index: 6;
     background-color: rgba(128, 128, 128, 0.2);
     box-sizing: border-box;
     width: 50%;
-    height:15%;
+    height:14%;
 }
 
 .topform {
     position: fixed;
-    margin-top: -8.4%;
+    margin-top: -11%;
     margin-left: 50%;
     z-index: 6;
     background-color: rgba(128, 128, 128, 0.2);
     box-sizing: border-box;
     width: 50%;
-    height: 15%;
+    height: 14%;
 }
 .topform a{
     background-color:#333;
@@ -94,7 +94,7 @@ body {
 }
 
 .space {
-    margin-top: 8.5%;
+    margin-top: 11%;
     position: relative;
 }
 
@@ -111,7 +111,6 @@ body {
     height: 40px;
     font-size: 16px;
 }
-
 .clients {
     margin-left: 30px;
     position: relative;
@@ -135,22 +134,20 @@ body {
     float: left;
     z-index: 1002;
 }
-.clients p{
-   padding-left: 40%;
-    margin: 15px;
-}
+
+
 .status {
     background-color: gray;
     color: white;
-    font-size: 24px;
     position: relative;
     border-radius: 15px;
-    margin-left:    70%;
-    margin-right: 20px;
+    margin-left:    50%;
+    margin-right: 5%;
 }
-.status p{
-   text-align: left;
+.status p {
+    text-align: center;
 }
+
 .image-preview{
     width: 300px;
     min-height: 100px;

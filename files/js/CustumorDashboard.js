@@ -7,10 +7,10 @@ let select = true;
 let doubleClickSelect = true;
 let sendArray = [];
 let sendFile;
-let sendArrayFields=[];
+let sendArrayFields = [];
 let updateOrCreate = true;
-let nameLenght=false;
-let moreMember=1;
+let nameLenght = false;
+let moreMember = 1;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -21,7 +21,7 @@ function generate() {
     let request = new XMLHttpRequest();
     let request1 = new XMLHttpRequest();
     let requestURL;
-    let projectid = 2;
+    let projectid = "20ced965";
     let b = document.body;
     let arrayMember;
     let arrayRole;
@@ -38,7 +38,7 @@ function generate() {
     let textStatus = document.createElement("p");
     let members = document.createElement("p");
     let role = document.createElement("p");
-    let includedPorjects= document.createElement("p");
+    let includedPorjects = document.createElement("p");
     //custumordiv generieren
     customerdiv.className = "clients";
     b.appendChild(customerdiv);
@@ -59,7 +59,7 @@ function generate() {
         if (request1.readyState === 4 && request1.status === 200) {
             let projectObejct = JSON.parse(request1.response);
             projektname.innerHTML = projectObejct.project.name;
-            versionen.innerHTML = "Versionen: "+projectObejct.project.version;
+            versionen.innerHTML = "Versionen: " + projectObejct.project.version;
             textStatus.innerHTML = projectObejct.project.status;
             let members1 = projectObejct.project.members;
             //members bekommen
@@ -115,27 +115,27 @@ function generate() {
             let help = userObject.user.name + counter;
             customerdiv.setAttribute('data-test', help);
             nameimg.setAttribute("src", userObject.user.avatar);
-            clientemail.innerHTML = userObject.user.email+" "+counter;
-            customerdiv.setAttribute('data-email',userObject.user.email+counter);
-            customerdiv.setAttribute('data-id',""+counter);
+            clientemail.innerHTML = userObject.user.email + " " + counter;
+            customerdiv.setAttribute('data-email', userObject.user.email + counter);
+            customerdiv.setAttribute('data-id', "" + counter);
             company.innerHTML = userObject.user.company;
-            if(!(userObject.user.status==="VERIFIED")){
-                window.location=window.location.origin+"/design-revision/login/verifizieren.html"
+            if (!(userObject.user.status === "VERIFIED")) {
+                window.location = window.location.origin + "/design-revision/login/verifizieren.html"
             }
             //Projects-array von Api holen
-            let tmp =userObject.user.projects;
-            let tmp1=tmp[0];
-            for (let i = 1; i <tmp.length ; i++) {
-                tmp1=tmp1+","+tmp[i];
+            let tmp = userObject.user.projects;
+            let tmp1 = tmp[0];
+            for (let i = 1; i < tmp.length; i++) {
+                tmp1 = tmp1 + "," + tmp[i];
             }
-            includedPorjects.innerHTML=tmp1;
-            includedPorjects.style.display="none";
+            includedPorjects.innerHTML = tmp1;
+            includedPorjects.style.display = "none";
             customerdiv.appendChild(includedPorjects);
             projectsArray = includedPorjects.innerHTML;
-            projectsArray=projectsArray.split(",");
+            projectsArray = projectsArray.split(",");
             includedPorjects.remove();
             //customerdiv id geben
-            customerdiv.setAttribute('data-id',""+ counter);
+            customerdiv.setAttribute('data-id', "" + counter);
             counter++;
         } else if (request.readyState === 4 && request.status === 403) {
             console.log("Forbidden");
@@ -174,7 +174,7 @@ function generate() {
         if (select) {
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
-            customerdiv.style.background="white";
+            customerdiv.style.background = "white";
             clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus, arrayMember, arrayRole);
             let btnAddMember = document.getElementById("btnAddMember");
             let projektErsellen = document.getElementById("projektErstellen");
@@ -209,7 +209,7 @@ function generate() {
                     }
                 }
                 //löschen nachricht verstecken
-                if(boolStatus) {
+                if (boolStatus) {
                     let delet = document.getElementById("form1");
                     //messageMember verstecken
                     delet.lastChild.style.display = "none";
@@ -222,12 +222,12 @@ function generate() {
                 projektErsellen.innerHTML = "Projekt ändern";
                 customerdiv.style.background = "#FFFF99";
                 btnAddMember.onclick = function () {
-                    changeClientState(arrayMember, arrayRole,customerdiv.getAttribute("data-id"));
+                    changeClientState(arrayMember, arrayRole, customerdiv.getAttribute("data-id"));
                     customerdiv.style.background = "#FFFF99";
                 };
                 updateOrCreate = false;
                 doubleClickSelect = false;
-                a=false;
+                a = false;
             }
         }
     });
@@ -322,7 +322,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
     } else {
         //Abfrage ob der Kunde gelöscht werden kann
         if (boolStatus) {
-            divForm.lastChild.style.display="none";
+            divForm.lastChild.style.display = "none";
         }
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.background = "white";
@@ -332,7 +332,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
             help = content[i].getAttribute("data-email");
             if (members.includes(help)) {
                 content[i].style.background = "white";
-                content[i].lastChild.style.display="none";
+                content[i].lastChild.style.display = "none";
 
             }
         }
@@ -400,18 +400,18 @@ let readyStateCheckInterval = setInterval(function () {
             generate();
         }
         addMemberWithEmail();
-            let projectName = document.getElementById("projectname");
-            projectName.addEventListener("keyup",function () {
-            let feedback= document.getElementById("nameToLong");
+        let projectName = document.getElementById("projectname");
+        projectName.addEventListener("keyup", function () {
+            let feedback = document.getElementById("nameToLong");
             console.log(projectName.value.length);
-            if(projectName.value.length>=80){
+            if (projectName.value.length >= 80) {
                 feedback.style.color = "red";
-                feedback.style.paddingLeft="100px";
+                feedback.style.paddingLeft = "100px";
                 feedback.innerHTML = "<strong>Name zu lang!</strong>"
-                nameLenght=true;
-            }else {
-                feedback.innerHTML="";
-                nameLenght=false;
+                nameLenght = true;
+            } else {
+                feedback.innerHTML = "";
+                nameLenght = false;
             }
         });
 
@@ -453,7 +453,7 @@ let readyStateCheckInterval = setInterval(function () {
         console.log(file);
         previewFile.style.fontSize = "12px";
         if (file) {
-            if(file.type==="application/pdf") {
+            if (file.type === "application/pdf") {
                 sendFile = file;
                 pdfIcon.style.display = "block";
                 previewDefaulText.style.display = "none";
@@ -462,19 +462,19 @@ let readyStateCheckInterval = setInterval(function () {
                 previewFile.style.fontSize = "12px";
                 previewFile.innerHTML = file.name + " (" + file.type + ")- " + file.size + " bytes,zuletzt Bearbeitet " + file.lastModifiedDate;
 
-            }else {
+            } else {
                 previewFile.style.fontSize = "16px";
-                previewFile.innerHTML ="Bitte PDF hinzufügen!";
+                previewFile.innerHTML = "Bitte PDF hinzufügen!";
                 previewFile.style.color = "#cccccc";
                 previewDefaulText.style.display = "none";
-                pdfIcon.style.display="none";
+                pdfIcon.style.display = "none";
             }
         } else {
             pdfIcon.style.display = "none";
             previewDefaulText.style.display = "block";
-            previewFile.innerHTML ="Keine Datei ausgewählt";
+            previewFile.innerHTML = "Keine Datei ausgewählt";
             previewFile.style.display = "none";
-            sendFile=null;
+            sendFile = null;
         }
     });
 }, 10);
@@ -490,7 +490,7 @@ function dateiauswahl(evt) {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     const pdfIcon = document.getElementById("pdfIcon");
 
-    if(f.type==="application/pdf") {
+    if (f.type === "application/pdf") {
         sendFile = f;
         let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
         pdfIcon.style.display = "block";
@@ -499,12 +499,12 @@ function dateiauswahl(evt) {
         previewFile.style.display = "block";
         previewFile.style.color = "black";
         previewFile.style.fontSize = "12px";
-    }else {
+    } else {
         previewFile.style.fontSize = "16px";
         previewFile.style.display = "block";
-        pdfIcon.style.display="none";
+        pdfIcon.style.display = "none";
         previewFile.style.color = "#cccccc";
-        previewFile.innerHTML ="Bitte PDF hinzufügen!";
+        previewFile.innerHTML = "Bitte PDF hinzufügen!";
         previewDefaulText.style.display = "none";
     }
 }
@@ -649,7 +649,7 @@ function changeClientState(members, role,id) {
             let delet = document.getElementById("form1");
             //messageMember verstecken
             if(boolStatus)
-            delet.lastChild.style.display = "none";
+                delet.lastChild.style.display = "none";
             a = true;
         }
         for (let i = 0; i < arrayLength; i++) {
@@ -772,11 +772,11 @@ function changeClientState(members, role,id) {
 function sendNewProject() {
     let data = new FormData();
     let projectname = document.getElementById("projectname").value;
-    let progressBar= document.getElementById("progressBar");
-    let progressBarBorder =document.getElementById("progressBarBorder");
+    let progressBar = document.getElementById("progressBar");
+    let progressBarBorder = document.getElementById("progressBarBorder");
     let tmpArray = JSON.stringify(sendArray);
     console.log(tmpArray);
-    let sendURL= window.location.origin+"/design-revision/api/";
+    let sendURL = window.location.origin + "/design-revision/api/";
     data.append("createproject", "");
     data.append("name", projectname);
     data.append("members", tmpArray);
@@ -786,9 +786,9 @@ function sendNewProject() {
     xhr.upload.addEventListener("progress", function (event) {
         if (event.lengthComputable) {
             let complete = (event.loaded / event.total * 100 | 0);
-            progressBarBorder.style.display="block";
-            progressBar.style.width=""+complete+"%";
-            progressBar.innerHTML=""+complete+"%";
+            progressBarBorder.style.display = "block";
+            progressBar.style.width = "" + complete + "%";
+            progressBar.innerHTML = "" + complete + "%";
 
         }
     });
@@ -796,8 +796,8 @@ function sendNewProject() {
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             //wartet 6 sekunden
-            setTimeout(function() {
-                progressBarBorder.style.display="none";
+            setTimeout(function () {
+                progressBarBorder.style.display = "none";
             }, 4000);
 
             console.log(this.responseText);
@@ -810,8 +810,8 @@ function sendNewProject() {
 
 function sendDelet(id) {
     let data = new FormData();
-    let sendURL= window.location.origin+"/design-revision/api/";
-    data.append("id","project_b46f15c0");
+    let sendURL = window.location.origin + "/design-revision/api/";
+    data.append("id", "project_b46f15c0");
     console.log(data);
 
     let settings = {
@@ -828,12 +828,13 @@ function sendDelet(id) {
     });
 
 }
+
 //Hello
 function sendUpdateProject() {
     let data = new FormData();
-    let sendURL= window.location.origin+"/design-revision/api/";
-    let progressBar= document.getElementById("progressBar");
-    let progressBarBorder =document.getElementById("progressBarBorder");
+    let sendURL = window.location.origin + "/design-revision/api/";
+    let progressBar = document.getElementById("progressBar");
+    let progressBarBorder = document.getElementById("progressBarBorder");
     //Daten in Api sollten auf Member Array und File geändert werden
     data.append("updateproject", "addmember");
     data.append("id", "value");
@@ -845,8 +846,8 @@ function sendUpdateProject() {
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             //wartet 6 sekunden
-            setTimeout(function() {
-                progressBarBorder.style.display="none";
+            setTimeout(function () {
+                progressBarBorder.style.display = "none";
             }, 4000);
             console.log(this.responseText);
         }
@@ -854,9 +855,9 @@ function sendUpdateProject() {
     xhr.upload.addEventListener("progress", function (event) {
         if (event.lengthComputable) {
             let complete = (event.loaded / event.total * 100 | 0);
-            progressBarBorder.style.display="block";
-            progressBar.style.width=""+complete+"%";
-            progressBar.innerHTML=""+complete+"%";
+            progressBarBorder.style.display = "block";
+            progressBar.style.width = "" + complete + "%";
+            progressBar.innerHTML = "" + complete + "%";
 
         }
     });
@@ -865,6 +866,7 @@ function sendUpdateProject() {
     xhr.send(data);
 
 }
+
 function addMemberWithEmail() {
     let adminOrMember = document.getElementById("AdminOrMember");
     let emailFiled = document.getElementById("email");
@@ -874,21 +876,21 @@ function addMemberWithEmail() {
     emailFiled.onblur = function () {
         member = emailFiled.value;
         objMember = {"email": member, "role": role};
-        sendArrayFields[0]=objMember;
+        sendArrayFields[0] = objMember;
         console.log(sendArrayFields);
     };
-    adminOrMember.onchange= function () {
+    adminOrMember.onchange = function () {
         let test = adminOrMember.value;
         if (test === "Member") {
             role = 0;
             objMember = {"email": member, "role": role};
-            sendArrayFields[0]=objMember;
+            sendArrayFields[0] = objMember;
             console.log(sendArrayFields);
         }
         if (test === "Admin") {
             role = 1;
             objMember = {"email": member, "role": role};
-            sendArrayFields[0]=objMember;
+            sendArrayFields[0] = objMember;
             console.log(sendArrayFields);
         }
 
@@ -896,32 +898,33 @@ function addMemberWithEmail() {
     };
 
 }
+
 function addEmailField() {
     //limiteirt die Felder
-    if(moreMember!==3) {
+    if (moreMember !== 3) {
         let emailSpan = document.getElementById('emailSpan');
         let childes = emailSpan.childNodes;
         let role = -1;
         let member = "";
         let objMember;
         let emailClone = document.createElement("input");
-        emailClone.setAttribute('data-emailFormId',""+moreMember);
+        emailClone.setAttribute('data-emailFormId', "" + moreMember);
         emailClone.type = "email";
-        emailClone.required=true;
+        emailClone.required = true;
         emailClone.placeholder = "E-mail";
         emailClone.style.width = "55%";
         //clont die beiden Elmente;
         let selectClone = childes[3].cloneNode(true);
-        selectClone.setAttribute('data-emailFormId',""+moreMember);
+        selectClone.setAttribute('data-emailFormId', "" + moreMember);
         emailSpan.appendChild(emailClone);
         emailSpan.appendChild(selectClone);
         let remove = document.createElement("b");
-        remove.setAttribute('data-emailFormId',""+moreMember);
+        remove.setAttribute('data-emailFormId', "" + moreMember);
         moreMember++;
         remove.innerHTML = " X";
         emailSpan.appendChild(remove);
         remove.onclick = function () {
-            let index= this.getAttribute("data-emailFormId");
+            let index = this.getAttribute("data-emailFormId");
             sendArrayFields.splice(index, 1);
             emailSpan.removeChild(emailClone);
             emailSpan.removeChild(selectClone);
@@ -931,39 +934,64 @@ function addEmailField() {
 
         };
         emailClone.onblur = function () {
-            let index= this.getAttribute('data-emailFormId');
+            let index = this.getAttribute('data-emailFormId');
             member = emailClone.value;
             objMember = {"email": member, "role": role};
-            sendArrayFields[index]=objMember;
+            sendArrayFields[index] = objMember;
             console.log(sendArrayFields);
         };
         selectClone.onchange = function () {
-            let index= this.getAttribute('data-emailFormId');
+            let index = this.getAttribute('data-emailFormId');
             let test = selectClone.value;
             if (test === "Member") {
                 role = 0;
                 objMember = {"email": member, "role": role};
-                sendArrayFields[index]=objMember;
+                sendArrayFields[index] = objMember;
                 console.log(sendArrayFields);
             }
             if (test === "Admin") {
                 role = 1;
                 objMember = {"email": member, "role": role};
-                sendArrayFields[index]=objMember;
+                sendArrayFields[index] = objMember;
                 console.log(sendArrayFields);
             }
 
         };
     }
 }
+
 function putArrayTogether() {
-    let message=document.getElementById("messageDoubleSelected");
+    let message = document.getElementById("messageDoubleSelected");
     let messageValid = document.getElementById("messageEmail");
-    let messageRole=document.getElementById("messageRole");
-    let allRight= true;
-    if(sendArray.length<1){
-        for (let i = 0; i <sendArrayFields.length; i++) {
-            sendArray[i]=sendArrayFields[i];
+    let messageRole = document.getElementById("messageRole");
+    let allRight = true;
+    let input = [];
+    let input1=[];
+    let helpSendArray=[];
+    for (let i = 0; i <sendArray.length ; i++) {
+        helpSendArray.push(sendArray[i]);
+    }
+    console.log(helpSendArray);
+    //schaut ob sendArray leer ist
+    if (sendArray.length < 1) {
+        //fügt Member in hilfs Array
+        for (let i = 0; i < sendArrayFields.length; i++) {
+            input[i] = sendArrayFields[i].email;
+        }
+        //fügt duplicate von hilfs Array in Array
+        let duplicates = input.reduce(function (acc, el, i, arr) {
+            if (arr.indexOf(el) !== i && acc.indexOf(el) < 0) acc.push(el);
+            return acc;
+        }, []);
+        console.log(duplicates);
+        //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
+        if (!(duplicates.length < 1)) {
+            message.innerHTML = "Zweimal gleiche E-Mail";
+            allRight = false;
+        }else {
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                sendArray[i] = sendArrayFields[i];
+            }
         }
         for (let i = 0; i < sendArrayFields.length; i++) {
             let valid = emailIsValid(sendArrayFields[i].email);
@@ -975,27 +1003,28 @@ function putArrayTogether() {
         for (let i = 0; i < sendArrayFields; i++) {
             if (sendArrayFields[i].role === (-1)) {
                 messageRole.innerHTML = "Rollen auswählen";
+                allRight = false;
             }
 
         }
-    }else {
-        for (let i = 0; i < sendArrayFields.length; i++) {
-            for (let j = 0; j < sendArray.length; j++) {
-                if (sendArrayFields[i].email === sendArray[j].email) {
-                    console.log("Same Email 2 times selected!");
-                    sendArray[j] = sendArrayFields[i];
-                    console.log(sendArray);
-                    message.innerHTML = "Zweimal gleiche E-Mail";
-                    allRight = false;
-                    i++;
-                }
-                if (j === (sendArray.length - 1) && !(sendArray[j].email === sendArray[i].email)) {
-                    sendArray.push(sendArrayFields[i]);
-                    j++;
-                }
-            }
+    } else {
+        for (let i = 0; i <sendArrayFields.length ; i++) {
+            helpSendArray.push(sendArrayFields[i])
+        }
+        for (let i = 0; i <helpSendArray.length ; i++) {
+            input1[i] = helpSendArray[i].email;
+        }
+        let duplicates = input1.reduce(function (acc, el, i, arr) {
+            if (arr.indexOf(el) !== i && acc.indexOf(el) < 0) acc.push(el);
+            return acc;
+        }, []);
+        //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
+        if (!(duplicates.length < 1)){
+            message.innerHTML = "Zweimal gleiche E-Mail";
+            allRight = false;
 
         }
+
         for (let i = 0; i < sendArrayFields.length; i++) {
             let valid = emailIsValid(sendArrayFields[i].email);
             if (!valid) {
@@ -1006,11 +1035,12 @@ function putArrayTogether() {
         for (let i = 0; i < sendArrayFields; i++) {
             if (sendArrayFields[i].role === (-1)) {
                 messageRole.innerHTML = "Rollen auswählen";
+                allRight = false;
             }
 
         }
     }
-    if(allRight){
+    if (allRight) {
         messageRole.innerHTML = "";
         message.innerHTML = "";
     }
@@ -1021,25 +1051,28 @@ function putArrayTogether() {
 function cleraForm() {
     let emailSpan = document.getElementById('email');
     let adminOrMember = document.getElementById("AdminOrMember");
-    let projectName= document.getElementById("projectname");
+    let projectName = document.getElementById("projectname");
     const previewContainer = document.getElementById("imagePreview");
     const previewFile = previewContainer.querySelector(".image-preview__file");
     const pdfIcon = document.getElementById("pdfIcon");
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     pdfIcon.style.display = "none";
     previewDefaulText.style.display = "block";
-    previewFile.innerHTML ="Keine Datei ausgewählt";
+    previewFile.innerHTML = "Keine Datei ausgewählt";
     previewFile.style.display = "none";
-    projectName.value="";
-    emailSpan.value="";
-    adminOrMember.value="";
-    sendArray=[];
-    sendArrayFields=[];
-    sendFile=null;
+    projectName.value = "";
+    emailSpan.value = "";
+    adminOrMember.value = "";
+    sendArray = [];
+    sendArrayFields = [];
+    sendFile = null;
     document.getElementById('inputFile').value = null;
     let content = document.querySelectorAll('[data-emailFormId');
-    for (let i = 0; i <content.length ; i++) {
+    for (let i = 0; i < content.length; i++) {
         content[i].remove();
+    }
+    if(!select){
+        addMember();
     }
 
 }
