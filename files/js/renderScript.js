@@ -432,6 +432,7 @@ function displayProgressOnBar() {
 
 function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+    console.log("Started loading pdf: " + loadingTask);
     loadingTask.onProgress = function (progress) {
         percentLoaded = Math.round(progress.loaded / progress.total);
         percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
@@ -440,14 +441,14 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
     };
     loadingTask.promise.then(function (localPdf) {
         pdf = localPdf;
-        loadPdfPage(pdf, scale);
+        loadPdfPage(scale);
     }, function (reason) {
         // PDF loading error
         window.alert(reason);
     });
 }
 
-function loadPdfPage(pdf, scale) {
+function loadPdfPage(scale) {
     pdf.getPage(pdfPageNumber).then(function (localPage) {
         pdfPage = localPage;
         renderPageFromPdf(scale);

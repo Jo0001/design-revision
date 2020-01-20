@@ -123,16 +123,16 @@ class Comment {
 
             commentContainer = document.getElementById('commentContainer');
             commentContainerObserver.observe(commentContainer, {attributes: true});
-    redirectAllEvents(canvas, commentContainer);
-    let titlecard = document.getElementById("titlecard");
-    let createCommentBtn = document.getElementById("createComment");
-    createCommentBtn.addEventListener("click", function (e) {
-        commentMode = !commentMode;
-        if (commentMode) {
-            //COMMENTMODE ON
-            createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
-            canvas.addEventListener("mousedown", startDragHandler, false);
-            canvas.addEventListener("mouseup", endDragHandler, false);
+            redirectAllEvents(canvas, commentContainer);
+            let titlecard = document.getElementById("titlecard");
+            let createCommentBtn = document.getElementById("createComment");
+            createCommentBtn.addEventListener("click", function (e) {
+                commentMode = !commentMode;
+                if (commentMode) {
+                    //COMMENTMODE ON
+                    createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
+                    canvas.addEventListener("mousedown", startDragHandler, false);
+                    canvas.addEventListener("mouseup", endDragHandler, false);
         } else {
             createCommentBtn.innerHTML = "Kommentarmodus einschalten";
             canvas.removeEventListener("mousedown", startDragHandler, false);
@@ -140,47 +140,35 @@ class Comment {
         }
     });
 
-    let projectId = getURLParameter('id');
-    if (projectId === "") {
-        projectId = 2;
-        console.log("Using demo Project id=2, because I received no parameter projectId.")
-    }
-    let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
-    let request = new XMLHttpRequest();
-    request.open('GET', requestURL);
-    request.send();
-    request.onreadystatechange = function (e) {
-        if (request.readyState === 4 && request.status === 200) {
-            let projectContainer = JSON.parse(request.response);
-            titlecard.innerText = titlecard.innerHTML.replace("/", projectContainer.project.name);
-        } else if (request.readyState === 4 && request.status === 401) {
-            window.alert("keine Berechtigung");
-        } else if (request.readyState === 4 && request.status === 403) {
-            window.alert("Forbidden");
-        } else if (request.readyState === 4 && request.status === 404) {
-            window.alert("Nichts gefunden");
-        }
-    };
+            let projectId = getURLParameter('id');
+            if (projectId === "") {
+                projectId = "2";
+                console.log("Using demo Project id=2, because I received no parameter projectId.")
+            }
+            let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
+            let request = new XMLHttpRequest();
+            request.open('GET', requestURL);
+            request.send();
+            request.addEventListener('readystatechange', function (e) {
+                if (this.readyState === 4) {
+                    let projectContainer = JSON.parse(request.response);
+                    titlecard.innerText = titlecard.innerHTML.replace("/", projectContainer.project.name);
+                }
+            });
 
-    //Json Kommentare aus Api hohlen
-    let request2 = new XMLHttpRequest();
-    requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
-    request2.open('GET', requestURL);
-    request2.send();
-    request2.onreadystatechange = function (e) {
-        if (request.readyState === 4 && request.status === 200) {
-            let projectObject = JSON.parse(request.response);
-            //pdfFileOrUrl = projectObject.link;
-            loadPDFAndRender(1, pdfFileOrUrl);
-        } else if (request.readyState === 4 && request.status === 401) {
-            window.alert("keine Berechtigung");
-        } else if (request.readyState === 4 && request.status === 403) {
-            window.alert("Forbidden");
-        } else if (request.readyState === 4 && request.status === 404) {
-            window.alert("Nichts gefunden");
+            //Json Kommentare aus Api hohlen
+            let request2 = new XMLHttpRequest();
+            requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+            request2.open('GET', requestURL);
+            request2.send();
+            request2.addEventListener('readystatechange', function (e) {
+                if (this.readyState === 4) {
+                    let projectObject = JSON.parse(request.response);
+                    //pdfFileOrUrl = projectObject.link;
+                    loadPDFAndRender(1, pdfFileOrUrl);
+                }
+            });
         }
-    };
-}
 
 function startDragHandler(event) {
     let eventDoc, doc, body;
@@ -433,6 +421,7 @@ function listenForMouseWheelTurn(e) {
 
         function loadPDFAndRender(scale, pdfFileOrUrl) {
             let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+            console.log("Started loading pdf: " + loadingTask);
             loadingTask.onProgress = function (progress) {
                 percentLoaded = Math.round(progress.loaded / progress.total);
                 percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
@@ -441,14 +430,14 @@ function listenForMouseWheelTurn(e) {
             };
             loadingTask.promise.then(function (localPdf) {
                 pdf = localPdf;
-                loadPdfPage(pdf, scale);
+                loadPdfPage(scale);
             }, function (reason) {
                 // PDF loading error
                 window.alert(reason);
             });
-}
+        }
 
-        function loadPdfPage(pdf, scale) {
+        function loadPdfPage(scale) {
             pdf.getPage(pdfPageNumber).then(function (localPage) {
                 pdfPage = localPage;
                 renderPageFromPdf(scale);
@@ -476,25 +465,25 @@ function listenForMouseWheelTurn(e) {
                 });
 
                 canvas.style.height = canvas.height + "px";
-        canvas.style.width = canvas.width + "px";
-        /* SVG-Rendering-Code but not all Graphic
-        Sates have been implemented in the library + convas needs to be div
-        let viewport = page.getViewport({scale: scale});
-        canvas.style.height = viewport.height + 'px';
-        canvas.style.width = viewport.width + 'px';
-        //Make sure Div is clean
-        while (canvas.firstChild) {
-            canvas.removeChild(canvas.firstChild);
-        }
-        page.getOperatorList()
-            .then(function (opList) {
-                let svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
-                return svgGfx.getSVG(opList, viewport);
-            })
-            .then(function (svg) {
-                canvas.appendChild(svg);
-            });
-         */
+                canvas.style.width = canvas.width + "px";
+                /* SVG-Rendering-Code but not all Graphic
+                Sates have been implemented in the library + convas needs to be div
+                let viewport = page.getViewport({scale: scale});
+                canvas.style.height = viewport.height + 'px';
+                canvas.style.width = viewport.width + 'px';
+                //Make sure Div is clean
+                while (canvas.firstChild) {
+                    canvas.removeChild(canvas.firstChild);
+                }
+                page.getOperatorList()
+                    .then(function (opList) {
+                        let svgGfx = new pdfjsLib.SVGGraphics(page.commonObjs, page.objs);
+                        return svgGfx.getSVG(opList, viewport);
+                    })
+                    .then(function (svg) {
+                        canvas.appendChild(svg);
+                    });
+                 */
     }
 }
 
