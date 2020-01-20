@@ -59,6 +59,7 @@ class TargetScaleHandlerClass {
         this.updateScale();
     };
 }
+
 class Comment {
     constructor(page, x, y, w, h, authorId, commentText) {
         this.page = page;
@@ -71,53 +72,57 @@ class Comment {
     }
 }
 
-let pdfFileOrUrl = "../user-content/test4.pdf";
-let pdfPageNumber = 101;
-let canvas;
-let commentContainer;
-let commentArea;
-let pdf;
-let pdfPage = undefined;
-let isRendering = false;
-let commentMode = false;
-let preventZoomAndMovement = false;
+        let pdfFileOrUrl = "../user-content/test4.pdf";
+        let pdfPageNumber = 101;
+        let pdf;
+        let pdfPage = undefined;
+        let isRendering = false;
+        let firstTimeDisplay = true;
+        let preventZoomAndMovement = false;
 
-let targetScaleHandler = new TargetScaleHandlerClass();
-let comments = new Array();
-let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+        let targetScaleHandler = new TargetScaleHandlerClass();
+        let canvas;
+        let commentContainer;
+        let commentArea;
+        let comments = new Array();
+        let commentMode = false;
+        let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+        let canvasObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutationRecord) {
+                let attribute = canvas.getAttribute(mutationRecord.attributeName);
+                if (mutationRecord.attributeName === "style") {
+                    commentContainer.setAttribute(mutationRecord.attributeName,
+                        attribute.replace("z-index: -5; ", "z-index: -4; "));
+                }
+            });
+        });
+        let commentContainerObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutationRecord) {
+                resizeComments();
+            });
+        });
 
-let canvasObserver = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutationRecord) {
-        let attribute = canvas.getAttribute(mutationRecord.attributeName);
-        if (mutationRecord.attributeName === "style") {
-            commentContainer.setAttribute(mutationRecord.attributeName,
-                attribute.replace("z-index: -5; ", "z-index: -4; "));
-        }
-    });
-});
-let commentContainerObserver = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutationRecord) {
-        resizeComments();
-    });
-});
+        let percentLoaded;
 
 
-function setup() {
-    //Prevent a contextmenu on page, so people cant download the design.
-    document.body.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-        return false;
-    });
-    commentArea = document.getElementById('commentArea');
+        function setup() {
+            //Prevent a contextmenu on page, so people cant download the design.
+            document.body.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+                return false;
+            });
+            //IF browser size changes progress bar can go over 100%
+            window.addEventListener('resize', displayProgressOnBar);
+            commentArea = document.getElementById('commentArea');
 
-    canvas = document.getElementById('pdf');
-    canvasObserver.observe(canvas, {attributes: true});
-    canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
-    canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-    dragElementWhenBtnIsDown(canvas, 1);
+            canvas = document.getElementById('pdf');
+            canvasObserver.observe(canvas, {attributes: true});
+            canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
+            canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
+            dragElementWhenBtnIsDown(canvas, 1);
 
-    commentContainer = document.getElementById('commentContainer');
-    commentContainerObserver.observe(commentContainer, {attributes: true});
+            commentContainer = document.getElementById('commentContainer');
+            commentContainerObserver.observe(commentContainer, {attributes: true});
     redirectAllEvents(canvas, commentContainer);
     let titlecard = document.getElementById("titlecard");
     let createCommentBtn = document.getElementById("createComment");
@@ -138,7 +143,7 @@ function setup() {
     let projectId = getURLParameter('id');
     if (projectId === "") {
         projectId = 2;
-        window.alert("Using demo Project id=2, because I received no parameter projectId.")
+        console.log("Using demo Project id=2, because I received no parameter projectId.")
     }
     let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
     let request = new XMLHttpRequest();
@@ -317,7 +322,10 @@ function createComment(commentArea) {
     commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
     commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
     commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
-    commentDiv.style.backgroundColor = "green";
+    commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
+    commentDiv.style.borderRadius = "3px";
+    commentDiv.style.outlineStyle = "outset";
+    commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
     commentContainer.appendChild(commentDiv);
 }
 
@@ -330,7 +338,10 @@ function resizeComments() {
         commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
         commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
         commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
-        commentDiv.style.backgroundColor = "green";
+        commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
+        commentDiv.style.borderRadius = "3px";
+        commentDiv.style.outlineStyle = "outset";
+        commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
     }
 }
 
@@ -412,32 +423,39 @@ function listenForMouseWheelTurn(e) {
     //console.log(delta);
 }
 
-async function loadPDFAndRender(scale, pdfFileOrUrl) {
-    let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
-    let loadingBar = document.getElementById("loading");
-    loadingTask.onProgress = function (progress) {
-        let percentLoaded = Math.round(progress.loaded / progress.total);
-        percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
-        percentLoaded = percentLoaded <= 1 ? percentLoaded : 1;
-        loadingBar.style.width = percentLoaded * (document.documentElement.clientWidth - 20) + "px";
-    };
-    loadingTask.promise.then(function (localPdf) {
-        pdf = localPdf;
-        loadPdfPage(pdf, scale);
-    }, function (reason) {
-        // PDF loading error
-        window.alert(reason);
-    });
+        function displayProgressOnBar() {
+            let loadingBar = document.getElementById("loading");
+            let lowBar = document.getElementById("lowbar");
+            let marginRight = (loadingBar.style.right.replace("px", "") - lowBar.style.right.replace("px", ""));
+            let marginLeft = (loadingBar.style.left.replace("px", "") - lowBar.style.left.replace("px", ""));
+            loadingBar.style.width = percentLoaded * (lowBar.clientWidth - marginRight - marginLeft) + "px";
+        }
+
+        function loadPDFAndRender(scale, pdfFileOrUrl) {
+            let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
+            loadingTask.onProgress = function (progress) {
+                percentLoaded = Math.round(progress.loaded / progress.total);
+                percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
+                percentLoaded = percentLoaded <= 0.99 ? percentLoaded : 1;
+                displayProgressOnBar();
+            };
+            loadingTask.promise.then(function (localPdf) {
+                pdf = localPdf;
+                loadPdfPage(pdf, scale);
+            }, function (reason) {
+                // PDF loading error
+                window.alert(reason);
+            });
 }
 
-async function loadPdfPage(pdf, scale) {
-    pdf.getPage(pdfPageNumber).then(function (localPage) {
-        pdfPage = localPage;
-        renderPageFromPdf(scale);
-    });
-}
+        function loadPdfPage(pdf, scale) {
+            pdf.getPage(pdfPageNumber).then(function (localPage) {
+                pdfPage = localPage;
+                renderPageFromPdf(scale);
+            });
+        }
 
-        async function renderPageFromPdf(scale) {
+        function renderPageFromPdf(scale) {
             if (!isRendering) {
                 isRendering = true;
                 let context = canvas.getContext('2d');
@@ -448,11 +466,16 @@ async function loadPdfPage(pdf, scale) {
                     canvasContext: context,
                     viewport: viewport
                 });
-        renderTask.promise.then(function () {
-            isRendering = false;
-        });
+                renderTask.promise.then(function () {
+                    isRendering = false;
+                    if (firstTimeDisplay) {
+                        firstTimeDisplay = false;
+                        canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
+                        canvas.style.top = "100px";
+                    }
+                });
 
-        canvas.style.height = canvas.height + "px";
+                canvas.style.height = canvas.height + "px";
         canvas.style.width = canvas.width + "px";
         /* SVG-Rendering-Code but not all Graphic
         Sates have been implemented in the library + convas needs to be div
