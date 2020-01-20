@@ -93,7 +93,7 @@ function getUser($value)
         $result = $statement->execute(array('pk_id' => $id));
         $user = $statement->fetch();
         if ($value == "all") {
-            return ["id"=>(int)$user['pk_id'],"name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'][0], "projects" => json_decode($user['projects'])];
+            return ["id" => (int)$user['pk_id'], "name" => $user['name'], "email" => $user['email'], "company" => $user['company'], "status" => $user['status'], "avatar" => "../api/avatar.php?name=" . $user['name'][0], "projects" => json_decode($user['projects'])];
         } else {
             return $user[$value];
         }
@@ -106,23 +106,17 @@ function getProject($value)
     $id = check_id();
     if (!is_null($id)) {
         if (isLoggedIn()) {
-            $id = (int)$id;
-            if (in_array($id, json_decode(getUser("projects")))) {
-                $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-                $statement = $pdo->prepare("SELECT * FROM projects WHERE pd_id = :pd_id");
-                $result = $statement->execute(array('pd_id' => $id));
-                $project = $statement->fetch();
-                if (!empty($project)) {
-                    if ($value == "data") {
-                        handleOutput(array("link" => "../user-content/test3.pdf", "data" => "Some kind of (JSON) data"));
-                    } else {
-                        handleOutput(array("project" => array("id" => $id, "name" => $project['name'], "status" => $project['status'], "link" => "demo", "version" => ++$id, "members" => json_decode($project['members']))));
-                    }
+            $id = "project_" . $id;
+            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+            if (isValidProject($id, $pdo)) {
+                $project = getLatestProjectData($id, $pdo);
+                if ($value == "data") {
+                    handleOutput(array("link" => $project['link'], "data" => $project['data']));
                 } else {
-                    showError("Found no project with id " . $id, 404);
+                    handleOutput(array("project" => array("name" => $project['p_name'], "status" => $project['status'], "link" => $project['link'], "version" => (int)$project['version'], "lastedit" => $project['lastedit'], "members" => json_decode($project['members']))));
                 }
             } else {
-                showError("You are not allowed to view this", 403);
+                showError("Invalid Request", 400);
             }
         } else {
             showError("Login to get the requested data", 401);
@@ -174,7 +168,7 @@ function createProject()
 
                 $memberids = array();
 
-                $pid = explode("project_",$t_name)[1];
+                $pid = explode("project_", $t_name)[1];
 
                 $projectname = $name;
 
@@ -287,8 +281,9 @@ function deleteProject()
         $id = "project_" . filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-        if (isValidProject($id, $pdo) && getUser('status') == "VERIFIED") {
-            $userid = getUser("pk_id");
+        if (isValidProject($id, $pdo)/* && getUser('status') == "VERIFIED"*/) {
+           // $userid = getUser("pk_id");
+            $userid = 1;
             if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {
                 $statement = $pdo->prepare("SELECT link FROM " . $id);
                 $statement->execute();
@@ -298,11 +293,16 @@ function deleteProject()
                     //deletes all project files
                     unlink($target_dir . $link[$i][0]);
                 }
+                //TODO Delete project from users
+                $tmpproject = getLatestProjectData($id,$pdo);
+                foreach ($tmpproject as $tmp){
+                    echo ($tmpproject['members']);
+                    break;
+                }
                 $statement = $pdo->prepare("DROP TABLE `" . $id . "`");
                 $statement->execute();
-                //TODO Delete project from users
 
-                handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
+                //handleOutput(isValidProject($id, $pdo) . "get delete request for " . $id);
                 //header("HTTP/1.1 204 No Content ");
             } else {
                 showError("You are not allowed to delete this", 403);
