@@ -1,19 +1,21 @@
 <!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Editor - DesignRevision</title>
     <link href="../files/css/CommentDesign.css" rel="stylesheet">
 </head>
 <body>
-<!-- The pdfjs library -->
-<script src="../files/js/renderScriptWLibrary.js"></script>
-<canvas id="pdf"
-        style="position: absolute; border: none; z-index: -5; top: 20px; left: 10px; page-break-inside: avoid; clear: none;"></canvas>
-<div id="commentContainer" style="position: absolute; border: none; z-index: -4; top: 20px; left: 10px;">
+<!-- The pdf.js library and controls-->
+<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+<script defer src="../files/js/renderScript.js"></script>
+<canvas id="pdf" style="top: 20px; left: 10px;"></canvas>
+<!--<div id="pdf" style="top: 20px; left: 10px;"></div>-->
+<div id="commentContainer" style="top: 20px; left: 10px;">
     <div id="commentArea"
-         style="position: absolute; background-color: rgba(99, 99, 99, 0.5); display: none; width: 10px; height: 10px; border-radius: 3px;"></div>
+         style="display: none; width: 10px; height: 10px;"></div>
 </div>
-<!-- <div id="svg" style="display: none; position: absolute; border: none; z-index: -5;"></div> -->
+
 <div id="titlebar">
     <h1 id="titlecard">Designvorschlag für /</h1>
 </div>

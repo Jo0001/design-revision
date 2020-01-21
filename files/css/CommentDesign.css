@@ -7,6 +7,27 @@
     text-align: center;
 }
 
+#pdf {
+    position: absolute;
+    border: none;
+    z-index: -5;
+    page-break-inside: avoid;
+    clear: none;
+}
+
+#commentContainer {
+    position: absolute;
+    border: none;
+    z-index: -4;
+}
+
+#commentArea {
+    position: absolute;
+    z-index: -3;
+    background-color: rgba(99, 99, 99, 0.5);
+    border-radius: 3px;
+}
+
 #loading {
     position: fixed;
     height: 10px;
