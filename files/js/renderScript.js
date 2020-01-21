@@ -2,7 +2,7 @@
 // Loaded via <script> tag, create shortcut to access PDF.js exports.
 let pdfjsLib = window['pdfjs-dist/build/pdf'];
 // The workerSrc property shall be specified.
-pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
 
 class TargetScaleHandlerClass {
     constructor() {
