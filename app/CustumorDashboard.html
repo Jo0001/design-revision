@@ -14,12 +14,13 @@
     <img alt="tick" height="100" src="../files/img/logo.png"
          style="float: left"
          width="100">
+    <div id="pageLoader"></div>
 </div>
 <div class="topform">
     <a href="../login/login.php?logout">Log Out</a>
     <form enctype="multipart/form-data" id="search1">
         <label>
-            <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Kundenname" required type="text">
+            <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname" required type="text">
         </label>
     </form>
 </div>
@@ -61,9 +62,7 @@
                type="button"
                value="Member ausw&#228;hlen"/>
         <input id="submitButton" type="submit" value="Speichern">
-        <div id="progressBarBorder"style="border: 3px solid lightgrey;border-radius: 4px;margin: 20px;background: lightgrey;display: none">
-            <div id="progressBar" style="height:24px;width:1%;background-color:green;border-radius: 4px;color: white;text-align: center"></div>
-        </div>
+        <div id="loader"><span id="percentage" style="display: none"></span></div>
     </form>
 </div>
 <dialog aria-labelledby="dialog-heading" id="dialog">
@@ -74,6 +73,8 @@
     <button class="Dialog_button" onclick="closeNo()">Nein</button>
 </dialog>
 <h1 id="message" style="color: red;text-align: center;display: none">Keine Treffer</h1>
+<div class="sendFeedBack" id="sendFeedBack">
+    <h1>Erfolgreich gesendet</h1>
+</div>
 </body>
-<script src="https://code.jquery.com/jquery-latest.js"></script>
 </html>

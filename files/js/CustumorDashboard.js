@@ -1,6 +1,9 @@
 let a = true;
 let counter = 0;
+let counterForId = 0;
 let customerid;
+let projectid;
+let ableNewProject = true;
 let bool1 = false;
 let boolStatus;
 let select = true;
@@ -11,7 +14,7 @@ let sendArrayFields = [];
 let updateOrCreate = true;
 let nameLenght = false;
 let moreMember = 1;
-
+let tmpClients;
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
 }
@@ -21,15 +24,25 @@ function generate() {
     let request = new XMLHttpRequest();
     let request1 = new XMLHttpRequest();
     let requestURL;
-    let projectid = "20ced965";
     let b = document.body;
     let arrayMember;
     let arrayRole;
     let projectsArray;
+    let requestredy = false;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
     let statusImg = document.createElement("img");
-    let projektname = document.createElement("p");
+    let projektname = document.createElement("a");
+    projektname.style.cursor = "pointer";
+    projektname.style.fontSize = "28px";
+    projektname.style.textDecoration = "none";
+    projektname.style.color = "black";
+    projektname.onmouseover = function () {
+        projektname.style.color = "lightgray";
+    };
+    projektname.onmouseout = function () {
+        projektname.style.color = "black";
+    };
     let clientname = document.createElement("p");
     let clientemail = document.createElement("p");
     let versionen = document.createElement("p");
@@ -51,100 +64,125 @@ function generate() {
     statusImg.style.zIndex = "2";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-    requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectid;
-    request1.open('GET', requestURL, true);
-    request1.send();
-    request1.onreadystatechange = function () {
-        //wir bekommen ein Jason Object
-        if (request1.readyState === 4 && request1.status === 200) {
-            let projectObejct = JSON.parse(request1.response);
-            projektname.innerHTML = projectObejct.project.name;
-            versionen.innerHTML = "Versionen: " + projectObejct.project.version;
-            textStatus.innerHTML = projectObejct.project.status;
-            let members1 = projectObejct.project.members;
-            //members bekommen
-            let help = members1[0].email;
-            let helpRole = members1[0].role;
-            let length = members1.length;
-            for (let i = 1; i < length; i++) {
-                help = help + "," + members1[i].email;
-                helpRole = helpRole + "," + members1[i].role;
-            }
-            //members generieren
-            members.innerHTML = help;
-            members.style.display = "none";
-            customerdiv.appendChild(members);
-            arrayMember = members.innerHTML;
-            arrayMember = arrayMember.split(",");
-            //role generiern
-            role.innerHTML = helpRole;
-            role.style.display = "none";
-            customerdiv.appendChild(role);
-            arrayRole = role.innerHTML;
-            arrayRole = arrayRole.split(",");
-            members.remove();
-            role.remove();
-            //window.location als ersatz zu a da man sonst dedign ändern muss
-            projektname.onclick = function () {
-                window.location = projectObejct.project.link;
-            }
-        } else if (request1.readyState === 4 && request1.status === 401) {
-            customerdiv.remove();
-            //window.alert("Nicht eingelogt");
-            document.location = "../login/login.html";
-        } else if (request1.readyState === 4 && request1.status === 403) {
-            window.alert("Sie sind noch in keinem Projekt warten sie bis wir sie zu einem hinzufügen!");
-            console.log("Forbidden");
-        } else if (request1.readyState === 4 && request1.status === 404) {
-            window.alert("Nichts gefunden");
-        } else if (request1.readyState === 4 && request1.status === 400) {
-            window.alert("Unbekannter Anfrageparameter");
-        }
-    };
+
     //Projectname erstellen
     customerdiv.appendChild(projektname);
-
     //Jason user Object aus Api holen
     requestURL = window.location.origin + "/design-revision/api/?getuser";
-    request.open('GET', requestURL);
+    request.open('GET', requestURL, true);
     request.send();
     request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
             let userObject = JSON.parse(request.response);
             clientname.innerHTML = userObject.user.name + counter;
-            let help = userObject.user.name + counter;
-            customerdiv.setAttribute('data-test', help);
             nameimg.setAttribute("src", userObject.user.avatar);
             clientemail.innerHTML = userObject.user.email + " " + counter;
             customerdiv.setAttribute('data-email', userObject.user.email + counter);
-            customerdiv.setAttribute('data-id', "" + counter);
             company.innerHTML = userObject.user.company;
             if (!(userObject.user.status === "VERIFIED")) {
                 window.location = window.location.origin + "/design-revision/login/verifizieren.html"
             }
             //Projects-array von Api holen
             let tmp = userObject.user.projects;
-            let tmp1 = tmp[0];
-            for (let i = 1; i < tmp.length; i++) {
-                tmp1 = tmp1 + "," + tmp[i];
+            if (tmp === null) {
+                customerdiv.remove();
+                clearInterval(checkForprojects);
+                ableNewProject = false;
+                window.alert("Noch keine Projekte");
+                window.location = window.location.origin + "/design-revision/login/login.html";
+            } else {
+                let tmp1 = tmp[0];
+                for (let i = 1; i < tmp.length; i++) {
+                    tmp1 = tmp1 + "," + tmp[i];
+                }
+                includedPorjects.innerHTML = tmp1;
+                includedPorjects.style.display = "none";
+                customerdiv.appendChild(includedPorjects);
+                projectsArray = includedPorjects.innerHTML;
+                projectsArray = projectsArray.split(",");
+                requestredy = true;
+                includedPorjects.remove();
             }
-            includedPorjects.innerHTML = tmp1;
-            includedPorjects.style.display = "none";
-            customerdiv.appendChild(includedPorjects);
-            projectsArray = includedPorjects.innerHTML;
-            projectsArray = projectsArray.split(",");
-            includedPorjects.remove();
-            //customerdiv id geben
-            customerdiv.setAttribute('data-id', "" + counter);
+            customerdiv.setAttribute('data-memberId', ""+ counter);
             counter++;
+
         } else if (request.readyState === 4 && request.status === 403) {
             console.log("Forbidden");
+        } else if (request.readyState === 4 && request.status === 401) {
+            document.location = window.location.origin + "/design-revision/login/login.html";
         } else if (request.readyState === 4 && request.status === 404) {
             window.alert("Nichts gefunden");
         } else if (request1.readyState === 4 && request1.status === 400) {
             window.alert("Unbekannter AnfrageParameter");
         }
     };
+    let checkForprojects = setInterval(function () {
+        if (requestredy) {
+            clearInterval(checkForprojects);
+            projectid = projectsArray[counterForId];
+            //window.location als ersatz zu a da man sonst dedign ändern muss
+            let link = window.location.origin + "/design-revision/simulate/edit.php?id=" + projectid;
+            projektname.href = link;
+            //customerdiv id geben
+            customerdiv.setAttribute('data-id', "" + projectsArray[counterForId]);
+            ableNewProject = counterForId < projectsArray.length;
+            if (!ableNewProject) {
+                customerdiv.remove();
+            } else {
+                counterForId++;
+                requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectid;
+                request1.open('GET', requestURL, true);
+                request1.send();
+                request1.onreadystatechange = function () {
+                    //wir bekommen ein Jason Object
+                    if (request1.readyState === 4 && request1.status === 200) {
+                        let projectObejct = JSON.parse(request1.response);
+                        projektname.innerHTML = projectObejct.project.name;
+                        versionen.innerHTML = "Versionen: " + projectObejct.project.version;
+                        textStatus.innerHTML = projectObejct.project.status;
+                        let members1 = projectObejct.project.members;
+                        let search = projectObejct.project.name ;
+                        customerdiv.setAttribute('data-test', search);
+                        //members bekommen
+                        let help = members1[0].id;
+                        let helpRole = members1[0].role;
+                        let length = members1.length;
+                        for (let i = 1; i < length; i++) {
+                            help = help + "," + members1[i].id;
+                            helpRole = helpRole + "," + members1[i].role;
+                        }
+                        //members generieren
+                        members.innerHTML = help;
+                        members.style.display = "none";
+                        customerdiv.appendChild(members);
+                        arrayMember = members.innerHTML;
+                        arrayMember = arrayMember.split(",");
+                        //role generiern
+                        role.innerHTML = helpRole;
+                        role.style.display = "none";
+                        customerdiv.appendChild(role);
+                        arrayRole = role.innerHTML;
+                        arrayRole = arrayRole.split(",");
+                        members.remove();
+                        role.remove();
+                    } else if (request1.readyState === 4 && request1.status === 401) {
+                        customerdiv.remove();
+                        //window.alert("Nicht eingelogt");
+                        document.location = "../login/login.html";
+                    } else if (request1.readyState === 4 && request1.status === 403) {
+                        window.alert("Sie sind noch in keinem Projekt warten sie bis wir sie zu einem hinzufügen!");
+                        console.log("Forbidden");
+                    } else if (request1.readyState === 4 && request1.status === 404) {
+                        window.alert("Nichts gefunden");
+                    } else if (request1.readyState === 4 && request1.status === 400) {
+                        console.log("Unbekannter Anfrageparameter");
+                    }
+                };
+            }
+        }
+    }, 200);
+
+
     customerdiv.appendChild(clientname);
     //fertig
     customerdiv.appendChild(clientemail);
@@ -171,6 +209,13 @@ function generate() {
     //Abfrage ob der Kunden gelöscht werden kann
 
     customerdiv.onclick = function () {
+        let content = document.querySelectorAll('[data-memberid');
+        let arrayLength = content.length;
+        for (let i = 0; i <arrayLength ; i++) {
+            content[i].style.background = "white";
+            content[i].style.border = "4px solid black";
+        }
+
         if (select) {
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
@@ -194,7 +239,7 @@ function generate() {
         let btnAddMember = document.getElementById("btnAddMember");
         let projektErsellen = document.getElementById("projektErstellen");
         let projektName = document.getElementById("projectname");
-        let content = document.querySelectorAll('[data-id');
+        let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (doubleClickSelect) {
             for (let i = 0; i < arrayLength; i++) {
@@ -222,7 +267,7 @@ function generate() {
                 projektErsellen.innerHTML = "Projekt ändern";
                 customerdiv.style.background = "#FFFF99";
                 btnAddMember.onclick = function () {
-                    changeClientState(arrayMember, arrayRole, customerdiv.getAttribute("data-id"));
+                    changeClientState(arrayMember, arrayRole, customerdiv.getAttribute("data-memberid"));
                     customerdiv.style.background = "#FFFF99";
                 };
                 updateOrCreate = false;
@@ -257,7 +302,7 @@ function closeYes(members, content, arrayLength) {
     sendDelet(id);
     //Daten der Cusomer löschen
     for (let i = 0; i < arrayLength; i++) {
-        let help = content[i].getAttribute("data-email");
+        let help = content[i].getAttribute("data-id");
         if (members.includes(help)) {
             content[i].style.background = "white";
             content[i].lastChild.remove();
@@ -278,12 +323,13 @@ function closeNo() {
 function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
     let divForm = document.getElementById("form1");
     let loeschen = document.createElement("p");
-    let content = document.querySelectorAll('[data-email');
+    let content = document.querySelectorAll('[data-memberId');
     let arrayLength = content.length;
     let help;
     if (a) {
+        tmpClients=members;
         for (let i = 0; i < arrayLength; i++) {
-            help = content[i].getAttribute("data-email");
+            help = content[i].getAttribute("data-memberId");
             if (members.includes(help)) {
                 let help1 = members.indexOf(help);
                 if (role[help1] == 0) {
@@ -329,8 +375,8 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
         customerdiv1.style.border = "4px solid black";
         a = true;
         for (let i = 0; i < arrayLength; i++) {
-            help = content[i].getAttribute("data-email");
-            if (members.includes(help)) {
+            help = content[i].getAttribute("data-memberId");
+            if (tmpClients.includes(help)) {
                 content[i].style.background = "white";
                 content[i].lastChild.style.display = "none";
 
@@ -395,10 +441,16 @@ function showRes() {
 let readyStateCheckInterval = setInterval(function () {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
-        //generirt 3 User
-        for (let i = 0; i <= 10; i++) {
-            generate();
-        }
+        //generirt  User solange sie Projekte haben
+        let userInterval = setInterval(function () {
+            if (ableNewProject) {
+                generate();
+            } else {
+                clearInterval(userInterval);
+            }
+
+        }, 200);
+
         addMemberWithEmail();
         let projectName = document.getElementById("projectname");
         projectName.addEventListener("keyup", function () {
@@ -417,11 +469,11 @@ let readyStateCheckInterval = setInterval(function () {
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            if (sendFile === undefined ||nameLenght) {
+            if (sendFile === undefined || nameLenght) {
                 console.log(Error);
             } else {
-                let allRight=putArrayTogether();
-                if(allRight) {
+                let allRight = putArrayTogether();
+                if (allRight) {
                     if (updateOrCreate) {
                         sendNewProject();
                     } else {
@@ -477,6 +529,10 @@ let readyStateCheckInterval = setInterval(function () {
             sendFile = null;
         }
     });
+    setTimeout(function () {
+        document.getElementById('pageLoader').style.display = "none";
+    }, 1000);
+
 }, 10);
 
 //Drag and Drop
@@ -630,11 +686,12 @@ function addMember() {
 
 }
 
-function changeClientState(members, role,id) {
-    let content = document.querySelectorAll('[data-email');
+function changeClientState(members, role, id) {
+    let content = document.querySelectorAll('[data-memberId');
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
+    let helpArray=[];
     if (select) {
         if (a === false) {
             for (let i = 0; i < arrayLength; i++) {
@@ -648,12 +705,13 @@ function changeClientState(members, role,id) {
             //löschen nachricht verstecken
             let delet = document.getElementById("form1");
             //messageMember verstecken
-            if(boolStatus)
+            if (boolStatus)
                 delet.lastChild.style.display = "none";
             a = true;
         }
+
         for (let i = 0; i < arrayLength; i++) {
-            let help = content[i].getAttribute("data-email");
+            let help = content[i].getAttribute("data-memberId");
             if (members.includes(help)) {
                 let help1 = members.indexOf(help);
                 if (role[help1] == 0) {
@@ -664,11 +722,21 @@ function changeClientState(members, role,id) {
                 }
             }
         }
-        for (let i = 0; i < members.length; i++) {
-            let member = {"email": members[i], "role": role[i]};
-            jasonmembers.push(member);
+        let j=0;
+        for (let i = 0; i <content.length ; i++) {
+            if(members.includes(content[i].getAttribute("data-memberId"))){
+               helpArray[j]=content[i].getAttribute("data-email");
+                j++;
+            }
         }
 
+        for (let i = 0; i < members.length; i++) {
+            if(content.length>members[i]) {
+                let mail = helpArray[i];
+                let member = {"email": mail, "role": role[i]};
+                jasonmembers.push(member);
+            }
+        }
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < arrayLength; i++) {
             let buttonAdmin = document.createElement("button");
@@ -682,7 +750,7 @@ function changeClientState(members, role,id) {
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[j].email== email) {
+                        if (jasonmembers[j].email == email) {
                             jasonmembers[i].role = 1;
                             include = false;
                         }
@@ -708,7 +776,7 @@ function changeClientState(members, role,id) {
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
-                        if (jasonmembers[j].email== email) {
+                        if (jasonmembers[j].email == email) {
 
                             jasonmembers[i].role = 0;
                             include = false;
@@ -746,10 +814,10 @@ function changeClientState(members, role,id) {
                 parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
-            if(i==id){
-                buttonMember.style.display="none";
-                buttonAdmin.style.display="none";
-                buttonDeletMember.style.display="none"
+            if (i == id) {
+                buttonMember.style.display = "none";
+                buttonAdmin.style.display = "none";
+                buttonDeletMember.style.display = "none"
             }
             select = false;
         }
@@ -759,7 +827,7 @@ function changeClientState(members, role,id) {
         select = true;
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
-            content[i].style.border="4px solid black";
+            content[i].style.border = "4px solid black";
             content[i].lastChild.remove();
             content[i].lastChild.remove();
             content[i].lastChild.remove();
@@ -772,8 +840,8 @@ function changeClientState(members, role,id) {
 function sendNewProject() {
     let data = new FormData();
     let projectname = document.getElementById("projectname").value;
-    let progressBar = document.getElementById("progressBar");
-    let progressBarBorder = document.getElementById("progressBarBorder");
+    let progressBar = document.getElementById("loader");
+    let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
     console.log(tmpArray);
     let sendURL = window.location.origin + "/design-revision/api/";
@@ -786,19 +854,23 @@ function sendNewProject() {
     xhr.upload.addEventListener("progress", function (event) {
         if (event.lengthComputable) {
             let complete = (event.loaded / event.total * 100 | 0);
-            progressBarBorder.style.display = "block";
-            progressBar.style.width = "" + complete + "%";
-            progressBar.innerHTML = "" + complete + "%";
-
+            progressBar.style.display = "block";
+            percentage.style.display = "block";
+            percentage.innerHTML = complete + " %"
         }
     });
 
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-            //wartet 6 sekunden
+            let message = document.getElementById("sendFeedBack");
+            message.style.display = "block";
+            //wartet
             setTimeout(function () {
-                progressBarBorder.style.display = "none";
-            }, 4000);
+                message.style.display = "none";
+                progressBar.style.display = "none";
+                percentage.style.display = "none";
+                javascript:location.reload(true);
+            }, 1000);
 
             console.log(this.responseText);
         }
@@ -810,22 +882,20 @@ function sendNewProject() {
 
 function sendDelet(id) {
     let data = new FormData();
-    let sendURL = window.location.origin + "/design-revision/api/";
-    data.append("id", "project_b46f15c0");
-    console.log(data);
+    data.append("id", id);
+    console.log(id);
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
 
-    let settings = {
-        "url": sendURL,
-        "method": "DELETE",
-        "timeout": 0,
-        "processData": false,
-        "mimeType": "multipart/form-data",
-        "contentType": false,
-        "data": data
-    };
-    $.ajax(settings).done(function (response) {
-        console.log(response);
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+            console.log(this.responseText);
+        }
     });
+
+    xhr.open("DELETE", "http://localhost/design-revision/api/");
+
+    xhr.send(data);
 
 }
 
@@ -833,8 +903,8 @@ function sendDelet(id) {
 function sendUpdateProject() {
     let data = new FormData();
     let sendURL = window.location.origin + "/design-revision/api/";
-    let progressBar = document.getElementById("progressBar");
-    let progressBarBorder = document.getElementById("progressBarBorder");
+    let progressBar = document.getElementById("loader");
+    let percentage = document.getElementById("percentage");
     //Daten in Api sollten auf Member Array und File geändert werden
     data.append("updateproject", "addmember");
     data.append("id", "value");
@@ -844,21 +914,24 @@ function sendUpdateProject() {
     xhr.withCredentials = true;
 
     xhr.addEventListener("readystatechange", function () {
+        let message = document.getElementById("sendFeedBack");
+        message.style.display = "block";
         if (this.readyState === 4) {
             //wartet 6 sekunden
             setTimeout(function () {
-                progressBarBorder.style.display = "none";
-            }, 4000);
+                progressBar.style.display = "none";
+                message.style.display = "none";
+                percentage.style.display = "none";
+            }, 1000);
             console.log(this.responseText);
         }
     });
     xhr.upload.addEventListener("progress", function (event) {
         if (event.lengthComputable) {
             let complete = (event.loaded / event.total * 100 | 0);
-            progressBarBorder.style.display = "block";
-            progressBar.style.width = "" + complete + "%";
-            progressBar.innerHTML = "" + complete + "%";
-
+            progressBar.style.display = "block";
+            percentage.style.display = "block";
+            percentage.innerHTML = complete + " %";
         }
     });
 
@@ -966,9 +1039,9 @@ function putArrayTogether() {
     let messageRole = document.getElementById("messageRole");
     let allRight = true;
     let input = [];
-    let input1=[];
-    let helpSendArray=[];
-    for (let i = 0; i <sendArray.length ; i++) {
+    let input1 = [];
+    let helpSendArray = [];
+    for (let i = 0; i < sendArray.length; i++) {
         helpSendArray.push(sendArray[i]);
     }
     console.log(helpSendArray);
@@ -988,7 +1061,7 @@ function putArrayTogether() {
         if (!(duplicates.length < 1)) {
             message.innerHTML = "Zweimal gleiche E-Mail";
             allRight = false;
-        }else {
+        } else {
             for (let i = 0; i < sendArrayFields.length; i++) {
                 sendArray[i] = sendArrayFields[i];
             }
@@ -1008,10 +1081,10 @@ function putArrayTogether() {
 
         }
     } else {
-        for (let i = 0; i <sendArrayFields.length ; i++) {
+        for (let i = 0; i < sendArrayFields.length; i++) {
             helpSendArray.push(sendArrayFields[i])
         }
-        for (let i = 0; i <helpSendArray.length ; i++) {
+        for (let i = 0; i < helpSendArray.length; i++) {
             input1[i] = helpSendArray[i].email;
         }
         let duplicates = input1.reduce(function (acc, el, i, arr) {
@@ -1019,7 +1092,7 @@ function putArrayTogether() {
             return acc;
         }, []);
         //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
-        if (!(duplicates.length < 1)){
+        if (!(duplicates.length < 1)) {
             message.innerHTML = "Zweimal gleiche E-Mail";
             allRight = false;
 
@@ -1071,9 +1144,8 @@ function cleraForm() {
     for (let i = 0; i < content.length; i++) {
         content[i].remove();
     }
-    if(!select){
+    if (!select) {
         addMember();
     }
 
 }
-

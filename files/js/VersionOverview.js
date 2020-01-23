@@ -1,7 +1,5 @@
 let counter =1;
 let urlParameter;
-//nur zum Testen today
-let today = new Date();
 
 function generate() {
     let tableNummer =document.getElementById("tnummer");
@@ -11,7 +9,7 @@ function generate() {
     let link =document.createElement("p");
     let lastModified =document.createElement("p");
     // parameter übergabe  austehend
-    urlParameter=2;
+    urlParameter="20ced965";
    let requestURL = window.location.origin + "/design-revision/api/?getproject&id="+urlParameter;
    let request= new XMLHttpRequest();
     request.open('GET', requestURL, true);
@@ -19,13 +17,12 @@ function generate() {
     request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
             let obj = JSON.parse(request.response);
-            nummer.innerHTML=""+counter;
-            //link.href= obj.project.link;
+            nummer.innerHTML=obj.project.version;
             link.innerHTML="link.to/file"+counter;
             link.onclick=function(){
                 window.location=obj.project.link;
             };
-            lastModified.innerHTML=""+today.toLocaleString();
+            lastModified.innerHTML=obj.project.lastedit;
             counter++;
         } else if (request.readyState === 4 && request.status === 401) {
             console.log("Nicht eingelogt");
@@ -49,11 +46,10 @@ function generate() {
 let readyStateCheckInterval = setInterval(function() {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
-        for (let i = 0; i <6; i++) {
             generate();
             urlParameter=getURLParameter('id');
 
-        }
+
     }
 }, 10);
 
