@@ -6,10 +6,17 @@ function generate() {
     let tableLink =document.getElementById("tlink");
     let tableLastModified=document.getElementById("tZuletztBearbeitet");
     let nummer = document.createElement("p");
-    let link =document.createElement("p");
+    let link =document.createElement("a");
+    link.style.cursor = "pointer";
+    link.style.textDecoration = "none";
+   link.style.color = "black";
+    link.onmouseover = function () {
+        link.style.color = "lightgray";
+    };
+    link.onmouseout = function () {
+        link.style.color = "black";
+    };
     let lastModified =document.createElement("p");
-    // parameter übergabe  austehend
-    urlParameter="20ced965";
    let requestURL = window.location.origin + "/design-revision/api/?getproject&id="+urlParameter;
    let request= new XMLHttpRequest();
     request.open('GET', requestURL, true);
@@ -19,9 +26,7 @@ function generate() {
             let obj = JSON.parse(request.response);
             nummer.innerHTML=obj.project.version;
             link.innerHTML="link.to/file"+counter;
-            link.onclick=function(){
-                window.location=obj.project.link;
-            };
+            link.href= window.location.origin+"/design-revision/"+obj.project.link;
             lastModified.innerHTML=obj.project.lastedit;
             counter++;
         } else if (request.readyState === 4 && request.status === 401) {
@@ -46,8 +51,9 @@ function generate() {
 let readyStateCheckInterval = setInterval(function() {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
+        urlParameter=getURLParameter('id');
             generate();
-            urlParameter=getURLParameter('id');
+
 
 
     }

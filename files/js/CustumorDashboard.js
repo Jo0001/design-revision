@@ -43,9 +43,19 @@ function generate() {
     projektname.onmouseout = function () {
         projektname.style.color = "black";
     };
+
     let clientname = document.createElement("p");
     let clientemail = document.createElement("p");
-    let versionen = document.createElement("p");
+    let versionen = document.createElement("a");
+    versionen.style.cursor = "pointer";
+    versionen.style.textDecoration = "none";
+    versionen.style.color = "black";
+   versionen.onmouseover = function () {
+        versionen.style.color = "lightgray";
+    };
+   versionen.onmouseout = function () {
+        versionen.style.color = "black";
+    };
     let company = document.createElement("p");
     let statusDiv = document.createElement("div");
     let textStatus = document.createElement("p");
@@ -123,6 +133,7 @@ function generate() {
             //window.location als ersatz zu a da man sonst dedign ändern muss
             let link = window.location.origin + "/design-revision/simulate/edit.php?id=" + projectid;
             projektname.href = link;
+            versionen.href= window.location.origin +"/design-revision/app/VersionOverview.html?id="+projectid;
             //customerdiv id geben
             customerdiv.setAttribute('data-id', "" + projectsArray[counterForId]);
             ableNewProject = counterForId < projectsArray.length;
