@@ -243,8 +243,19 @@ function setup() {
     }
 }
 
+function resetAreaData(event) {
+    commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
+    commentArea.style.top = 10 + "px";
+    commentArea.style.left = 10 + "px";
+    commentArea.style.width = 10 + "px";
+    commentArea.style.height = 10 + "px";
+    commentArea.style.display = "none";
+    preventZoomAndMovement = false;
+}
+
 function startDragHandler(event) {
-    event = event || window.event; // IE-ism
+    event = event || window.event;
+    // IE-ism
     event.preventDefault();
     if (event.button === 0) {
         preventZoomAndMovement = true;
@@ -257,12 +268,12 @@ function startDragHandler(event) {
         commentArea.style.width = 0 + "px";
         commentArea.style.height = 0 + "px";
         commentArea.style.display = "inherit";
-        commentContainer.addEventListener("mousemove", resizeCommentArea);
+        document.addEventListener("mousemove", resizeCommentArea);
     }
 }
 
 function endDragHandler(event) {
-    commentContainer.removeEventListener("mousemove", resizeCommentArea);
+    document.removeEventListener("mousemove", resizeCommentArea);
     event = event || window.event; // IE-ism
     event.preventDefault();
     if (event.button === 0) {
@@ -278,14 +289,7 @@ function endDragHandler(event) {
                 createComment(commentArea);
             }
         }
-
-        commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
-        commentArea.style.top = 10 + "px";
-        commentArea.style.left = 10 + "px";
-        commentArea.style.width = 10 + "px";
-        commentArea.style.height = 10 + "px";
-        commentArea.style.display = "none";
-        preventZoomAndMovement = false;
+        resetAreaData(undefined);
     }
 }
 
@@ -307,8 +311,20 @@ function ensureEventAttributes(event) {
 }
 
 function resizeCommentArea(event) {
+    ensureEventAttributes(event);
+    //check if mouse is over canvas
+    let clientWidth = (parseFloat(canvas.style.left.replace("px", "")) + parseFloat(canvas.style.width.replace("px", "")));
+    let clientHeight = (parseFloat(canvas.style.left.replace("px", "")) + parseFloat(canvas.style.width.replace("px", "")));
+    if (event.pageX <= (canvas.style.left.replace("px", "")) ||
+        event.pageX >= clientWidth) {
+        resetAreaData(undefined);
+    }
+    if (event.pageY <= (canvas.style.top.replace("px", "")) ||
+        event.pageY >= clientHeight) {
+        resetAreaData(undefined);
+    }
+
     if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
-        ensureEventAttributes(event);
         let eventXRelativeCanvas = (event.pageX - parseInt(canvas.style.left.replace("px", "")));
         let eventYRelativeCanvas = (event.pageY - parseInt(canvas.style.top.replace("px", "")));
         let width = (eventXRelativeCanvas - commentAreaData.sX);
