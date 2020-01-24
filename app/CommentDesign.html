@@ -8,23 +8,37 @@
 </head>
 <body>
 <!-- The pdf.js library and controls-->
-<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.js"></script>
 <script defer src="../files/js/renderScript.js"></script>
+<div id="titleBar">
+    <p id="titleCard">Designvorschlag für /</p>
+</div>
 <canvas id="pdf" style="top: 20px; left: 10px;"></canvas>
 <!--<div id="pdf" style="top: 20px; left: 10px;"></div>-->
 <div id="commentContainer" style="top: 20px; left: 10px;">
-    <div id="commentArea"
-         style="display: none; width: 10px; height: 10px; z-index: -3;"></div>
+    <div id="commentArea" style="display: none; width: 10px; height: 10px; z-index: -3;"></div>
 </div>
-
-<div id="titlebar">
-    <h1 id="titlecard">Designvorschlag für /</h1>
 </div>
-<div id="toolbox">
+<div class="toolbox" style="top: 43%;">
     <button id="createComment" style="left: 40px; right: 40px;">Kommentarmodus einschalten</button>
 </div>
-<div id="lowbar" style="right: 20px; left: 20px;">
-    <div id="loading" style="right: 25px; left: 25px; width: 10px;"></div>
+<div class="lowerBar">
+    <button class="button" style=" left: 42%;">-</button>
+    <label>
+        <input class="textField" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+               style="left: 44%; margin-left: 20px; "
+               type="text" value="101"/>
+    </label>
+    <p class="pageNumField">von</p>
+    <label>
+        <input class="textField" onkeypress="return event.charCode >= 48 && event.charCode <= 57" readonly
+               style="right: 44%; margin-right: 20px;" type="text"
+               value="999"/>
+    </label>
+    <button class="button" style="right: 42%;">+</button>
+    <div id="loadingBar" style="right: 20px; left: 20px;">
+        <div id="loading" style="right: 25px; left: 25px; width: 10px;"></div>
+    </div>
 </div>
 </body>
 </html>

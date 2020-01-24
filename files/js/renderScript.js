@@ -2,13 +2,13 @@
 // Loaded via <script> tag, create shortcut to access PDF.js exports.
 let pdfjsLib = window['pdfjs-dist/build/pdf'];
 // The workerSrc property shall be specified.
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.worker.js';
 
 class TargetScaleHandlerClass {
     constructor() {
         this.isScalingATM = false;
         this.innerTargetScale = 1;
-        this.scale = 0.9;
+        this.scale = 1;
         this.handlerId = -1;
         this.round = function round(num) {
             return parseFloat(num + "").toFixed(6);
@@ -18,14 +18,14 @@ class TargetScaleHandlerClass {
             this.scale = this.round(this.scale);
             this.innerTargetScale = this.round(this.innerTargetScale);
             if (this.scale > this.innerTargetScale && !preventZoomAndMovement) {
+                this.isScalingATM = true;
                 this.scale = parseFloat(this.scale + "") - 0.01;
                 this.scale = this.round(this.scale);
-                this.isScalingATM = true;
                 renderPageFromPdf(this.scale);
             } else if (this.scale < this.innerTargetScale && !preventZoomAndMovement) {
+                this.isScalingATM = true;
                 this.scale = parseFloat(this.scale + "") + 0.01;
                 this.scale = this.round(this.scale);
-                this.isScalingATM = true;
                 renderPageFromPdf(this.scale);
             } else if (this.scale === this.innerTargetScale && !preventZoomAndMovement) {
                 if (this.handlerId > 0) {
@@ -53,8 +53,10 @@ class TargetScaleHandlerClass {
     set targetScale(val) {
         if (val < 0.4) {
             this.innerTargetScale = 0.4;
+        } else if (val > 4.5) {
+            this.innerTargetScale = 4.5;
         } else {
-            this.innerTargetScale = val;
+            this.innerTargetScale = this.round(val);
         }
         this.updateScale();
     };
@@ -123,7 +125,7 @@ function setup() {
     commentContainer = document.getElementById('commentContainer');
     commentContainerObserver.observe(commentContainer, {attributes: true});
     redirectAllEvents(canvas, commentContainer);
-    let titlecard = document.getElementById("titlecard");
+    let titleCard = document.getElementById("titleCard");
     let createCommentBtn = document.getElementById("createComment");
     createCommentBtn.addEventListener("click", function (e) {
         commentMode = !commentMode;
@@ -149,16 +151,9 @@ function setup() {
     request.open('GET', requestURL);
     request.send();
     request.addEventListener('readystatechange', function (e) {
-        if (this.readyState === 4 && this.status === 200) {
-            let projectContainer = JSON.parse(this.response);
-            titlecard.innerText = titlecard.innerHTML.replace("/", projectContainer.project.name);
-        } else if (this.readyState === 4 && this.status === 401) {
-            window.alert("keine Berechtigung");
-        } else if (this.readyState === 4 && this.status === 403) {
-            window.alert("Forbidden");
-        } else if (this.readyState === 4 && this.status === 404) {
-            window.alert("Nichts gefunden");
-        }
+        handleServerResponse(request, function (response) {
+            titleCard.innerText = titleCard.innerHTML.replace("/", response.project.name);
+        });
     });
 
     //Json PDF aus Api hohlen
@@ -167,17 +162,10 @@ function setup() {
     request2.open('GET', requestURL);
     request2.send();
     request2.addEventListener('readystatechange', function (e) {
-        if (this.readyState === 4 && this.status === 200) {
-            let projectObject = JSON.parse(this.response);
-            //pdfFileOrUrl = projectObject.link;
+        handleServerResponse(request2, function (response) {
+            //pdfFileOrUrl = response.link;
             loadPDFAndRender(1, pdfFileOrUrl);
-        } else if (this.readyState === 4 && this.status === 401) {
-            window.alert("keine Berechtigung");
-        } else if (this.readyState === 4 && this.status === 403) {
-            window.alert("Forbidden");
-        } else if (this.readyState === 4 && this.status === 404) {
-            window.alert("Nichts gefunden");
-        }
+        });
     });
 
     function dragElementWhenBtnIsDown(element, btn) {
@@ -227,7 +215,7 @@ function setup() {
         event.preventDefault();
         let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
         if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-            if (event.deltaY < 0) {
+            if (event.deltaY <= 0) {
                 targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
             } else {
                 targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
@@ -243,7 +231,19 @@ function setup() {
     }
 }
 
-function resetAreaData(event) {
+function handleServerResponse(request, successCallback) {
+    if (request.readyState === 4 && request.status === 200) {
+        successCallback(JSON.parse(request.response));
+    } else if (request.readyState === 4 && request.status === 401) {
+        window.alert("keine Berechtigung");
+    } else if (request.readyState === 4 && request.status === 403) {
+        window.alert("Forbidden");
+    } else if (request.readyState === 4 && request.status === 404) {
+        window.alert("Nichts gefunden");
+    }
+}
+
+function resetAreaData() {
     commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
     commentArea.style.top = 10 + "px";
     commentArea.style.left = 10 + "px";
@@ -289,13 +289,16 @@ function endDragHandler(event) {
                 createComment(commentArea);
             }
         }
-        resetAreaData(undefined);
+        resetAreaData();
     }
 }
 
 function ensureEventAttributes(event) {
     // If pageX/Y aren't available and clientX/Y are,
     // calculate pageX/Y - logic taken from jQuery.
+    let eventDoc;
+    let doc;
+    let body;
     if (event.pageX == null && event.clientX != null) {
         eventDoc = (event.target && event.target.ownerDocument) || document;
         doc = eventDoc.documentElement;
@@ -317,11 +320,11 @@ function resizeCommentArea(event) {
     let clientHeight = (parseFloat(canvas.style.left.replace("px", "")) + parseFloat(canvas.style.width.replace("px", "")));
     if (event.pageX <= (canvas.style.left.replace("px", "")) ||
         event.pageX >= clientWidth) {
-        resetAreaData(undefined);
+        resetAreaData();
     }
     if (event.pageY <= (canvas.style.top.replace("px", "")) ||
         event.pageY >= clientHeight) {
-        resetAreaData(undefined);
+        resetAreaData();
     }
 
     if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
@@ -357,38 +360,33 @@ function createComment(commentArea) {
     let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
     let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
 
-    let commment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
+    let comment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
         "Somebody", "Message....");
-    comments.push(commment);
+    comments.push(comment);
     //TODO upload Data to API
 
     let commentDiv = document.createElement("div");
-    commentDiv.setAttribute("id", "comment" + comments.indexOf(commment));
-    commentDiv.style.position = "absolute";
-    commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
-    commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
-    commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
-    commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
-    commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
-    commentDiv.style.borderRadius = "3px";
-    commentDiv.style.outlineStyle = "outset";
-    commentDiv.style.outlineColor = "rgb(250, 0, 0)";
+    commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
+    setCommentAttributes(commentDiv, comment);
     commentContainer.appendChild(commentDiv);
+}
+
+function setCommentAttributes(commentDiv, comment) {
+    commentDiv.style.position = "absolute";
+    commentDiv.style.left = (comment.x * canvas.getAttribute("width")) + "px";
+    commentDiv.style.top = (comment.y * canvas.getAttribute("height")) + "px";
+    commentDiv.style.width = (comment.w * canvas.getAttribute("width")) + "px";
+    commentDiv.style.height = (comment.h * canvas.getAttribute("height")) + "px";
+    commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
+    commentDiv.style.outlineStyle = "outset";
+    commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
 }
 
 function resizeComments() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
-        let commment = comments[index];
-        commentDiv.style.position = "absolute";
-        commentDiv.style.left = (commment.x * canvas.getAttribute("width")) + "px";
-        commentDiv.style.top = (commment.y * canvas.getAttribute("height")) + "px";
-        commentDiv.style.width = (commment.w * canvas.getAttribute("width")) + "px";
-        commentDiv.style.height = (commment.h * canvas.getAttribute("height")) + "px";
-        commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
-        commentDiv.style.borderRadius = "3px";
-        commentDiv.style.outlineStyle = "outset";
-        commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
+        let comment = comments[index];
+        setCommentAttributes(commentDiv, comment);
     }
 }
 
@@ -410,7 +408,7 @@ function redirectAllEvents(target, fromElement) {
 
 function displayProgressOnBar() {
     let loadingBar = document.getElementById("loading");
-    let lowBar = document.getElementById("lowbar");
+    let lowBar = document.getElementById("loadingBar");
     let marginRight = (loadingBar.style.right.replace("px", "") - lowBar.style.right.replace("px", ""));
     let marginLeft = (loadingBar.style.left.replace("px", "") - lowBar.style.left.replace("px", ""));
     loadingBar.style.width = percentLoaded * (lowBar.clientWidth - marginRight - marginLeft) + "px";
