@@ -31,6 +31,9 @@ function generate() {
     let requestredy = false;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
+    if(counter===0){
+        customerdiv.style.marginTop="11.5%";
+    }
     let statusImg = document.createElement("img");
     let projektname = document.createElement("a");
     projektname.style.cursor = "pointer";
@@ -461,6 +464,7 @@ let readyStateCheckInterval = setInterval(function () {
             }
 
         }, 200);
+
 
         addMemberWithEmail();
         let projectName = document.getElementById("projectname");
@@ -903,7 +907,7 @@ function sendDelet(id) {
         }
     });
 
-    xhr.open("DELETE", "http://localhost/design-revision/api/");
+    xhr.open("DELETE",  window.location.origin + "/design-revision/api/");
 
     xhr.send(data);
 

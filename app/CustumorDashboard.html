@@ -10,26 +10,25 @@
 
 </head>
 <body>
-<div class="topimg">
-    <img alt="tick" height="100" src="../files/img/logo.png"
-         style="float: left"
-         width="100">
+<div class="topDivs">
+        <img alt="tick" height="100%" src="../files/img/logo.png"
+             style="float: left"
+             width="100">
     <div id="pageLoader"></div>
+        <a href="../login/login.php?logout">Log Out</a>
+        <form enctype="multipart/form-data" id="search1">
+            <label>
+                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname" required
+                       type="text">
+            </label>
+        </form>
 </div>
-<div class="topform">
-    <a href="../login/login.php?logout">Log Out</a>
-    <form enctype="multipart/form-data" id="search1">
-        <label>
-            <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname" required type="text">
-        </label>
-    </form>
-</div>
-<div class="space"></div>
+
 <div class="form" id="form1">
     <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
         <label>
-            <input id="projectname" name="projectname" placeholder="Projektname" type="text" required>
+            <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
         </label><br>
         <span id="nameToLong"></span><br>
         <span id="emailSpan">
@@ -41,8 +40,8 @@
                 <option value="Member">Member</option>
                 <option value="Admin">Admin</option>
             </select></span>
-            <span id="messageRole"></span><br><span id="messageEmail"></span><br>
-            <span id="messageDoubleSelected"></span>
+        <span id="messageRole"></span><br><span id="messageEmail"></span><br>
+        <span id="messageDoubleSelected"></span>
         <input onclick="addEmailField()"
                style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:25px;border: none;cursor: pointer"
                type="button" value="Weiterer Nutzer auswählen"/>
