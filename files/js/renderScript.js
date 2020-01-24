@@ -21,12 +21,12 @@ class TargetScaleHandlerClass {
                 this.isScalingATM = true;
                 this.scale = parseFloat(this.scale + "") - 0.01;
                 this.scale = this.round(this.scale);
-                renderPageFromPdf(this.scale);
+                renderIfReady(this.scale);
             } else if (this.scale < this.innerTargetScale && !preventZoomAndMovement) {
                 this.isScalingATM = true;
                 this.scale = parseFloat(this.scale + "") + 0.01;
                 this.scale = this.round(this.scale);
-                renderPageFromPdf(this.scale);
+                renderIfReady(this.scale);
             } else if (this.scale === this.innerTargetScale && !preventZoomAndMovement) {
                 if (this.handlerId > 0) {
                     clearInterval(this.handlerId);
@@ -34,7 +34,7 @@ class TargetScaleHandlerClass {
                     //console.log("Removed Listener. " + this.handlerId + " " + (this.scale === this.innerTargetScale) + " " + this.scale + " " + this.innerTargetScale);
                     this.handlerId = -1;
                     this.scale = this.round(this.scale);
-                    renderPageFromPdf(this.scale);
+                    renderIfReady(this.scale);
                 } else {
                     console.log("We should not get here ever.")
                 }
@@ -61,6 +61,7 @@ class TargetScaleHandlerClass {
         this.updateScale();
     };
 }
+
 class Comment {
     constructor(page, x, y, w, h, authorId, commentText) {
         this.page = page;
@@ -74,6 +75,7 @@ class Comment {
 }
 
 //Rendering-Variables
+let canvas;
 let pdf;
 let pdfPage = undefined;
 let pdfFileOrUrl = "../user-content/test4.pdf";
@@ -82,8 +84,9 @@ let pdfPageNumber = 101;
 let isRendering = false;
 let firstTimeDisplay = true;
 let preventZoomAndMovement = false;
+let context;
 //Comment-Variables
-let canvas;
+
 let commentArea;
 let commentContainer;
 let comments = [];
@@ -108,6 +111,16 @@ let percentLoaded;
 
 
 function setup() {
+    let myRequestAnimationFrame = window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 10);
+        };
+    window.requestAnimationFrame = myRequestAnimationFrame;
+    pdfjsLib.disableStream = true;
     //Prevent a contextmenu on page, so people cant download the design.
     document.body.addEventListener("contextmenu", function (e) {
         e.preventDefault();
@@ -121,6 +134,7 @@ function setup() {
     canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
     dragElementWhenBtnIsDown(canvas, 1);
+    context = canvas.getContext('2d');
 
     commentContainer = document.getElementById('commentContainer');
     commentContainerObserver.observe(commentContainer, {attributes: true});
@@ -435,59 +449,64 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
 function loadPdfPage(scale) {
     pdf.getPage(pdfPageNumber).then(function (localPage) {
         pdfPage = localPage;
-        renderPageFromPdf(scale);
+        renderIfReady(scale);
     });
 }
 
-function renderPageFromPdf(scale) {
+function renderIfReady(scale) {
     if (!isRendering) {
         isRendering = true;
-        let context = canvas.getContext('2d');
-        let viewport = pdfPage.getViewport({scale: scale});
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        let renderTask = pdfPage.render({
-            canvasContext: context,
-            viewport: viewport
-        });
-        renderTask.promise.then(function () {
-            isRendering = false;
-            if (firstTimeDisplay) {
-                firstTimeDisplay = false;
-                canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
-                canvas.style.top = "100px";
-            }
-        });
-        canvas.style.height = canvas.height + "px";
-        canvas.style.width = canvas.width + "px";
-        /* SVG-Rendering-Code but not all Graphic
-        Sates have been implemented in the library + convas needs to be div
-        let viewport = pdfPage.getViewport({scale: scale});
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        canvas.style.height = viewport.height + 'px';
-        canvas.style.width = viewport.width + 'px';
-        //Make sure Div is clean
-        while (canvas.firstChild) {
-            canvas.removeChild(canvas.firstChild);
-        }
-        pdfPage.getOperatorList()
-            .then(function (opList) {
-                let svgGfx = new pdfjsLib.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
-                return svgGfx.getSVG(opList, viewport);
-            })
-            .then(function (svg) {
-                canvas.appendChild(svg);
-            })
-            .then(function () {
+        renderPageFromPdf(scale);
+
+        function renderPageFromPdf(scale) {
+            let viewport = pdfPage.getViewport({scale: scale});
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.style.height = viewport.height + "px";
+            canvas.style.width = viewport.width + "px";
+
+            let renderTask = pdfPage.render({
+                canvasContext: context,
+                viewport: viewport
+            });
+            renderTask.promise.then(function () {
                 isRendering = false;
-                    if (firstTimeDisplay) {
-                        firstTimeDisplay = false;
-                        canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
-                        canvas.style.top = "100px";
-                    }
-            });*/
+                if (firstTimeDisplay) {
+                    firstTimeDisplay = false;
+                    canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
+                    canvas.style.top = "100px";
+                }
+            });
+            /* SVG-Rendering-Code but not all Graphic
+            Sates have been implemented in the library + convas needs to be div
+            let viewport = pdfPage.getViewport({scale: scale});
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            canvas.style.height = viewport.height + 'px';
+            canvas.style.width = viewport.width + 'px';
+            //Make sure Div is clean
+            while (canvas.firstChild) {
+                canvas.removeChild(canvas.firstChild);
+            }
+            pdfPage.getOperatorList()
+                .then(function (opList) {
+                    let svgGfx = new pdfjsLib.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
+                    return svgGfx.getSVG(opList, viewport);
+                })
+                .then(function (svg) {
+                    canvas.appendChild(svg);
+                })
+                .then(function () {
+                    isRendering = false;
+                        if (firstTimeDisplay) {
+                            firstTimeDisplay = false;
+                            canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
+                            canvas.style.top = "100px";
+                        }
+                });*/
+        }
     }
+
 }
 
 let readyStateCheckInterval = setInterval(function () {
