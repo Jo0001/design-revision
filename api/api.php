@@ -157,13 +157,16 @@ function createProject()
                 $statement = $pdo->prepare("SELECT email FROM `users` ");
                 $statement->execute();
                 $tmpmails = $statement->fetchAll();
-                //Create a one dimensional array with all email from the db
+                //Create a one dimensional array with all emails from the db
                 $useremails = array();
                 foreach ($tmpmails as $tmp) {
                     array_push($useremails, $tmp['email']);
                 }
                 //convert json post to php array format
                 $members = json_decode($members, true);
+
+                //Remove all double entrys from the array
+                $members = array_unique($members);
 
                 $memberids = array();
 
@@ -174,6 +177,10 @@ function createProject()
                 //add current user (as admin)
                 $userid = getUser('pk_id');
                 array_push($memberids, array("id" => (int)$userid, "role" => 1));
+                updateUserProjects($pdo, $userid, $pid);
+
+                //Converts everything to lowercase
+                $members = array_map('nestedLowercase', $members);
 
                 foreach ($useremails as $tmp) {
                     //check if user has an account
@@ -182,15 +189,8 @@ function createProject()
                         //get array with all roles and emails as index and select the one equal to the current email and save it
                         $role = array_column($members, 'role', 'email')[$tmp];
                         array_push($memberids, array("id" => (int)$id, "role" => $role));
-                        //fetch all projectdata of the user
-                        $statement = $pdo->prepare("SELECT projects FROM `users` WHERE pk_id = ? ");
-                        $statement->execute(array($id));
-                        $tmpprojects = json_decode($statement->fetch()[0]);
 
-                        //and save the new project to the user
-                        array_push($tmpprojects, $pid);
-                        $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
-                        $statement->execute(array(json_encode($tmpprojects), $id));
+                        updateUserProjects($pdo, $id, $pid);
 
                         $statement = $pdo->prepare("SELECT name FROM `users` WHERE pk_id = ?");
                         $statement->execute(array($id));
@@ -365,4 +365,28 @@ function emailToId($email)
     $statement->execute(array($email));
     $tmpid = $statement->fetch();
     return $tmpid[0];
+}
+
+//Converts a 2 dimensional array to lowercase
+function nestedLowercase($value)
+{
+    if (is_array($value)) {
+        return array_map('nestedLowercase', $value);
+    }
+    return strtolower($value);
+}
+
+//$id => Userid, $pid => project id
+function updateUserProjects($pdo, $id, $pid)
+{
+    //fetch all projectdata of the user
+    $statement = $pdo->prepare("SELECT projects FROM `users` WHERE pk_id = ? ");
+    $statement->execute(array($id));
+    $tmpprojects = json_decode($statement->fetch()[0]);
+
+    //and save the new project to the user
+    array_push($tmpprojects, $pid);
+    $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
+    $statement->execute(array(json_encode($tmpprojects), $id));
+
 }
