@@ -1,17 +1,22 @@
 let counter =1;
 let urlParameter;
-//nur zum Testen today
-let today = new Date();
 
 function generate() {
     let tableNummer =document.getElementById("tnummer");
     let tableLink =document.getElementById("tlink");
     let tableLastModified=document.getElementById("tZuletztBearbeitet");
     let nummer = document.createElement("p");
-    let link =document.createElement("p");
+    let link =document.createElement("a");
+    link.style.cursor = "pointer";
+    link.style.textDecoration = "none";
+   link.style.color = "black";
+    link.onmouseover = function () {
+        link.style.color = "lightgray";
+    };
+    link.onmouseout = function () {
+        link.style.color = "black";
+    };
     let lastModified =document.createElement("p");
-    // parameter übergabe  austehend
-    urlParameter=2;
    let requestURL = window.location.origin + "/design-revision/api/?getproject&id="+urlParameter;
    let request= new XMLHttpRequest();
     request.open('GET', requestURL, true);
@@ -19,13 +24,10 @@ function generate() {
     request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
             let obj = JSON.parse(request.response);
-            nummer.innerHTML=""+counter;
-            //link.href= obj.project.link;
+            nummer.innerHTML=obj.project.version;
             link.innerHTML="link.to/file"+counter;
-            link.onclick=function(){
-                window.location=obj.project.link;
-            };
-            lastModified.innerHTML=""+today.toLocaleString();
+            link.href= window.location.origin+"/design-revision/"+obj.project.link;
+            lastModified.innerHTML=obj.project.lastedit;
             counter++;
         } else if (request.readyState === 4 && request.status === 401) {
             console.log("Nicht eingelogt");
@@ -49,11 +51,11 @@ function generate() {
 let readyStateCheckInterval = setInterval(function() {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
-        for (let i = 0; i <6; i++) {
+        urlParameter=getURLParameter('id');
             generate();
-            urlParameter=getURLParameter('id');
 
-        }
+
+
     }
 }, 10);
 

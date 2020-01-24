@@ -8,10 +8,11 @@ body {
 .form {
     border-radius: 30px;
     position: fixed;
-    margin-left: 70%;
+    margin-top: -8%;
+    margin-left: 83%;
     background: #0cfad6;
-    width: 30%;
-    transform: scale(0.6);
+    width: 20%;
+    transform: scale(0.7);
 
 }
 
@@ -149,10 +150,9 @@ body {
 }
 
 .image-preview{
-    width: 300px;
+    width: 100%;
     min-height: 100px;
     border: 2px solid #dddddd;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -190,4 +190,82 @@ dialog[open="open"] {
     padding: 10px 20px;
     border: none;
     cursor: pointer
+}
+.sendFeedBack{
+    display: none;
+    border: 4px solid black;
+    position: fixed;
+    background-color: white;
+    z-index: 500;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 10%;
+    text-align: center;
+}
+
+#loader {
+    position: relative;
+    z-index: 1;
+    margin-left: 40%;
+    display: none;
+    border: 16px solid rgba(209, 246, 254, 0.63);
+    border-radius: 50%;
+    border-top: 16px solid #11db0f;
+    width: 40px;
+    height: 40px;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+}
+#percentage{
+    -webkit-animation: invertspin 1s linear infinite;
+    animation: invertspin 1s linear infinite;
+}
+#pageLoader {
+    position: relative;
+    z-index: 1;
+   float: right;
+    margin-top: 2%;
+    border: 16px solid rgba(209, 246, 254, 0.63);
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 40px;
+    height: 40px;
+    -webkit-animation: spin 1s linear infinite;
+    animation: spin 1s linear infinite;
+}
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+@-webkit-keyframes invertspin {
+    100% {
+        -webkit-transform: rotate(0deg);
+    }
+    0% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes invertspin {
+    100% {
+        transform: rotate(0deg);
+    }
+    0% {
+        transform: rotate(360deg);
+    }
 }
