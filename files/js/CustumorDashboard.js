@@ -892,8 +892,7 @@ function sendNewProject() {
 }
 
 function sendDelet(id) {
-    let data = new FormData();
-    data.append("id", id);
+    let data ="id="+id;
     console.log(id);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;

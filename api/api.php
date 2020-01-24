@@ -388,5 +388,4 @@ function updateUserProjects($pdo, $id, $pid)
     array_push($tmpprojects, $pid);
     $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
     $statement->execute(array(json_encode($tmpprojects), $id));
-
 }
