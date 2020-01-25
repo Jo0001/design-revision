@@ -108,15 +108,12 @@ let targetScaleHandler = new TargetScaleHandlerClass();
 let pdfPageNumber;
 let isRendering = false;
 let firstTimeDisplay = true;
-let preventZoomAndMovement = false;
 let context;
+let preventZoomAndMovement = false;
 let viewport;
 //Comment-Variables
-let commentArea;
 let commentContainer;
 let comments = [];
-let commentMode = false;
-let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
 let canvasObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutationRecord) {
         let attribute = canvas.getAttribute(mutationRecord.attributeName);
@@ -137,7 +134,7 @@ let percentLoaded;
 let decPage;
 let incPage;
 
-function setup() {
+function setupViewport() {
     //Prevent a contextmenu on page, so people cant download the design.
     document.body.addEventListener("contextmenu", function (e) {
         e.preventDefault();
@@ -146,13 +143,11 @@ function setup() {
     //Rescale Loading bar so we cant get over 100%
     window.addEventListener('resize', displayProgressOnBar);
     //Get dom elements
-    commentArea = document.getElementById('commentArea');
     pdfPageNumber = document.getElementById("currentPage");
     decPage = document.getElementById("decPage");
     incPage = document.getElementById("incPage");
     canvas = document.getElementById('pdf');
     let titleCard = document.getElementById("titleCard");
-    let createCommentBtn = document.getElementById("createComment");
 
     //Turn-Page-Logic
     pdfPageNumber.addEventListener("click", function () {
@@ -184,19 +179,6 @@ function setup() {
     commentContainer = document.getElementById('commentContainer');
     commentContainerObserver.observe(commentContainer, {attributes: true});
     redirectAllEvents(canvas, commentContainer);
-    createCommentBtn.addEventListener("click", function (e) {
-        commentMode = !commentMode;
-        if (commentMode) {
-            //COMMENTMODE ON
-            createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
-            canvas.addEventListener("mousedown", startDragHandler, false);
-            canvas.addEventListener("mouseup", endDragHandler, false);
-        } else {
-            createCommentBtn.innerHTML = "Kommentarmodus einschalten";
-            canvas.removeEventListener("mousedown", startDragHandler, false);
-            canvas.removeEventListener("mouseup", endDragHandler, false);
-        }
-    });
 
     //Demo-Data
     let projectId = getURLParameter('id');
@@ -265,6 +247,7 @@ function setup() {
             }
         }
     }
+
     function listenForMouseWheelTurn(e) {
         let event = window.event || e;
         event.preventDefault();
@@ -320,52 +303,7 @@ function setup() {
     }
 }
 
-function resetAreaData() {
-    commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
-    commentArea.style.top = 10 + "px";
-    commentArea.style.left = 10 + "px";
-    commentArea.style.width = 10 + "px";
-    commentArea.style.height = 10 + "px";
-    commentArea.style.display = "none";
-    preventZoomAndMovement = false;
-}
-function startDragHandler(event) {
-    event = event || window.event; // IE-ism
-    event.preventDefault();
-    if (event.button === 0) {
-        preventZoomAndMovement = true;
-        ensureEventAttributes(event);
-        commentAreaData.sX = event.pageX - parseInt(commentContainer.style.left.replace("px", ""));
-        commentAreaData.sY = event.pageY - parseInt(commentContainer.style.top.replace("px", ""));
 
-        commentArea.style.top = parseInt(commentAreaData.sY) + "px";
-        commentArea.style.left = parseInt(commentAreaData.sX) + "px";
-        commentArea.style.width = 1 + "px";
-        commentArea.style.height = 1 + "px";
-        commentArea.style.display = "inherit";
-        document.addEventListener("mousemove", resizeCommentArea);
-    }
-}
-function endDragHandler(event) {
-    document.removeEventListener("mousemove", resizeCommentArea);
-    event = event || window.event; // IE-ism
-    event.preventDefault();
-    if (event.button === 0) {
-        ensureEventAttributes(event);
-        commentAreaData.eX = event.pageX - parseFloat(commentContainer.style.left.replace("px", ""));
-        commentAreaData.eY = event.pageY - parseFloat(commentContainer.style.top.replace("px", ""));
-        commentAreaData.widthPdf = parseFloat(commentContainer.style.width.replace("px", ""));
-        commentAreaData.heightPdf = parseFloat(commentContainer.style.height.replace("px", ""));
-
-        if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
-            commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
-            if (commentAreaData.sX !== commentAreaData.eX && commentAreaData.sY !== commentAreaData.eY) {
-                createComment(commentArea);
-            }
-        }
-        resetAreaData();
-    }
-}
 function ensureEventAttributes(event) {
     // If pageX/Y aren't available and clientX/Y are,
     // calculate pageX/Y - logic taken from jQuery.
@@ -386,70 +324,7 @@ function ensureEventAttributes(event) {
     }
 }
 
-function resizeCommentArea(event) {
-    event = event || window.event; // IE-ism
-    event.preventDefault();
-    ensureEventAttributes(event);
-    //check if mouse is over canvas
-    let clientWidth = (parseFloat(commentContainer.style.left.replace("px", "")) + parseFloat(commentContainer.style.width.replace("px", "")));
-    let clientHeight = (parseFloat(commentContainer.style.top.replace("px", "")) + parseFloat(commentContainer.style.height.replace("px", "")));
-    if (event.pageX <= (commentContainer.style.left.replace("px", "")) ||
-        event.pageX >= clientWidth || event.pageY <= (commentContainer.style.top.replace("px", "")) ||
-        event.pageY >= clientHeight) {
-        resetAreaData();
-    }
-    let eventXRelativeCanvas = (event.pageX - parseFloat(commentContainer.style.left.replace("px", "")));
-    let eventYRelativeCanvas = (event.pageY - parseFloat(commentContainer.style.top.replace("px", "")));
-    let width = (eventXRelativeCanvas - commentAreaData.sX);
-    let height = (eventYRelativeCanvas - commentAreaData.sY);
-    if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
-        if (commentAreaData.sX !== eventXRelativeCanvas && commentAreaData.sY !== eventYRelativeCanvas) {
-            if (commentAreaData.sX < eventXRelativeCanvas) {
-                //pageX is right corner
-                commentArea.style.left = commentAreaData.sX + "px";
-                width = (eventXRelativeCanvas - commentAreaData.sX);
-            } else {
-                //pageX is left corner
-                commentArea.style.left = eventXRelativeCanvas + "px";
-                width = (commentAreaData.sX - eventXRelativeCanvas);
-            }
-            if (commentAreaData.sY < eventYRelativeCanvas) {
-                //pageX is top corner
-                commentArea.style.top = commentAreaData.sY + "px";
-                height = (eventYRelativeCanvas - commentAreaData.sY);
-            } else {
-                //pageX lower corner
-                commentArea.style.top = eventYRelativeCanvas + "px";
-                height = (commentAreaData.sY - eventYRelativeCanvas);
-            }
-        }
-        width = width <= 0 ? -1 : width;
-        height = height <= 0 ? -1 : height;
-        commentArea.style.width = width + "px";
-        commentArea.style.height = height + "px";
-    }
-}
-function createComment(commentArea) {
-    let xInPx = parseFloat(commentArea.style.left.replace("px", ""));
-    let yInPx = parseFloat(commentArea.style.top.replace("px", ""));
-    let wInPx = parseFloat(commentArea.style.width.replace("px", ""));
-    let hInPx = parseFloat(commentArea.style.height.replace("px", ""));
 
-    let xInCoords = (xInPx / commentAreaData.widthPdf).toPrecision(7);
-    let yInCoords = (yInPx / commentAreaData.heightPdf).toPrecision(7);
-    let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
-    let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
-
-    let comment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
-        "Somebody", "Message....", false);
-    comments.push(comment);
-    //TODO upload Data to API
-
-    let commentDiv = document.createElement("div");
-    commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
-    setCommentAttributes(commentDiv, comment);
-    commentContainer.appendChild(commentDiv);
-}
 function clearComments() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
@@ -458,6 +333,7 @@ function clearComments() {
     comments = [];
     //TODO Request Comments for page from api
 }
+
 function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.position = "absolute";
     commentDiv.style.left = (comment.x * commentContainer.style.width.replace("px", "")) + "px";
@@ -468,6 +344,7 @@ function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.outlineStyle = "outset";
     commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
 }
+
 function resizeComments() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
@@ -476,6 +353,7 @@ function resizeComments() {
     }
 }
 
+
 function displayProgressOnBar() {
     let loadingBar = document.getElementById("loading");
     let lowBar = document.getElementById("loadingBar");
@@ -483,6 +361,7 @@ function displayProgressOnBar() {
     let marginLeft = (loadingBar.style.left.replace("px", "") - lowBar.style.left.replace("px", ""));
     loadingBar.style.width = percentLoaded * (lowBar.clientWidth - marginRight - marginLeft) + "px";
 }
+
 function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
     console.log("Started loading pdf: " + loadingTask);
@@ -514,6 +393,7 @@ function loadPdfPage(scale) {
         });
     }
 }
+
 
 function scaleViewport(scale) {
     // console.log("Scale: " + scale);
@@ -591,10 +471,3 @@ async function renderIfReady(scale) {
         return new Promise(resolve => setTimeout(resolve, ms || DEF_DELAY));
     }
 }
-
-let readyStateCheckInterval = setInterval(function () {
-    if (document.readyState === "complete") {
-        clearInterval(readyStateCheckInterval);
-        setup();
-    }
-}, 10);
