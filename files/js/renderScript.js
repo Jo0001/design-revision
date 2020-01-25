@@ -5,11 +5,15 @@ let pdfjsLib = window['pdfjs-dist/build/pdf'];
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.worker.js';
 
 class TargetScaleHandlerClass {
+    timeSinceResize;
+
     constructor() {
         this.isScalingATM = false;
         this.innerTargetScale = 1;
         this.scale = 1;
         this.handlerId = -1;
+        this.handlerIdTime = -1;
+        this.timeSinceResize = 0;
         this.round = function round(num) {
             return parseFloat(num + "").toFixed(6);
         };
@@ -21,12 +25,14 @@ class TargetScaleHandlerClass {
                 this.isScalingATM = true;
                 this.scale = parseFloat(this.scale + "") - 0.01;
                 this.scale = this.round(this.scale);
-                renderIfReady(this.scale);
+                this.timeSinceResize = 0;
+                scaleViewport(this.scale);
             } else if (this.scale < this.innerTargetScale && !preventZoomAndMovement) {
                 this.isScalingATM = true;
                 this.scale = parseFloat(this.scale + "") + 0.01;
                 this.scale = this.round(this.scale);
-                renderIfReady(this.scale);
+                this.timeSinceResize = 0;
+                scaleViewport(this.scale);
             } else if (this.scale === this.innerTargetScale && !preventZoomAndMovement) {
                 if (this.handlerId > 0) {
                     clearInterval(this.handlerId);
@@ -34,32 +40,50 @@ class TargetScaleHandlerClass {
                     //console.log("Removed Listener. " + this.handlerId + " " + (this.scale === this.innerTargetScale) + " " + this.scale + " " + this.innerTargetScale);
                     this.handlerId = -1;
                     this.scale = this.round(this.scale);
-                    renderIfReady(this.scale);
+                    this.timeSinceResize = 0;
+                    scaleViewport(this.scale);
                 } else {
                     console.log("We should not get here ever.")
                 }
             }
         };
+        let timeout = 1;
         this.updateScale = function updateScale() {
             if (this.handlerId < 0) {
-                this.handlerId = setInterval(this.check.bind(this, this.handlerId), 1);
+                this.handlerId = setInterval(this.check.bind(this, this.handlerId), timeout);
                 //console.log("Added Listener. " + this.handlerId);
             } else {
                 //console.log("Already have a scale Updater with targetScale: " + this.innerTargetScale);
             }
         };
+        this.handleTime = function handleTime() {
+            this.timeSinceResize += timeout;
+        };
+        this.handlerIdTime = setInterval(this.handleTime.bind(this, this.handlerIdTime), timeout);
     }
 
-    set targetScale(val) {
-        if (val < 0.4) {
+    isDoneScaling() {
+        return this.innerTargetScale === this.scale && !this.isScalingATM;
+    }
+
+    targetScale(val) {
+        if (val < 0.4 && this.innerTargetScale !== val) {
             this.innerTargetScale = 0.4;
-        } else if (val > 4.5) {
+            this.timeSinceResize = 10000;
+            this.updateScale();
+        } else if (val > 4.5 && this.innerTargetScale !== val) {
             this.innerTargetScale = 4.5;
-        } else {
+            this.timeSinceResize = 10000;
+            this.updateScale();
+        } else if (this.innerTargetScale !== val) {
             this.innerTargetScale = this.round(val);
+            this.updateScale();
         }
-        this.updateScale();
     };
+
+    getTimeMsSinceLastScale() {
+        return this.timeSinceResize;
+    }
 }
 
 class Comment {
@@ -80,13 +104,13 @@ let pdf;
 let pdfPage = undefined;
 let pdfFileOrUrl = "../user-content/test4.pdf";
 let targetScaleHandler = new TargetScaleHandlerClass();
-let pdfPageNumber = 101;
+let pdfPageNumber;
 let isRendering = false;
 let firstTimeDisplay = true;
 let preventZoomAndMovement = false;
 let context;
+let viewport;
 //Comment-Variables
-
 let commentArea;
 let commentContainer;
 let comments = [];
@@ -108,39 +132,57 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
 });
 //Progressbar-Variables
 let percentLoaded;
-
+//Page-Turn-Logic
+let decPage;
+let incPage;
 
 function setup() {
-    let myRequestAnimationFrame = window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.oRequestAnimationFrame ||
-        window.msRequestAnimationFrame ||
-        function (callback) {
-            window.setTimeout(callback, 10);
-        };
-    window.requestAnimationFrame = myRequestAnimationFrame;
-    pdfjsLib.disableStream = true;
     //Prevent a contextmenu on page, so people cant download the design.
     document.body.addEventListener("contextmenu", function (e) {
         e.preventDefault();
         return false;
     });
+    //Rescale Loading bar so we cant get over 100%
     window.addEventListener('resize', displayProgressOnBar);
+    //Get dom elements
     commentArea = document.getElementById('commentArea');
-
+    pdfPageNumber = document.getElementById("currentPage");
+    decPage = document.getElementById("decPage");
+    incPage = document.getElementById("incPage");
     canvas = document.getElementById('pdf');
+    let titleCard = document.getElementById("titleCard");
+    let createCommentBtn = document.getElementById("createComment");
+
+    //Turn-Page-Logic
+    pdfPageNumber.addEventListener("click", function () {
+        pdfPageNumber.value = "";
+    });
+    pdfPageNumber.addEventListener("input", function () {
+        clearComments();
+        loadPdfPage(targetScaleHandler.scale);
+    });
+    decPage.addEventListener("click", function () {
+        pdfPageNumber.value = parseInt(pdfPageNumber.value) - 1;
+        clearComments();
+        loadPdfPage(targetScaleHandler.scale);
+    });
+    incPage.addEventListener("click", function () {
+        pdfPageNumber.value = parseInt(pdfPageNumber.value) + 1;
+        clearComments();
+        loadPdfPage(targetScaleHandler.scale);
+    });
+
+    //Canvas-Setup
     canvasObserver.observe(canvas, {attributes: true});
     canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
     dragElementWhenBtnIsDown(canvas, 1);
     context = canvas.getContext('2d');
 
+    //Comment-Setup
     commentContainer = document.getElementById('commentContainer');
     commentContainerObserver.observe(commentContainer, {attributes: true});
     redirectAllEvents(canvas, commentContainer);
-    let titleCard = document.getElementById("titleCard");
-    let createCommentBtn = document.getElementById("createComment");
     createCommentBtn.addEventListener("click", function (e) {
         commentMode = !commentMode;
         if (commentMode) {
@@ -155,11 +197,14 @@ function setup() {
         }
     });
 
+    //Demo-Data
     let projectId = getURLParameter('id');
     if (projectId === "") {
         projectId = "20ced965";
         console.log("Using demo Project id=20ced965, because I received no parameter projectId.")
     }
+
+    //Request Project-Data from API
     let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
     let request = new XMLHttpRequest();
     request.open('GET', requestURL);
@@ -182,6 +227,7 @@ function setup() {
         });
     });
 
+    //Viewport-Movement
     function dragElementWhenBtnIsDown(element, btn) {
         let pos1 = 0, pos2 = 0, cursorXinView = 0, cursorYinView = 0;
         element.addEventListener("mousedown", function (e) {
@@ -218,42 +264,58 @@ function setup() {
             }
         }
     }
-
-    function getURLParameter(name) {
-        let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [undefined, ""])[1]);
-        return (value !== 'null') ? value : undefined;
-    }
-
     function listenForMouseWheelTurn(e) {
         let event = window.event || e;
         event.preventDefault();
         let delta = Math.max(-1, Math.min(1, (event.wheelDelta || -event.detail)));
         if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
             if (event.deltaY <= 0) {
-                targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+                targetScaleHandler.targetScale(parseFloat(targetScaleHandler.innerTargetScale) + 0.05);
             } else {
-                targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+                targetScaleHandler.targetScale(parseFloat(targetScaleHandler.innerTargetScale) - 0.05);
             }
         } else {
             if (delta === 1) {
-                targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) + 0.05;
+                targetScaleHandler.targetScale(parseFloat(targetScaleHandler.innerTargetScale) + 0.05);
             } else {
-                targetScaleHandler.targetScale = parseFloat(targetScaleHandler.innerTargetScale) - 0.05;
+                targetScaleHandler.targetScale(parseFloat(targetScaleHandler.innerTargetScale) - 0.05);
             }
         }
         //console.log(delta);
     }
-}
 
-function handleServerResponse(request, successCallback) {
-    if (request.readyState === 4 && request.status === 200) {
-        successCallback(JSON.parse(request.response));
-    } else if (request.readyState === 4 && request.status === 401) {
-        window.alert("keine Berechtigung");
-    } else if (request.readyState === 4 && request.status === 403) {
-        window.alert("Forbidden");
-    } else if (request.readyState === 4 && request.status === 404) {
-        window.alert("Nichts gefunden");
+    function redirectAllEvents(target, fromElement) {
+        redirect("wheel", target, fromElement);
+        redirect("DOMMouseScroll", target, fromElement);
+        redirect("mousedown", target, fromElement);
+        redirect("mouseup", target, fromElement);
+        redirect("mousemove", target, fromElement);
+
+        function redirect(eventType, target, fromElement) {
+            fromElement.addEventListener(eventType, function (event) {
+                target.dispatchEvent(new event.constructor(event.type, event));
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        }
+    }
+
+    //API-Request-Stuff
+    function handleServerResponse(request, successCallback) {
+        if (request.readyState === 4 && request.status === 200) {
+            successCallback(JSON.parse(request.response));
+        } else if (request.readyState === 4 && request.status === 401) {
+            window.alert("keine Berechtigung");
+        } else if (request.readyState === 4 && request.status === 403) {
+            window.alert("Forbidden");
+        } else if (request.readyState === 4 && request.status === 404) {
+            window.alert("Nichts gefunden");
+        }
+    }
+
+    function getURLParameter(name) {
+        let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [undefined, ""])[1]);
+        return (value !== 'null') ? value : undefined;
     }
 }
 
@@ -266,36 +328,33 @@ function resetAreaData() {
     commentArea.style.display = "none";
     preventZoomAndMovement = false;
 }
-
 function startDragHandler(event) {
-    event = event || window.event;
-    // IE-ism
+    event = event || window.event; // IE-ism
     event.preventDefault();
     if (event.button === 0) {
         preventZoomAndMovement = true;
         ensureEventAttributes(event);
-        commentAreaData.sX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
-        commentAreaData.sY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
+        commentAreaData.sX = event.pageX - parseInt(commentContainer.style.left.replace("px", ""));
+        commentAreaData.sY = event.pageY - parseInt(commentContainer.style.top.replace("px", ""));
 
         commentArea.style.top = parseInt(commentAreaData.sY) + "px";
         commentArea.style.left = parseInt(commentAreaData.sX) + "px";
-        commentArea.style.width = 0 + "px";
-        commentArea.style.height = 0 + "px";
+        commentArea.style.width = 1 + "px";
+        commentArea.style.height = 1 + "px";
         commentArea.style.display = "inherit";
         document.addEventListener("mousemove", resizeCommentArea);
     }
 }
-
 function endDragHandler(event) {
     document.removeEventListener("mousemove", resizeCommentArea);
     event = event || window.event; // IE-ism
     event.preventDefault();
     if (event.button === 0) {
         ensureEventAttributes(event);
-        commentAreaData.eX = event.pageX - parseInt(canvas.style.left.replace("px", ""));
-        commentAreaData.eY = event.pageY - parseInt(canvas.style.top.replace("px", ""));
-        commentAreaData.widthPdf = parseFloat(canvas.getAttribute("width"));
-        commentAreaData.heightPdf = parseFloat(canvas.getAttribute("height"));
+        commentAreaData.eX = event.pageX - parseFloat(commentContainer.style.left.replace("px", ""));
+        commentAreaData.eY = event.pageY - parseFloat(commentContainer.style.top.replace("px", ""));
+        commentAreaData.widthPdf = parseFloat(commentContainer.style.width.replace("px", ""));
+        commentAreaData.heightPdf = parseFloat(commentContainer.style.height.replace("px", ""));
 
         if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
             commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
@@ -306,7 +365,6 @@ function endDragHandler(event) {
         resetAreaData();
     }
 }
-
 function ensureEventAttributes(event) {
     // If pageX/Y aren't available and clientX/Y are,
     // calculate pageX/Y - logic taken from jQuery.
@@ -328,41 +386,48 @@ function ensureEventAttributes(event) {
 }
 
 function resizeCommentArea(event) {
+    event = event || window.event; // IE-ism
+    event.preventDefault();
     ensureEventAttributes(event);
     //check if mouse is over canvas
-    let clientWidth = (parseFloat(canvas.style.left.replace("px", "")) + parseFloat(canvas.style.width.replace("px", "")));
-    let clientHeight = (parseFloat(canvas.style.left.replace("px", "")) + parseFloat(canvas.style.width.replace("px", "")));
-    if (event.pageX <= (canvas.style.left.replace("px", "")) ||
-        event.pageX >= clientWidth) {
-        resetAreaData();
-    }
-    if (event.pageY <= (canvas.style.top.replace("px", "")) ||
+    let clientWidth = (parseFloat(commentContainer.style.left.replace("px", "")) + parseFloat(commentContainer.style.width.replace("px", "")));
+    let clientHeight = (parseFloat(commentContainer.style.top.replace("px", "")) + parseFloat(commentContainer.style.height.replace("px", "")));
+    if (event.pageX <= (commentContainer.style.left.replace("px", "")) ||
+        event.pageX >= clientWidth || event.pageY <= (commentContainer.style.top.replace("px", "")) ||
         event.pageY >= clientHeight) {
         resetAreaData();
     }
-
+    let eventXRelativeCanvas = (event.pageX - parseFloat(commentContainer.style.left.replace("px", "")));
+    let eventYRelativeCanvas = (event.pageY - parseFloat(commentContainer.style.top.replace("px", "")));
+    let width = (eventXRelativeCanvas - commentAreaData.sX);
+    let height = (eventYRelativeCanvas - commentAreaData.sY);
     if (commentAreaData.sX > -1 && commentAreaData.sY > -1) {
-        let eventXRelativeCanvas = (event.pageX - parseInt(canvas.style.left.replace("px", "")));
-        let eventYRelativeCanvas = (event.pageY - parseInt(canvas.style.top.replace("px", "")));
-        let width = (eventXRelativeCanvas - commentAreaData.sX);
-        let height = ((event.pageY - parseInt(canvas.style.top.replace("px", ""))) - commentAreaData.sY);
-        if (commentAreaData.sX > eventXRelativeCanvas &&
-            commentAreaData.sX !== eventXRelativeCanvas) {
-            //pageX is right corner
-            commentArea.style.left = eventXRelativeCanvas + "px";
-            width = (commentAreaData.sX - eventXRelativeCanvas);
+        if (commentAreaData.sX !== eventXRelativeCanvas && commentAreaData.sY !== eventYRelativeCanvas) {
+            if (commentAreaData.sX < eventXRelativeCanvas) {
+                //pageX is right corner
+                commentArea.style.left = commentAreaData.sX + "px";
+                width = (eventXRelativeCanvas - commentAreaData.sX);
+            } else {
+                //pageX is left corner
+                commentArea.style.left = eventXRelativeCanvas + "px";
+                width = (commentAreaData.sX - eventXRelativeCanvas);
+            }
+            if (commentAreaData.sY < eventYRelativeCanvas) {
+                //pageX is top corner
+                commentArea.style.top = commentAreaData.sY + "px";
+                height = (eventYRelativeCanvas - commentAreaData.sY);
+            } else {
+                //pageX lower corner
+                commentArea.style.top = eventYRelativeCanvas + "px";
+                height = (commentAreaData.sY - eventYRelativeCanvas);
+            }
         }
-        if (commentAreaData.sY > eventYRelativeCanvas &&
-            commentAreaData.sY !== eventYRelativeCanvas) {
-            //pageX is top corner
-            commentArea.style.top = eventYRelativeCanvas + "px";
-            height = (commentAreaData.sY - eventYRelativeCanvas);
-        }
+        width = width <= 0 ? -1 : width;
+        height = height <= 0 ? -1 : height;
         commentArea.style.width = width + "px";
         commentArea.style.height = height + "px";
     }
 }
-
 function createComment(commentArea) {
     let xInPx = parseFloat(commentArea.style.left.replace("px", ""));
     let yInPx = parseFloat(commentArea.style.top.replace("px", ""));
@@ -385,38 +450,30 @@ function createComment(commentArea) {
     commentContainer.appendChild(commentDiv);
 }
 
+function clearComments() {
+    for (let index = 0; index < comments.length; index++) {
+        let commentDiv = document.getElementById("comment" + index);
+        commentDiv.remove();
+    }
+    comments = [];
+    //TODO Request Comments for page from api
+}
+
 function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.position = "absolute";
-    commentDiv.style.left = (comment.x * canvas.getAttribute("width")) + "px";
-    commentDiv.style.top = (comment.y * canvas.getAttribute("height")) + "px";
-    commentDiv.style.width = (comment.w * canvas.getAttribute("width")) + "px";
-    commentDiv.style.height = (comment.h * canvas.getAttribute("height")) + "px";
+    commentDiv.style.left = (comment.x * commentContainer.style.width.replace("px", "")) + "px";
+    commentDiv.style.top = (comment.y * commentContainer.style.height.replace("px", "")) + "px";
+    commentDiv.style.width = (comment.w * commentContainer.style.width.replace("px", "")) + "px";
+    commentDiv.style.height = (comment.h * commentContainer.style.height.replace("px", "")) + "px";
     commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
     commentDiv.style.outlineStyle = "outset";
     commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
 }
-
 function resizeComments() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
         let comment = comments[index];
         setCommentAttributes(commentDiv, comment);
-    }
-}
-
-function redirectAllEvents(target, fromElement) {
-    redirect("wheel", target, fromElement);
-    redirect("DOMMouseScroll", target, fromElement);
-    redirect("mousedown", target, fromElement);
-    redirect("mouseup", target, fromElement);
-    redirect("mousemove", target, fromElement);
-
-    function redirect(eventType, target, fromElement) {
-        fromElement.addEventListener(eventType, function (event) {
-            target.dispatchEvent(new event.constructor(event.type, event));
-            event.preventDefault();
-            event.stopPropagation();
-        });
     }
 }
 
@@ -427,7 +484,6 @@ function displayProgressOnBar() {
     let marginLeft = (loadingBar.style.left.replace("px", "") - lowBar.style.left.replace("px", ""));
     loadingBar.style.width = percentLoaded * (lowBar.clientWidth - marginRight - marginLeft) + "px";
 }
-
 function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
     console.log("Started loading pdf: " + loadingTask);
@@ -439,6 +495,7 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
     };
     loadingTask.promise.then(function (localPdf) {
         pdf = localPdf;
+        document.getElementById("lastPage").value = pdf.numPages;
         loadPdfPage(scale);
     }, function (reason) {
         // PDF loading error
@@ -447,24 +504,41 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
 }
 
 function loadPdfPage(scale) {
-    pdf.getPage(pdfPageNumber).then(function (localPage) {
-        pdfPage = localPage;
-        renderIfReady(scale);
-    });
+    if (pdfPageNumber.value !== undefined) {
+        let num = parseInt(pdfPageNumber.value);
+        num = num >= 1 ? num : 1;
+        num = num <= pdf.numPages ? num : pdf.numPages;
+        pdfPageNumber.value = num;
+        pdf.getPage(parseInt(pdfPageNumber.value)).then(function (localPage) {
+            pdfPage = localPage;
+            renderIfReady(scale);
+        });
+    }
 }
 
-function renderIfReady(scale) {
-    if (!isRendering) {
+function scaleViewport(scale) {
+    // console.log("Scale: " + scale);
+    let canvasW = parseInt((pdfPage.getViewport({scale: 1}).width * scale).toPrecision(7) + "");
+    let canvasH = parseInt((pdfPage.getViewport({scale: 1}).height * scale).toPrecision(7) + "");
+    canvas.style.height = canvasH + "px";
+    canvas.style.width = canvasW + "px";
+    if (targetScaleHandler.isDoneScaling() && !targetScaleHandler.isScalingATM) {
+        renderIfReady(scale);
+    }
+}
+
+async function renderIfReady(scale) {
+    if (!isRendering && targetScaleHandler.getTimeMsSinceLastScale() > 100) {
         isRendering = true;
         renderPageFromPdf(scale);
 
         function renderPageFromPdf(scale) {
-            let viewport = pdfPage.getViewport({scale: scale});
+            viewport = pdfPage.getViewport({scale});
             canvas.height = viewport.height;
             canvas.width = viewport.width;
-            canvas.style.height = viewport.height + "px";
-            canvas.style.width = viewport.width + "px";
-
+            canvas.style.height = canvas.height + "px";
+            canvas.style.width = canvas.width + "px";
+            pdfjsLib.disableWorker = false;
             let renderTask = pdfPage.render({
                 canvasContext: context,
                 viewport: viewport
@@ -505,8 +579,18 @@ function renderIfReady(scale) {
                         }
                 });*/
         }
+    } else {
+        // console.log(targetScaleHandler.getTimeMsSinceLastScale());
+        if (!isRendering) {
+            await sleep(20).then(function () {
+                renderIfReady(targetScaleHandler.scale);
+            });
+        }
     }
 
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms || DEF_DELAY));
+    }
 }
 
 let readyStateCheckInterval = setInterval(function () {

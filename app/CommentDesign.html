@@ -10,7 +10,7 @@
 <!-- The pdf.js library and controls-->
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.js"></script>-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.min.js"></script>
-<script defer src="../files/js/renderScript.js"></script>
+<script async defer src="../files/js/renderScript.js"></script>
 <div id="titleBar">
     <p id="titleCard">Designvorschlag für /</p>
 </div>
@@ -24,19 +24,19 @@
     <button id="createComment" style="left: 40px; right: 40px;">Kommentarmodus einschalten</button>
 </div>
 <div class="lowerBar">
-    <button class="button" style=" left: 42%;">-</button>
+    <button class="button" id="decPage" style=" left: 42%;">-</button>
     <label>
-        <input class="textField" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+        <input class="textField" id="currentPage" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                style="left: 44%; margin-left: 20px; "
                type="text" value="101"/>
     </label>
     <p class="pageNumField">von</p>
     <label>
-        <input class="textField" onkeypress="return event.charCode >= 48 && event.charCode <= 57" readonly
+        <input class="textField" id="lastPage" onkeypress="return event.charCode >= 48 && event.charCode <= 57" readonly
                style="right: 44%; margin-right: 20px;" type="text"
                value="999"/>
     </label>
-    <button class="button" style="right: 42%;">+</button>
+    <button class="button" id="incPage" style="right: 42%;">+</button>
     <div id="loadingBar" style="right: 20px; left: 20px;">
         <div id="loading" style="right: 25px; left: 25px; width: 10px;"></div>
     </div>
