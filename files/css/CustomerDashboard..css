@@ -4,11 +4,10 @@ body {
     font-family: Arial, sans-serif;
 
 }
-
 .form {
     border-radius: 30px;
-    position: fixed;
-    margin-top: -8%;
+    position:fixed;
+    margin-top: -10%;
     margin-left: 83%;
     background: #0cfad6;
     width: 20%;
@@ -38,7 +37,6 @@ body {
     background: transparent;
     outline: none;
     height: 40px;
-
     font-size: 16px;
 }
 
@@ -61,28 +59,16 @@ body {
     text-underline: red;
 }
 
-
-.topimg {
-    position: fixed;
-    margin-top: -11%;
+.topDivs{
+    position:fixed;
+    top: 0;
+    width: 100%;
     z-index: 6;
-    background-color: rgba(128, 128, 128, 0.2);
-    box-sizing: border-box;
-    width: 50%;
     height:14%;
-}
-
-.topform {
-    position: fixed;
-    margin-top: -11%;
-    margin-left: 50%;
-    z-index: 6;
     background-color: rgba(128, 128, 128, 0.2);
-    box-sizing: border-box;
-    width: 50%;
-    height: 14%;
 }
-.topform a{
+.topDivs a{
+    float: right;
     background-color:#333;
     color: #fff;
     text-decoration:none;
@@ -91,18 +77,14 @@ body {
     margin: 30px 10px 10px 20px;
     cursor: pointer;
     border: none;
-    float: right;
+
 }
 
-.space {
-    margin-top: 11%;
-    position: relative;
-}
 
-.topform input[type="text"] {
-    float: right;
+
+.topDivs input[type="text"] {
     margin-top: 25px;
-    margin-right: 10px;
+  float: right;
     color: black;
     text-align: center;
     border: none;
@@ -119,7 +101,7 @@ body {
     border-radius: 30px;
     background-color: ghostwhite;
     border: 4px solid black;
-    margin-bottom: 20px;
+    margin-bottom: 2%;
 }
 
 .clients img:nth-child(2){
@@ -135,8 +117,6 @@ body {
     float: left;
     z-index: 1002;
 }
-
-
 .status {
     background-color: gray;
     color: white;
@@ -223,10 +203,10 @@ dialog[open="open"] {
     animation: invertspin 1s linear infinite;
 }
 #pageLoader {
-    position: relative;
+    position: absolute;
     z-index: 1;
-   float: right;
-    margin-top: 2%;
+    margin-left: 40%;
+    margin-top: 1%;
     border: 16px solid rgba(209, 246, 254, 0.63);
     border-radius: 50%;
     border-top: 16px solid #3498db;
