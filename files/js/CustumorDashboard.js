@@ -8,6 +8,9 @@ let bool1 = false;
 let boolStatus;
 let select = true;
 let doubleClickSelect = true;
+let autoComplete=[];
+let currentFocus;
+let newKeyUp=true;
 let sendArray = [];
 let sendFile;
 let sendArrayFields = [];
@@ -31,11 +34,6 @@ function generate() {
     let requestredy = false;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
-    if(counter===0){
-        customerdiv.style.marginTop="11.5%";
-        let form = document.querySelector('.form');
-        form.style.marginTop="-9%";
-    }
     let statusImg = document.createElement("img");
     let projektname = document.createElement("a");
     projektname.style.cursor = "pointer";
@@ -154,6 +152,20 @@ function generate() {
                     if (request1.readyState === 4 && request1.status === 200) {
                         let projectObejct = JSON.parse(request1.response);
                         projektname.innerHTML = projectObejct.project.name;
+                        let includes =true;
+                        if(autoComplete.length===0){
+                            autoComplete[0]=projectObejct.project.name;
+                            includes=false;
+                        }
+                        for (let i = 0; i <autoComplete.length ; i++) {
+                           if(autoComplete[i]==projectObejct.project.name){
+                               autoComplete[i]=projectObejct.project.name;
+                               includes=false
+                           }
+                        }
+                        if(includes){
+                            autoComplete.push(projectObejct.project.name);
+                        }
                         versionen.innerHTML = "Versionen: " + projectObejct.project.version;
                         textStatus.innerHTML = projectObejct.project.status;
                         let members1 = projectObejct.project.members;
@@ -449,6 +461,7 @@ function showRes() {
         bool1 = true;
 
     }
+    autocomplete(document.getElementById("searchform"),autoComplete)
 }
 
 
@@ -1170,4 +1183,87 @@ function cleraForm() {
         addMember();
     }
 
+}
+
+function autocomplete(inp, arr) {
+    inp.addEventListener("input", function(e) {
+        let a, b, i, val = this.value;
+        //schließt die Liste
+        closeAllLists();
+        if (!val) { return false;}
+        currentFocus = -1;
+       //erstellt ein div welches die inhalte des Array anzeigt sobald sie auf das value von dem inpuz passen
+        a = document.createElement("DIV");
+        a.setAttribute("id", this.id + "autocomplete-list");
+        a.setAttribute("class", "autocomplete-items");
+        this.parentNode.appendChild(a);
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                b = document.createElement("DIV");
+                //buchstaben die auf das Wort passen sind fett
+                b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+                b.innerHTML += arr[i].substr(val.length);
+                /*insert a input field that will hold the current array item's value:*/
+                b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                b.addEventListener("click", function(e) {
+                    //füllt den inhalt des divs in den input bei mausClick
+                    inp.value = this.getElementsByTagName("input")[0].value;
+                    closeAllLists();
+                });
+                a.appendChild(b);
+            }
+        }
+    });
+    inp.addEventListener("keydown", function(e) {
+        if(newKeyUp) {
+            newKeyUp=false;
+            //abfrage damit die Tasten nicht mehrmal ausgeführt werden obwohl nur ein mal gedrückt wird
+            setTimeout(function () {
+                newKeyUp=true;
+            },200);
+            let x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            //wenn Pfeil nach unten gedrückt wird
+            if (e.keyCode === 40) {
+                currentFocus++;
+                addActive(x);
+                //wenn Pfeil nach oben gedrückt wird
+            } else if (e.keyCode === 38) {
+                currentFocus--;
+                addActive(x);
+                //wenn Enter gedrückt wird
+            } else if (e.keyCode === 13) {
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    if (x) x[currentFocus].click();
+                }
+            }
+        }
+    });
+    function addActive(x) {
+        if (!x) return false;
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        console.log(currentFocus);
+        x[currentFocus].classList.add("autocomplete-active");
+        console.log(x[currentFocus]);
+    }
+    function removeActive(x) {
+            for (let i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+
+    }
+    function closeAllLists(elmnt) {
+       let x = document.getElementsByClassName("autocomplete-items");
+        for (let i = 0; i < x.length; i++) {
+            if (elmnt != x[i] && elmnt != inp) {
+                x[i].parentNode.removeChild(x[i]);
+            }
+        }
+    }
+    document.addEventListener("click", function (e) {
+        closeAllLists(e.target);
+    });
 }

@@ -16,14 +16,16 @@
              width="100">
     <div id="pageLoader"></div>
         <a href="../login/login.php?logout">Log Out</a>
-        <form enctype="multipart/form-data" id="search1">
+        <form enctype="multipart/form-data" autocomplete="off" id="search1">
+            <div class="autocomplete" style="float: right">
             <label>
-                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname" required
+                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname"
                        type="text">
             </label>
+            </div>
         </form>
 </div>
-
+<div class="space"></div>
 <div class="form" id="form1">
     <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
