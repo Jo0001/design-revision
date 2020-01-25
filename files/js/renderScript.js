@@ -87,7 +87,7 @@ class TargetScaleHandlerClass {
 }
 
 class Comment {
-    constructor(page, x, y, w, h, authorId, commentText) {
+    constructor(page, x, y, w, h, authorId, commentText, isImplemented) {
         this.page = page;
         this.x = x;
         this.y = y;
@@ -95,6 +95,7 @@ class Comment {
         this.h = h;
         this.authorId = authorId;
         this.commentText = commentText;
+        this.isImplemented = isImplemented;
     }
 }
 
@@ -440,7 +441,7 @@ function createComment(commentArea) {
     let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
 
     let comment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
-        "Somebody", "Message....");
+        "Somebody", "Message....", false);
     comments.push(comment);
     //TODO upload Data to API
 
@@ -449,7 +450,6 @@ function createComment(commentArea) {
     setCommentAttributes(commentDiv, comment);
     commentContainer.appendChild(commentDiv);
 }
-
 function clearComments() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
@@ -458,7 +458,6 @@ function clearComments() {
     comments = [];
     //TODO Request Comments for page from api
 }
-
 function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.position = "absolute";
     commentDiv.style.left = (comment.x * commentContainer.style.width.replace("px", "")) + "px";
