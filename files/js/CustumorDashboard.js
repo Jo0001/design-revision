@@ -33,6 +33,8 @@ function generate() {
     let customerdiv = document.createElement("div");
     if(counter===0){
         customerdiv.style.marginTop="11.5%";
+        let form = document.querySelector('.form');
+        form.style.marginTop="-9%";
     }
     let statusImg = document.createElement("img");
     let projektname = document.createElement("a");
@@ -225,12 +227,11 @@ function generate() {
     customerdiv.onclick = function () {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
-        for (let i = 0; i <arrayLength ; i++) {
-            content[i].style.background = "white";
-            content[i].style.border = "4px solid black";
-        }
-
         if (select) {
+            for (let i = 0; i <arrayLength ; i++) {
+                content[i].style.background = "white";
+                content[i].style.border = "4px solid black";
+            }
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
             customerdiv.style.background = "white";
@@ -316,13 +317,13 @@ function closeYes(members, content, arrayLength) {
     sendDelet(id);
     //Daten der Cusomer löschen
     for (let i = 0; i < arrayLength; i++) {
-        let help = content[i].getAttribute("data-id");
+        let help = content[i].getAttribute("data-memberid");
         if (members.includes(help)) {
             content[i].style.background = "white";
             content[i].lastChild.remove();
         }
     }
-    loeschen.remove();
+   loeschen.remove();
     div.remove();
     toggleDialog();
 }
@@ -858,6 +859,7 @@ function sendNewProject() {
     let progressBar = document.getElementById("loader");
     let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
+    console.log(projectname);
     console.log(tmpArray);
     let sendURL = window.location.origin + "/design-revision/api/";
     data.append("createproject", "");
@@ -884,8 +886,8 @@ function sendNewProject() {
                 message.style.display = "none";
                 progressBar.style.display = "none";
                 percentage.style.display = "none";
-                javascript:location.reload(true);
-            }, 1000);
+                location.reload(true);
+            }, 2000);
 
             console.log(this.responseText);
         }
@@ -900,10 +902,16 @@ function sendDelet(id) {
     console.log(id);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
-
+    let message = document.getElementById("sendFeedBack");
     xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
+            message.style.display = "block";
             console.log(this.responseText);
+            setTimeout(function () {
+                message.style.display = "none";
+                location.reload(true);
+            },2000);
+
         }
     });
 
@@ -936,7 +944,7 @@ function sendUpdateProject() {
                 progressBar.style.display = "none";
                 message.style.display = "none";
                 percentage.style.display = "none";
-            }, 1000);
+            }, 2000);
             console.log(this.responseText);
         }
     });
