@@ -499,7 +499,8 @@ let readyStateCheckInterval = setInterval(function () {
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
             if (sendFile === undefined || nameLenght) {
-                console.log(Error);
+                const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                previewDefaulText.style.color="red";
             } else {
                 let allRight = putArrayTogether();
                 if (allRight) {
@@ -535,13 +536,14 @@ let readyStateCheckInterval = setInterval(function () {
         previewFile.style.fontSize = "12px";
         if (file) {
             if (file.type === "application/pdf") {
+                const date = new Date(file.lastModified);
                 sendFile = file;
                 pdfIcon.style.display = "block";
                 previewDefaulText.style.display = "none";
                 previewFile.style.display = "block";
                 previewFile.style.color = "black";
                 previewFile.style.fontSize = "12px";
-                previewFile.innerHTML = file.name + " (" + file.type + ")- " + file.size + " bytes,zuletzt Bearbeitet " + file.lastModifiedDate;
+                previewFile.innerHTML = file.name + " - " + file.size + " bytes,zuletzt Bearbeitet: " + date.toDateString();
 
             } else {
                 previewFile.style.fontSize = "16px";
@@ -553,9 +555,10 @@ let readyStateCheckInterval = setInterval(function () {
         } else {
             pdfIcon.style.display = "none";
             previewDefaulText.style.display = "block";
+            previewDefaulText.style.color = "#cccccc";
             previewFile.innerHTML = "Keine Datei ausgewählt";
             previewFile.style.display = "none";
-            sendFile = null;
+            sendFile = undefined;
         }
     });
     setTimeout(function () {
@@ -574,10 +577,11 @@ function dateiauswahl(evt) {
     const previewFile = previewContainer.querySelector(".image-preview__file");
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     const pdfIcon = document.getElementById("pdfIcon");
-
     if (f.type === "application/pdf") {
+        console.log(document.getElementById("inputFile").value);
         sendFile = f;
-        let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
+        const date = new Date(f.lastModified);
+        let output = f.name + " - " + f.size + " bytes, zuletzt Bearbeitet: " + date.toDateString();
         pdfIcon.style.display = "block";
         previewFile.innerHTML = output;
         previewDefaulText.style.display = "none";
@@ -585,6 +589,7 @@ function dateiauswahl(evt) {
         previewFile.style.color = "black";
         previewFile.style.fontSize = "12px";
     } else {
+        sendFile=undefined;
         previewFile.style.fontSize = "16px";
         previewFile.style.display = "block";
         pdfIcon.style.display = "none";
@@ -1173,7 +1178,7 @@ function cleraForm() {
     adminOrMember.value = "";
     sendArray = [];
     sendArrayFields = [];
-    sendFile = null;
+    sendFile = undefined;
     document.getElementById('inputFile').value = null;
     let content = document.querySelectorAll('[data-emailFormId');
     for (let i = 0; i < content.length; i++) {
