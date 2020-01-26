@@ -1,0 +1,109 @@
+.button {
+    position: fixed;
+    margin-top: 0.6%;
+    width: 2%;
+}
+
+.textField {
+    min-width: 21px;
+    position: fixed;
+    margin-top: 0.9%;
+    width: 2%;
+    color: white;
+    text-align: center;
+    border: none;
+    border-bottom: 1px solid black;
+    background: transparent;
+    outline: none;
+    font-size: 16px;
+}
+
+.lowerBar {
+    background-color: rgb(18, 18, 18);
+    position: fixed;
+    bottom: 0;
+    height: 9%;
+    width: 100%;
+    left: 0;
+}
+
+.pageNumField {
+    position: absolute;
+    left: 47.8%;
+    width: 4%;
+    text-align: center;
+    color: white;
+    font-size: 18px;
+}
+
+#pdf {
+    position: absolute;
+    border: none;
+    z-index: -5;
+    page-break-inside: avoid;
+    clear: none;
+}
+
+#commentContainer {
+    position: absolute;
+    border: none;
+    z-index: -4;
+}
+
+#commentArea {
+    position: absolute;
+    z-index: -3;
+    background-color: rgba(99, 99, 99, 0.5);
+    border-radius: 3px;
+}
+
+#loading {
+    position: fixed;
+    height: 10px;
+    background-color: #00620b;
+    bottom: 15px;
+    border-radius: 5px;
+    z-index: 1;
+}
+
+#loadingBar {
+    position: fixed;
+    height: 20px;
+    background-color: rgb(41, 41, 41);
+    bottom: 10px;
+}
+
+#titleCard {
+    text-align: center;
+    color: black;
+    font-size: 25px;
+}
+
+#titleBar {
+    position: absolute;
+    border-radius: 20px;
+    right: 1%;
+    left: 1%;
+    top: 1%;
+    background-color: #0cfad6;
+}
+
+body {
+    background-color: rgb(92, 92, 92);
+    width: 100%;
+    overflow: hidden;
+    line-height: 1;
+}
+
+html {
+    min-height: 100%;
+}
+
+button {
+    background-color: #333;
+    color: #fff;
+    font-size: 20px;
+    padding: 5px 5px;
+    border: none;
+    cursor: pointer;
+}
