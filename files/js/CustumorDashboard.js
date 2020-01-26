@@ -500,6 +500,9 @@ let readyStateCheckInterval = setInterval(function () {
         CustumorDashForm.addEventListener('submit', function (evt) {
             if (sendFile === undefined || nameLenght) {
                 const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                const previewFile = previewContainer.querySelector(".image-preview__file");
+                previewDefaulText.style.display="block";
+                previewFile.style.display="none";
                 previewDefaulText.style.color="red";
             } else {
                 let allRight = putArrayTogether();
@@ -549,8 +552,10 @@ let readyStateCheckInterval = setInterval(function () {
                 previewFile.style.fontSize = "16px";
                 previewFile.innerHTML = "Bitte PDF hinzufügen!";
                 previewFile.style.color = "#cccccc";
+                previewFile.style.display="block";
                 previewDefaulText.style.display = "none";
                 pdfIcon.style.display = "none";
+                sendFile = undefined;
             }
         } else {
             pdfIcon.style.display = "none";
@@ -882,6 +887,7 @@ function sendNewProject() {
     let sendURL = window.location.origin + "/design-revision/api/";
     data.append("createproject", "");
     data.append("name", projectname);
+    console.log(projectname);
     data.append("members", tmpArray);
     data.append("file", sendFile);
     let xhr = new XMLHttpRequest();
@@ -1031,10 +1037,11 @@ function addEmailField() {
         selectClone.setAttribute('data-emailFormId', "" + moreMember);
         emailSpan.appendChild(emailClone);
         emailSpan.appendChild(selectClone);
-        let remove = document.createElement("b");
+        let remove = document.createElement("i");
         remove.setAttribute('data-emailFormId', "" + moreMember);
         moreMember++;
-        remove.innerHTML = " X";
+        remove.setAttribute('class','material-icons');
+        remove.innerHTML = "delete_forever";
         emailSpan.appendChild(remove);
         remove.onclick = function () {
             let index = this.getAttribute("data-emailFormId");

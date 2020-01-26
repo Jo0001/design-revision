@@ -7,11 +7,11 @@ body {
 .form {
     border-radius: 30px;
     position:fixed;
-    margin-top: -10%;
-    margin-left: 82.5%;
+    margin-top: -8%;
+    margin-left: 82%;
     background: #0cfad6;
     width: 20%;
-    transform: scale(0.7);
+    transform: scale(0.8);
 
 }
 .space {
