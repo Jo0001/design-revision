@@ -7,7 +7,8 @@
     <link href="../files/css/CustomerDashboard..css" rel="stylesheet">
     <script src="../files/js/CustumorDashboard.js"></script>
     <link href="../files/img/favicon.ico" rel="icon" type="image/x-icon">
-
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
 </head>
 <body>
 <div class="topDivs">
@@ -16,14 +17,16 @@
              width="100">
     <div id="pageLoader"></div>
         <a href="../login/login.php?logout">Log Out</a>
-        <form enctype="multipart/form-data" id="search1">
+        <form enctype="multipart/form-data" autocomplete="off" id="search1">
+            <div class="autocomplete" style="float: right">
             <label>
-                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname" required
+                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname"
                        type="text">
             </label>
+            </div>
         </form>
 </div>
-
+<div class="space"></div>
 <div class="form" id="form1">
     <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
@@ -43,16 +46,16 @@
         <span id="messageRole"></span><br><span id="messageEmail"></span><br>
         <span id="messageDoubleSelected"></span>
         <input onclick="addEmailField()"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:25px;border: none;cursor: pointer"
+               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:10%;border: none;cursor: pointer"
                type="button" value="Weiterer Nutzer auswählen"/>
         <input accept="application/pdf" id="inputFile" name="inputFile" style="display: none;" type="file"/>
         <input onclick="document.getElementById('inputFile').click();"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin: 15px 15px 15px 90px;border: none;cursor: pointer"
+               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 4%;margin-left:30%;margin-bottom:2%;border: none;cursor: pointer"
                type="button"
                value="Datei suchen"/>
         <div class="image-preview" id="imagePreview">
             <img alt="PDF" id="pdfIcon" src="../files/img/pdf.icon.png"
-                 style="display:none;width: 10%;height: 10%"/><br>
+                 style="display:none;width: 25%;height: 80%;padding-left: 5px"/><br>
             <span class="image-preview__file"></span>
             <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>
         </div>

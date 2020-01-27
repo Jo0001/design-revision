@@ -8,6 +8,9 @@ let bool1 = false;
 let boolStatus;
 let select = true;
 let doubleClickSelect = true;
+let autoComplete=[];
+let currentFocus;
+let newKeyUp=true;
 let sendArray = [];
 let sendFile;
 let sendArrayFields = [];
@@ -31,9 +34,6 @@ function generate() {
     let requestredy = false;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
-    if(counter===0){
-        customerdiv.style.marginTop="11.5%";
-    }
     let statusImg = document.createElement("img");
     let projektname = document.createElement("a");
     projektname.style.cursor = "pointer";
@@ -152,6 +152,20 @@ function generate() {
                     if (request1.readyState === 4 && request1.status === 200) {
                         let projectObejct = JSON.parse(request1.response);
                         projektname.innerHTML = projectObejct.project.name;
+                        let includes =true;
+                        if(autoComplete.length===0){
+                            autoComplete[0]=projectObejct.project.name;
+                            includes=false;
+                        }
+                        for (let i = 0; i <autoComplete.length ; i++) {
+                           if(autoComplete[i]==projectObejct.project.name){
+                               autoComplete[i]=projectObejct.project.name;
+                               includes=false
+                           }
+                        }
+                        if(includes){
+                            autoComplete.push(projectObejct.project.name);
+                        }
                         versionen.innerHTML = "Versionen: " + projectObejct.project.version;
                         textStatus.innerHTML = projectObejct.project.status;
                         let members1 = projectObejct.project.members;
@@ -225,12 +239,11 @@ function generate() {
     customerdiv.onclick = function () {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
-        for (let i = 0; i <arrayLength ; i++) {
-            content[i].style.background = "white";
-            content[i].style.border = "4px solid black";
-        }
-
         if (select) {
+            for (let i = 0; i <arrayLength ; i++) {
+                content[i].style.background = "white";
+                content[i].style.border = "4px solid black";
+            }
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
             customerdiv.style.background = "white";
@@ -316,13 +329,13 @@ function closeYes(members, content, arrayLength) {
     sendDelet(id);
     //Daten der Cusomer löschen
     for (let i = 0; i < arrayLength; i++) {
-        let help = content[i].getAttribute("data-id");
+        let help = content[i].getAttribute("data-memberid");
         if (members.includes(help)) {
             content[i].style.background = "white";
             content[i].lastChild.remove();
         }
     }
-    loeschen.remove();
+   loeschen.remove();
     div.remove();
     toggleDialog();
 }
@@ -448,6 +461,7 @@ function showRes() {
         bool1 = true;
 
     }
+    autocomplete(document.getElementById("searchform"),autoComplete)
 }
 
 
@@ -485,7 +499,11 @@ let readyStateCheckInterval = setInterval(function () {
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
             if (sendFile === undefined || nameLenght) {
-                console.log(Error);
+                const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                const previewFile = previewContainer.querySelector(".image-preview__file");
+                previewDefaulText.style.display="block";
+                previewFile.style.display="none";
+                previewDefaulText.style.color="red";
             } else {
                 let allRight = putArrayTogether();
                 if (allRight) {
@@ -521,27 +539,31 @@ let readyStateCheckInterval = setInterval(function () {
         previewFile.style.fontSize = "12px";
         if (file) {
             if (file.type === "application/pdf") {
+                const date = new Date(file.lastModified);
                 sendFile = file;
                 pdfIcon.style.display = "block";
                 previewDefaulText.style.display = "none";
                 previewFile.style.display = "block";
                 previewFile.style.color = "black";
                 previewFile.style.fontSize = "12px";
-                previewFile.innerHTML = file.name + " (" + file.type + ")- " + file.size + " bytes,zuletzt Bearbeitet " + file.lastModifiedDate;
+                previewFile.innerHTML = file.name + " - " + file.size + " bytes,zuletzt Bearbeitet: " + date.toDateString();
 
             } else {
                 previewFile.style.fontSize = "16px";
                 previewFile.innerHTML = "Bitte PDF hinzufügen!";
                 previewFile.style.color = "#cccccc";
+                previewFile.style.display="block";
                 previewDefaulText.style.display = "none";
                 pdfIcon.style.display = "none";
+                sendFile = undefined;
             }
         } else {
             pdfIcon.style.display = "none";
             previewDefaulText.style.display = "block";
+            previewDefaulText.style.color = "#cccccc";
             previewFile.innerHTML = "Keine Datei ausgewählt";
             previewFile.style.display = "none";
-            sendFile = null;
+            sendFile = undefined;
         }
     });
     setTimeout(function () {
@@ -560,10 +582,11 @@ function dateiauswahl(evt) {
     const previewFile = previewContainer.querySelector(".image-preview__file");
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     const pdfIcon = document.getElementById("pdfIcon");
-
     if (f.type === "application/pdf") {
+        console.log(document.getElementById("inputFile").value);
         sendFile = f;
-        let output = f.name + " (" + f.type + ")- " + f.size + " bytes,zuletzt Bearbeitet " + f.lastModifiedDate;
+        const date = new Date(f.lastModified);
+        let output = f.name + " - " + f.size + " bytes, zuletzt Bearbeitet: " + date.toDateString();
         pdfIcon.style.display = "block";
         previewFile.innerHTML = output;
         previewDefaulText.style.display = "none";
@@ -571,6 +594,7 @@ function dateiauswahl(evt) {
         previewFile.style.color = "black";
         previewFile.style.fontSize = "12px";
     } else {
+        sendFile=undefined;
         previewFile.style.fontSize = "16px";
         previewFile.style.display = "block";
         pdfIcon.style.display = "none";
@@ -858,10 +882,12 @@ function sendNewProject() {
     let progressBar = document.getElementById("loader");
     let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
+    console.log(projectname);
     console.log(tmpArray);
     let sendURL = window.location.origin + "/design-revision/api/";
     data.append("createproject", "");
     data.append("name", projectname);
+    console.log(projectname);
     data.append("members", tmpArray);
     data.append("file", sendFile);
     let xhr = new XMLHttpRequest();
@@ -884,8 +910,8 @@ function sendNewProject() {
                 message.style.display = "none";
                 progressBar.style.display = "none";
                 percentage.style.display = "none";
-                javascript:location.reload(true);
-            }, 1000);
+                location.reload(true);
+            }, 2000);
 
             console.log(this.responseText);
         }
@@ -900,10 +926,16 @@ function sendDelet(id) {
     console.log(id);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
-
+    let message = document.getElementById("sendFeedBack");
     xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
+            message.style.display = "block";
             console.log(this.responseText);
+            setTimeout(function () {
+                message.style.display = "none";
+                location.reload(true);
+            },2000);
+
         }
     });
 
@@ -936,7 +968,7 @@ function sendUpdateProject() {
                 progressBar.style.display = "none";
                 message.style.display = "none";
                 percentage.style.display = "none";
-            }, 1000);
+            }, 2000);
             console.log(this.responseText);
         }
     });
@@ -1005,10 +1037,11 @@ function addEmailField() {
         selectClone.setAttribute('data-emailFormId', "" + moreMember);
         emailSpan.appendChild(emailClone);
         emailSpan.appendChild(selectClone);
-        let remove = document.createElement("b");
+        let remove = document.createElement("i");
         remove.setAttribute('data-emailFormId', "" + moreMember);
         moreMember++;
-        remove.innerHTML = " X";
+        remove.setAttribute('class','material-icons');
+        remove.innerHTML = "delete_forever";
         emailSpan.appendChild(remove);
         remove.onclick = function () {
             let index = this.getAttribute("data-emailFormId");
@@ -1152,7 +1185,7 @@ function cleraForm() {
     adminOrMember.value = "";
     sendArray = [];
     sendArrayFields = [];
-    sendFile = null;
+    sendFile = undefined;
     document.getElementById('inputFile').value = null;
     let content = document.querySelectorAll('[data-emailFormId');
     for (let i = 0; i < content.length; i++) {
@@ -1162,4 +1195,87 @@ function cleraForm() {
         addMember();
     }
 
+}
+
+function autocomplete(inp, arr) {
+    inp.addEventListener("input", function(e) {
+        let a, b, i, val = this.value;
+        //schließt die Liste
+        closeAllLists();
+        if (!val) { return false;}
+        currentFocus = -1;
+       //erstellt ein div welches die inhalte des Array anzeigt sobald sie auf das value von dem inpuz passen
+        a = document.createElement("DIV");
+        a.setAttribute("id", this.id + "autocomplete-list");
+        a.setAttribute("class", "autocomplete-items");
+        this.parentNode.appendChild(a);
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+                b = document.createElement("DIV");
+                //buchstaben die auf das Wort passen sind fett
+                b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+                b.innerHTML += arr[i].substr(val.length);
+                /*insert a input field that will hold the current array item's value:*/
+                b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                b.addEventListener("click", function(e) {
+                    //füllt den inhalt des divs in den input bei mausClick
+                    inp.value = this.getElementsByTagName("input")[0].value;
+                    closeAllLists();
+                });
+                a.appendChild(b);
+            }
+        }
+    });
+    inp.addEventListener("keydown", function(e) {
+        if(newKeyUp) {
+            newKeyUp=false;
+            //abfrage damit die Tasten nicht mehrmal ausgeführt werden obwohl nur ein mal gedrückt wird
+            setTimeout(function () {
+                newKeyUp=true;
+            },200);
+            let x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            //wenn Pfeil nach unten gedrückt wird
+            if (e.keyCode === 40) {
+                currentFocus++;
+                addActive(x);
+                //wenn Pfeil nach oben gedrückt wird
+            } else if (e.keyCode === 38) {
+                currentFocus--;
+                addActive(x);
+                //wenn Enter gedrückt wird
+            } else if (e.keyCode === 13) {
+                e.preventDefault();
+                if (currentFocus > -1) {
+                    if (x) x[currentFocus].click();
+                }
+            }
+        }
+    });
+    function addActive(x) {
+        if (!x) return false;
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        console.log(currentFocus);
+        x[currentFocus].classList.add("autocomplete-active");
+        console.log(x[currentFocus]);
+    }
+    function removeActive(x) {
+            for (let i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+
+    }
+    function closeAllLists(elmnt) {
+       let x = document.getElementsByClassName("autocomplete-items");
+        for (let i = 0; i < x.length; i++) {
+            if (elmnt != x[i] && elmnt != inp) {
+                x[i].parentNode.removeChild(x[i]);
+            }
+        }
+    }
+    document.addEventListener("click", function (e) {
+        closeAllLists(e.target);
+    });
 }

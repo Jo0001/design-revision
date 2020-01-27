@@ -128,7 +128,7 @@ function getProject($value)
 function createProject()
 {
     if (isLoggedIn() && getUser('status') == "VERIFIED") {
-        $name = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
+        $projectname = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
         $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
         $target_dir = "../user-content/";
         $hash = bin2hex(openssl_random_pseudo_bytes(4));
@@ -136,7 +136,7 @@ function createProject()
         $target_file = $target_dir . basename($filename);
         $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($name) < 81) {
+        if ($_FILES["file"]["type"] == "application/pdf" && $fileType == "pdf" && !file_exists($target_file) && $_FILES["file"]["size"] < 500000001 && strlen($projectname) < 81) {
 
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                 //Generate Table
@@ -165,14 +165,14 @@ function createProject()
                 //convert json post to php array format
                 $members = json_decode($members, true);
 
-                //Remove all double entrys from the array
-                $members = array_unique($members);
+                //Remove double entries from the array
+                $members = array_unique($members, SORT_REGULAR);
 
                 $memberids = array();
 
                 $pid = explode("project_", $t_name)[1];
 
-                $projectname = $name;
+                // $projectname = $name;
 
                 //add current user (as admin)
                 $userid = getUser('pk_id');
@@ -192,12 +192,19 @@ function createProject()
 
                         updateUserProjects($pdo, $id, $pid);
 
-                        $statement = $pdo->prepare("SELECT name FROM `users` WHERE pk_id = ?");
+                        $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
                         $statement->execute(array($id));
+                        $results = $statement->fetch();
+                        $name = $results['name'];
+                        $status = $results['status'];
                         //Inform user per email about the new project
-                        $name = $statement->fetch()[0];
-                        $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
-                        sendMail($tmp, $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
+                        if ($status == "INVITE") {
+                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
+                            sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                        } else {
+                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
+                            sendMail($tmp, $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
+                        }
                     }
                 }
                 //save all email addresses of the members as one dimensional array
@@ -224,7 +231,7 @@ function createProject()
 
                 header("HTTP/1.1 201 Created ");
                 //Just for development
-                handleOutput("Successful uploaded file");
+                //handleOutput("Successful uploaded file");
             } else {
                 showError("Something went seriously wrong", 500);
             }
@@ -345,6 +352,21 @@ function getLatestProjectData($id, $pdo)
     return $statement->fetch();
 }
 
+//$id => Userid, $pid => project id
+function updateUserProjects($pdo, $id, $pid)
+{
+    //fetch all projectdata of the user
+    $statement = $pdo->prepare("SELECT projects FROM `users` WHERE pk_id = ? ");
+    $statement->execute(array($id));
+    $tmpprojects = json_decode($statement->fetch()[0]);
+
+    //and save the new project to the user
+    array_push($tmpprojects, $pid);
+    $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
+    $statement->execute(array(json_encode($tmpprojects), $id));
+
+}
+
 function isAdmin($lastrow, $userid)
 {
     $members = json_decode($lastrow['members'], true);
@@ -358,15 +380,6 @@ function isAdmin($lastrow, $userid)
     }
 }
 
-function emailToId($email)
-{
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-    $statement = $pdo->prepare("SELECT pk_id FROM `users` WHERE email = ?");
-    $statement->execute(array($email));
-    $tmpid = $statement->fetch();
-    return $tmpid[0];
-}
-
 //Converts a 2 dimensional array to lowercase
 function nestedLowercase($value)
 {
@@ -376,16 +389,11 @@ function nestedLowercase($value)
     return strtolower($value);
 }
 
-//$id => Userid, $pid => project id
-function updateUserProjects($pdo, $id, $pid)
+function emailToId($email)
 {
-    //fetch all projectdata of the user
-    $statement = $pdo->prepare("SELECT projects FROM `users` WHERE pk_id = ? ");
-    $statement->execute(array($id));
-    $tmpprojects = json_decode($statement->fetch()[0]);
-
-    //and save the new project to the user
-    array_push($tmpprojects, $pid);
-    $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
-    $statement->execute(array(json_encode($tmpprojects), $id));
+    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $statement = $pdo->prepare("SELECT pk_id FROM `users` WHERE email = ?");
+    $statement->execute(array($email));
+    $tmpid = $statement->fetch();
+    return $tmpid[0];
 }

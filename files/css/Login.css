@@ -14,11 +14,11 @@ body {
 
 .form {
     background: #0cfad6;
-    width: 900px;
+    width: 70%;
     height: auto;
+    position: fixed;
+    left: 50%;
     top: 50%;
-    left: 40%;
-    position: absolute;
     transform: translate(-50%, -50%);
     box-sizing: border-box;
     padding-left: 20px;
@@ -69,4 +69,22 @@ body {
     color: black;
     font-size: 16px;
 }
+.input-container{
+    width: 50%;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid black;
+}
+.input-container input[type="text"],input[type="password"]{
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    height: 40px;
+    color: black;
+    font-size: 16px;
 
+}
+.input-container i{
+    cursor: pointer;
+}

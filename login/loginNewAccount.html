@@ -6,6 +6,8 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>New Account</title>
     <link href="../files/css/Login.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
 </head>
 <body>
 <div class="form">
@@ -26,19 +28,27 @@
         <label>
             <input id="firmName" name="company" placeholder="Firmenname (optional)" type="text">
         </label><br><br>
-        <label>
+        <div class="input-container">
             <input id="password" name="password" onkeyup="char_count();" placeholder="Passwort" required
-                   style="width: 300px"
                    type="password">
-        </label>
-        <progress id="progress" max="100" value="0"></progress>
+            <i onclick="passwordToggle()" class="material-icons">
+                visibility
+            </i>
+            </div>
+        <div id="progressBarBorder"style="border: 3px solid white;border-radius: 2px;margin-top: 10px;background: white; width: 50%">
+            <div id="progressBar" style="height:24px;width:1%;background-color:#ff352c;border-radius: 4px;color: white;text-align: center"></div>
+        </div>
         <span id="feedback"></span>
         <br><br>
-        <label>
+            <div class="input-container">
             <input id="againPassword" name="againPassword" onkeyup="check_up3()" placeholder="Passwort wiederholt"
-                   required style="width: 300px" type="password">
+                   required  type="password">
+            <i onclick="passwordToggle2()" class="material-icons">
+                visibility
+            </i>
+            </div>
             <span id="samePass"></span>
-        </label><br><br>
+        <br><br>
         <input id="btnSignIn" name="btnSignIn" type="submit" value="Registrieren">
     </form>
     <p>Sie haben schon ein Konto? <a href="login.html">Anmelden</a></p>
@@ -49,7 +59,7 @@
     let newAcount = document.getElementById("newAccountForm");
     newAcount.addEventListener('submit', function (evt) {
         let call = document.getElementById("feedback");
-        let feedback = document.getElementById('progress');
+        let feedback = document.getElementById('progressBar');
         let statusEmail = document.getElementById('statusEmail');
         if (!(emailIsValid(document.querySelector("#email").value)) || status) {
             if (!(emailIsValid(document.querySelector("#email").value))) {
@@ -58,7 +68,7 @@
             }
             if (status) {
                 call.style.color = "black";
-                feedback.value = 0;
+                feedback.style.width = "0%";
                 call.innerHTML = "<strong>Das Passwort muss sicher sein</strong>";
             }
             evt.preventDefault();
@@ -79,36 +89,57 @@
     function char_count() {
         let val = document.getElementById('password').value;
         let call = document.getElementById('feedback');
-        let feedback = document.getElementById('progress');
+        let feedback = document.getElementById('progressBar');
 
         if (val.length > 7) {
             if (val.match(/\d+/) && val.match(/[a-zäöü]+/) && val.match(/\W/) && val.match(/[[A-ZÄÖU]+/)) {
                 call.style.color = "#428c0d";
-                call.innerHTML = "<strong>100% - Das Passwort ist sehr sicher!</strong>";
-                feedback.value = 100;
+                call.innerHTML = "<strong>Das Passwort ist sehr sicher!</strong>";
+                feedback.style.background = "#428c0d";
+                feedback.style.width= "100%";
+                feedback.innerHTML="100%";
                 status = false;
 
             } else if (val.match(/\d+/) && val.match(/[a-zäöü]+/) || val.match(/\W/) && val.match(/[a-zäöü]+/)) {
                 call.style.color = "#ff9410";
-                call.innerHTML = "<strong>75% - Das Passwort fast sicher!</strong>";
-                feedback.value = 75;
+                call.innerHTML = "<strong>Das Passwort fast sicher!</strong>";
+                feedback.style.background = "#ff9410";
+                feedback.style.width = "75%";
+                feedback.innerHTML="75%";
                 status = true;
             } else {
                 call.style.color = "#ff9410";
-                call.innerHTML = "<strong>50% -Das Passwort ist unsicher!</strong>";
-                feedback.value = 50;
+                call.innerHTML = "<strong>Das Passwort ist unsicher!</strong>";
+                feedback.style.background = "#ff9410";
+                feedback.style.width = "50%";
+                feedback.innerHTML="50%";
             }
         } else {
             call.style.color = "#ff352c";
-            call.innerHTML = "<strong>25% - Das Passwort ist zu kurz!</strong>";
-            feedback.value = 25;
+            call.innerHTML = "<strong>Das Passwort ist zu kurz!</strong>";
+            feedback.style.background = "#ff352c";
+            feedback.style.width = "25%";
+            feedback.innerHTML="25%";
             status = true;
         }
         if (val.length === 0) {
             call.innerHTML = "";
-            feedback.value = 0;
+            feedback.style.background = "#ff352c";
+            feedback.style.width = "0%";
+            feedback.innerHTML="0%";
             status = true;
 
+        }
+        let pass1 = document.querySelector("#password").value;
+        let pass2 = document.querySelector("#againPassword").value;
+        let samePass1 = document.getElementById("samePass");
+        if(pass2.length>0) {
+            if (!(pass1 === pass2)) {
+                samePass1.style.color = "red";
+                samePass1.innerHTML = "<strong>Passwörter verschieden</strong>";
+            } else {
+                samePass1.innerHTML = "";
+            }
         }
     }
 
@@ -145,6 +176,28 @@
             document.location="../login/verifizieren.html"
         }
     };
+    function passwordToggle() {
+        const visibilityToggle = document.querySelector('.material-icons');
+        let password = document.getElementById('password');
+        if (password.type === "password") {
+            password.type = "text";
+            visibilityToggle.innerHTML="visibility_off";
+        } else {
+            password.type = "password";
+            visibilityToggle.innerHTML="visibility";
+        }
+    }
+    function passwordToggle2() {
+        const visibilityToggle = document.querySelectorAll('.material-icons');
+        let password = document.getElementById('againPassword');
+        if (password.type === "password") {
+            password.type = "text";
+            visibilityToggle[1].innerHTML="visibility_off";
+        } else {
+            password.type = "password";
+            visibilityToggle[1].innerHTML="visibility";
+        }
+    }
 
 </script>
 </html>
