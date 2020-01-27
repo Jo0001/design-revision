@@ -20,17 +20,18 @@
         </label><span id="statusEmail"></span><br><br>
         <label>Passwort: </label><br>
         <div class="input-container">
-                <input id="password" name="password" placeholder="Passwort" required type="password"
-                       value="Test#2019">
+            <input id="password" name="password" placeholder="Passwort" required type="password"
+                   value="Test#2019">
 
-        <i class="material-icons" onclick="passwordToggle()">
-            visibility
-        </i>
-</div>
-<p>Passwort vergessen? <a href="loginforgotpass.html">Zurücksetzen</a></p>
-<input id="btnLogin" name="btnLogin" type="submit" value="Anmelden">
-</form>
-<p>Sie haben noch kein Konto? <a href="loginNewAccount.html">Erstellen sie sich jetzt eins</a></p>
+            <i class="material-icons" onclick="passwordToggle()">
+                visibility
+            </i>
+        </div>
+        <input type="hidden" name="returnto" id="returnto"/>
+        <p>Passwort vergessen? <a href="loginforgotpass.html">Zurücksetzen</a></p>
+        <input id="btnLogin" name="btnLogin" type="submit" value="Anmelden">
+    </form>
+    <p>Sie haben noch kein Konto? <a href="loginNewAccount.html">Erstellen sie sich jetzt eins</a></p>
 
 </div>
 </body>
@@ -93,5 +94,19 @@
             visibilityToggle.innerHTML = "visibility";
         }
     }
+
+    function saveLocation() {
+        let location = encodeURIComponent(getURLParameter("returnto"));
+        let readyStateCheckInterval = setInterval(function () {
+            if (document.readyState === "complete") {
+                clearInterval(readyStateCheckInterval);
+                if (location) {
+                    document.getElementById("returnto").value = location;
+                }
+            }
+        }, 10);
+    }
+
+    saveLocation();
 </script>
 </html>

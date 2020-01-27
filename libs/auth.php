@@ -50,3 +50,9 @@ function logOut()
     header("Location: ../login/login.html?success=logout");
     die;
 }
+
+function getCurrentURL()
+{
+    //TODO Check if the url is a valid desing-revision url
+    return urlencode((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL));
+}
