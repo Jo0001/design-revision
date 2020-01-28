@@ -131,6 +131,9 @@ let percentLoaded;
 //Page-Turn-Logic
 let decPage;
 let incPage;
+//Tollbar-Variables
+let sidebarElements = [];
+let moveBtn;
 
 function setupViewport() {
     //Prevent a contextmenu on page, so people cant download the design.
@@ -177,6 +180,17 @@ function setupViewport() {
     commentContainer = document.getElementById('commentContainer');
     commentContainerObserver.observe(commentContainer, {attributes: true});
     redirectAllEvents(canvas, commentContainer);
+	
+	//Move-Button-Setup
+	moveBtn = document.getElementById("movePdf");
+	sidebarElements.push(moveBtn);
+	moveBtn.addEventListener("click", function (e) {
+		if(getSelectedSidebarElement() !== moveBtn){
+			selectSidebarElementById(moveBtn.id);
+		}else{
+			deselectSidebarElementById(moveBtn.id);
+		}
+	});
 
     //Demo-Data
     let projectId = getURLParameter('id');
@@ -301,6 +315,33 @@ function setupViewport() {
     }
 }
 
+function getSelectedSidebarElement(){
+	for (let index = 0; index < sidebarElements.length; index++) {
+		if(sidebarElements[index].classList.contains("selected")){
+			return sidebarElements[index];
+		}
+	}
+	return undefined;
+}
+function triggerEvent(el, type){
+    var e = document.createEvent('HTMLEvents');
+    e.initEvent(type, false, true);
+    el.dispatchEvent(e);
+}
+function selectSidebarElementById(id){
+	if(getSelectedSidebarElement() !== undefined){
+		let tmp = getSelectedSidebarElement();
+		deselectSidebarElementById(getSelectedSidebarElement().id);
+		triggerEvent(tmp, "click");
+	}
+	document.getElementById(id).classList.remove("disSelected");
+	document.getElementById(id).classList.add("selected");
+	triggerEvent(document.getElementById(id), "click");
+}
+function deselectSidebarElementById(id){
+	document.getElementById(id).classList.remove("selected");
+	document.getElementById(id).classList.add("disSelected"); 
+}
 
 function ensureEventAttributes(event) {
     // If pageX/Y aren't available and clientX/Y are,

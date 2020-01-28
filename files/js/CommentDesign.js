@@ -1,4 +1,3 @@
-let commentMode = false;
 let createCommentBtn;
 let commentArea;
 let commentAreaData = {sX: -1, sY: -1, eX: -1, eY: -1, widthPdf: -1, heightPdf: -1};
@@ -7,21 +6,22 @@ function setup() {
     createCommentBtn = document.getElementById("createComment");
     commentArea = document.getElementById("commentArea");
     //Comment-Setup
+	sidebarElements.push(createCommentBtn);
     createCommentBtn.addEventListener("click", function (e) {
-        commentMode = !commentMode;
-        if (commentMode) {
+        if (createCommentBtn.classList.contains("disSelected")) {
             //COMMENTMODE ON
             canvas.addEventListener("mousedown", startDragHandler, false);
             canvas.addEventListener("mouseup", endDragHandler, false);
 			document.getElementsByTagName("html")[0].style.cursor = "crosshair";
-			createCommentBtn.style.border = "solid";
+			selectSidebarElementById(createCommentBtn.id);
         } else {
             canvas.removeEventListener("mousedown", startDragHandler, false);
             canvas.removeEventListener("mouseup", endDragHandler, false);
 			document.getElementsByTagName("html")[0].style.cursor = "context-menu";
-			createCommentBtn.style.border = "solid transparent";
+			deselectSidebarElementById(createCommentBtn.id);
         }
     });
+	
 }
 
 //CommentArea-Methods
