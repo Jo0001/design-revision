@@ -8,9 +8,9 @@ let bool1 = false;
 let boolStatus;
 let select = true;
 let doubleClickSelect = true;
-let autoComplete=[];
+let autoComplete = [];
 let currentFocus;
-let newKeyUp=true;
+let newKeyUp = true;
 let sendArray = [];
 let sendFile;
 let sendArrayFields = [];
@@ -18,6 +18,15 @@ let updateOrCreate = true;
 let nameLenght = false;
 let moreMember = 1;
 let tmpClients;
+//Variables for getUser method
+let nameImgSrc;
+let userName;
+let userEmail;
+let userCompany;
+let userProjects=[];
+let gotUserData = false;
+
+
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
 }
@@ -30,7 +39,7 @@ function generate() {
     let b = document.body;
     let arrayMember;
     let arrayRole;
-    let projectsArray;
+    let projectsArray = [];
     let requestredy = false;
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
@@ -53,10 +62,10 @@ function generate() {
     versionen.style.cursor = "pointer";
     versionen.style.textDecoration = "none";
     versionen.style.color = "black";
-   versionen.onmouseover = function () {
+    versionen.onmouseover = function () {
         versionen.style.color = "lightgray";
     };
-   versionen.onmouseout = function () {
+    versionen.onmouseout = function () {
         versionen.style.color = "black";
     };
     let company = document.createElement("p");
@@ -77,66 +86,89 @@ function generate() {
     statusImg.style.zIndex = "2";
     customerdiv.appendChild(statusImg);
     //Projektname generieren
-
-    //Projectname erstellen
     customerdiv.appendChild(projektname);
-    //Jason user Object aus Api holen
-    requestURL = window.location.origin + "/design-revision/api/?getuser";
-    request.open('GET', requestURL, true);
-    request.send();
-    request.onreadystatechange = function () {
-        if (request.readyState === 4 && request.status === 200) {
-            let userObject = JSON.parse(request.response);
-            clientname.innerHTML = userObject.user.name + counter;
-            nameimg.setAttribute("src", userObject.user.avatar);
-            clientemail.innerHTML = userObject.user.email + " " + counter;
-            customerdiv.setAttribute('data-email', userObject.user.email + counter);
-            company.innerHTML = userObject.user.company;
-            if (!(userObject.user.status === "VERIFIED")) {
-                window.location = window.location.origin + "/design-revision/login/verifizieren.html"
-            }
-            //Projects-array von Api holen
-            let tmp = userObject.user.projects;
-            if (tmp === null) {
-                customerdiv.remove();
-                clearInterval(checkForprojects);
-                ableNewProject = false;
-                window.alert("Noch keine Projekte");
-                window.location = window.location.origin + "/design-revision/login/login.html";
-            } else {
-                let tmp1 = tmp[0];
-                for (let i = 1; i < tmp.length; i++) {
-                    tmp1 = tmp1 + "," + tmp[i];
-                }
-                includedPorjects.innerHTML = tmp1;
-                includedPorjects.style.display = "none";
-                customerdiv.appendChild(includedPorjects);
-                projectsArray = includedPorjects.innerHTML;
-                projectsArray = projectsArray.split(",");
-                requestredy = true;
-                includedPorjects.remove();
-            }
-            customerdiv.setAttribute('data-memberId', ""+ counter);
-            counter++;
-
-        } else if (request.readyState === 4 && request.status === 403) {
-            console.log("Forbidden");
-        } else if (request.readyState === 4 && request.status === 401) {
-            document.location = window.location.origin + "/design-revision/login/login.html";
-        } else if (request.readyState === 4 && request.status === 404) {
-            window.alert("Nichts gefunden");
-        } else if (request1.readyState === 4 && request1.status === 400) {
-            window.alert("Unbekannter AnfrageParameter");
+    //schaut ob der User schon abgefragt wurde
+    if (gotUserData) {
+        clientname.innerHTML = userName;
+        clientemail.innerHTML = userEmail;
+        company.innerHTML = userCompany;
+        nameimg.setAttribute("src", nameImgSrc);
+        customerdiv.setAttribute('data-email', userEmail + counter);
+        customerdiv.setAttribute('data-memberId', "" + counter);
+        counter++;
+        requestredy = true;
+        for (let i = 0; i < userProjects.length; i++) {
+            projectsArray.push(userProjects[i]);
         }
-    };
+        console.log("Took Saved Data");
+    } else {
+        //Jason user Object aus Api holen
+        requestURL = window.location.origin + "/design-revision/api/?getuser";
+        request.open('GET', requestURL, true);
+        request.send();
+        request.onreadystatechange = function () {
+            if (request.readyState === 4 && request.status === 200) {
+                let userObject = JSON.parse(request.response);
+                console.log("xhrRequest");
+                clientname.innerHTML = userObject.user.name + counter;
+                nameimg.setAttribute("src", userObject.user.avatar);
+                clientemail.innerHTML = userObject.user.email + " " + counter;
+                customerdiv.setAttribute('data-email', userObject.user.email + counter);
+                company.innerHTML = userObject.user.company;
+                if (!(userObject.user.status === "VERIFIED")) {
+                    window.location = window.location.origin + "/design-revision/login/verifizieren.html"
+                }
+                //Projects-array von Api holen
+                let tmp = userObject.user.projects;
+                if (tmp === null) {
+                    customerdiv.remove();
+                    clearInterval(checkForprojects);
+                    ableNewProject = false;
+                    window.alert("Noch keine Projekte");
+                    window.location = window.location.origin + "/design-revision/login/login.html";
+                } else {
+                    let tmp1 = tmp[0];
+                    for (let i = 1; i < tmp.length; i++) {
+                        tmp1 = tmp1 + "," + tmp[i];
+                    }
+                    includedPorjects.innerHTML = tmp1;
+                    includedPorjects.style.display = "none";
+                    customerdiv.appendChild(includedPorjects);
+                    projectsArray = includedPorjects.innerHTML;
+                    projectsArray = projectsArray.split(",");
+                    requestredy = true;
+                    includedPorjects.remove();
+                    //Variablen für das Wiederverwenden der Abgefraten Daten
+                    for (let i = 0; i < projectsArray.length; i++) {
+                        userProjects.push(projectsArray[i]);
+                    }
+                    userName = clientname.innerHTML;
+                    userEmail = clientemail.innerHTML;
+                    userCompany = company.innerHTML;
+                    nameImgSrc = userObject.user.avatar;
+                    gotUserData = true;
+                }
+                customerdiv.setAttribute('data-memberId', "" + counter);
+                counter++;
+
+            } else if (request.readyState === 4 && request.status === 403) {
+                console.log("Forbidden");
+            } else if (request.readyState === 4 && request.status === 401) {
+                document.location = window.location.origin + "/design-revision/login/login.html";
+            } else if (request.readyState === 4 && request.status === 404) {
+                window.alert("Nichts gefunden");
+            } else if (request1.readyState === 4 && request1.status === 400) {
+                window.alert("Unbekannter AnfrageParameter");
+            }
+        };
+    }
     let checkForprojects = setInterval(function () {
         if (requestredy) {
             clearInterval(checkForprojects);
             projectid = projectsArray[counterForId];
-            //window.location als ersatz zu a da man sonst dedign ändern muss
             let link = window.location.origin + "/design-revision/simulate/edit.php?id=" + projectid;
             projektname.href = link;
-            versionen.href= window.location.origin +"/design-revision/app/VersionOverview.html?id="+projectid;
+            versionen.href = window.location.origin + "/design-revision/app/VersionOverview.html?id=" + projectid;
             //customerdiv id geben
             customerdiv.setAttribute('data-id', "" + projectsArray[counterForId]);
             ableNewProject = counterForId < projectsArray.length;
@@ -152,33 +184,33 @@ function generate() {
                     if (request1.readyState === 4 && request1.status === 200) {
                         let projectObejct = JSON.parse(request1.response);
                         projektname.innerHTML = projectObejct.project.name;
-                        let includes =true;
-                        if(autoComplete.length===0){
-                            autoComplete[0]=projectObejct.project.name;
-                            includes=false;
+                        let includes = true;
+                        if (autoComplete.length === 0) {
+                            autoComplete[0] = projectObejct.project.name;
+                            includes = false;
                         }
-                        for (let i = 0; i <autoComplete.length ; i++) {
-                           if(autoComplete[i]==projectObejct.project.name){
-                               autoComplete[i]=projectObejct.project.name;
-                               includes=false
-                           }
+                        for (let i = 0; i < autoComplete.length; i++) {
+                            if (autoComplete[i] == projectObejct.project.name) {
+                                autoComplete[i] = projectObejct.project.name;
+                                includes = false
+                            }
                         }
-                        if(includes){
+                        if (includes) {
                             autoComplete.push(projectObejct.project.name);
                         }
                         versionen.innerHTML = "Versionen: " + projectObejct.project.version;
                         textStatus.innerHTML = projectObejct.project.status;
                         let members1 = projectObejct.project.members;
-                        let search = projectObejct.project.name ;
+                        let search = projectObejct.project.name;
                         customerdiv.setAttribute('data-test', search);
                         //members bekommen
-                        let help = members1[0].id;
-                        let helpRole = members1[0].role;
-                        let length = members1.length;
-                        for (let i = 1; i < length; i++) {
-                            help = help + "," + members1[i].id;
-                            helpRole = helpRole + "," + members1[i].role;
-                        }
+                            let help = members1[0].id;
+                            let helpRole = members1[0].role;
+                            let length = members1.length;
+                            for (let i = 1; i < length; i++) {
+                                help = help + "," + members1[i].id;
+                                helpRole = helpRole + "," + members1[i].role;
+                            }
                         //members generieren
                         members.innerHTML = help;
                         members.style.display = "none";
@@ -240,7 +272,7 @@ function generate() {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
-            for (let i = 0; i <arrayLength ; i++) {
+            for (let i = 0; i < arrayLength; i++) {
                 content[i].style.background = "white";
                 content[i].style.border = "4px solid black";
             }
@@ -335,7 +367,7 @@ function closeYes(members, content, arrayLength) {
             content[i].lastChild.remove();
         }
     }
-   loeschen.remove();
+    loeschen.remove();
     div.remove();
     toggleDialog();
 }
@@ -354,7 +386,7 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
     let arrayLength = content.length;
     let help;
     if (a) {
-        tmpClients=members;
+        tmpClients = members;
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-memberId");
             if (members.includes(help)) {
@@ -461,7 +493,7 @@ function showRes() {
         bool1 = true;
 
     }
-    autocomplete(document.getElementById("searchform"),autoComplete)
+    autocomplete(document.getElementById("searchform"), autoComplete)
 }
 
 
@@ -501,9 +533,9 @@ let readyStateCheckInterval = setInterval(function () {
             if (sendFile === undefined || nameLenght) {
                 const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
                 const previewFile = previewContainer.querySelector(".image-preview__file");
-                previewDefaulText.style.display="block";
-                previewFile.style.display="none";
-                previewDefaulText.style.color="red";
+                previewDefaulText.style.display = "block";
+                previewFile.style.display = "none";
+                previewDefaulText.style.color = "red";
             } else {
                 let allRight = putArrayTogether();
                 if (allRight) {
@@ -552,7 +584,7 @@ let readyStateCheckInterval = setInterval(function () {
                 previewFile.style.fontSize = "16px";
                 previewFile.innerHTML = "Bitte PDF hinzufügen!";
                 previewFile.style.color = "#cccccc";
-                previewFile.style.display="block";
+                previewFile.style.display = "block";
                 previewDefaulText.style.display = "none";
                 pdfIcon.style.display = "none";
                 sendFile = undefined;
@@ -594,7 +626,7 @@ function dateiauswahl(evt) {
         previewFile.style.color = "black";
         previewFile.style.fontSize = "12px";
     } else {
-        sendFile=undefined;
+        sendFile = undefined;
         previewFile.style.fontSize = "16px";
         previewFile.style.display = "block";
         pdfIcon.style.display = "none";
@@ -730,7 +762,7 @@ function changeClientState(members, role, id) {
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
-    let helpArray=[];
+    let helpArray = [];
     if (select) {
         if (a === false) {
             for (let i = 0; i < arrayLength; i++) {
@@ -761,16 +793,16 @@ function changeClientState(members, role, id) {
                 }
             }
         }
-        let j=0;
-        for (let i = 0; i <content.length ; i++) {
-            if(members.includes(content[i].getAttribute("data-memberId"))){
-               helpArray[j]=content[i].getAttribute("data-email");
+        let j = 0;
+        for (let i = 0; i < content.length; i++) {
+            if (members.includes(content[i].getAttribute("data-memberId"))) {
+                helpArray[j] = content[i].getAttribute("data-email");
                 j++;
             }
         }
 
         for (let i = 0; i < members.length; i++) {
-            if(content.length>members[i]) {
+            if (content.length > members[i]) {
                 let mail = helpArray[i];
                 let member = {"email": mail, "role": role[i]};
                 jasonmembers.push(member);
@@ -893,14 +925,8 @@ function sendNewProject() {
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.upload.addEventListener("progress", function (event) {
-        if (event.lengthComputable) {
-            let complete = (event.loaded / event.total * 100 | 0);
-            progressBar.style.display = "block";
-            percentage.style.display = "block";
-            percentage.innerHTML = complete + " %"
-        }
+       update_progress(event,data)
     });
-
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             let message = document.getElementById("sendFeedBack");
@@ -922,24 +948,24 @@ function sendNewProject() {
 }
 
 function sendDelet(id) {
-    let data ="id="+id;
+    let data = "id=" + id;
     console.log(id);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     let message = document.getElementById("sendFeedBack");
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             message.style.display = "block";
             console.log(this.responseText);
             setTimeout(function () {
                 message.style.display = "none";
                 location.reload(true);
-            },2000);
+            }, 2000);
 
         }
     });
 
-    xhr.open("DELETE",  window.location.origin + "/design-revision/api/");
+    xhr.open("DELETE", window.location.origin + "/design-revision/api/");
 
     xhr.send(data);
 
@@ -955,10 +981,11 @@ function sendUpdateProject() {
     data.append("updateproject", "addmember");
     data.append("id", "value");
     data.append("role", "value");
-
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
-
+    xhr.upload.addEventListener("progress", function (event) {
+        update_progress(event,data)
+    });
     xhr.addEventListener("readystatechange", function () {
         let message = document.getElementById("sendFeedBack");
         message.style.display = "block";
@@ -972,20 +999,40 @@ function sendUpdateProject() {
             console.log(this.responseText);
         }
     });
-    xhr.upload.addEventListener("progress", function (event) {
-        if (event.lengthComputable) {
-            let complete = (event.loaded / event.total * 100 | 0);
-            progressBar.style.display = "block";
-            percentage.style.display = "block";
-            percentage.innerHTML = complete + " %";
-        }
-    });
-
+    xhr.onprogress= update_progress;
     xhr.open("PUT", sendURL);
     xhr.send(data);
 
 }
+function getDataSize(data) {
+   let fd = data;
+    let size = 0;
+    for(let pair of fd.entries()) {
+        if (pair[1] instanceof Blob)
+            size += pair[1].size;
+        else
+            size += pair[1].length;
+    }
+    return (size);
 
+}
+function update_progress(event,data){
+    let progressBar = document.getElementById("loader");
+    progressBar.style.display = "block";
+    let size =getDataSize(data);
+    if (event.lengthComputable) {
+       //there is no better way to get the process ov the upload than by detection the size of the dataForm
+        let percentage1 = document.getElementById("percentage");
+        let percentage = Math.floor((event.loaded/size)*100);
+        console.log("percent " + percentage + '%' );
+        percentage1.style.display = "block";
+        percentage1.innerHTML = percentage + " %";
+    }
+    else
+    {
+        console.log("Unable to compute progress information since the total size is unknown");
+    }
+}
 function addMemberWithEmail() {
     let adminOrMember = document.getElementById("AdminOrMember");
     let emailFiled = document.getElementById("email");
@@ -1040,7 +1087,7 @@ function addEmailField() {
         let remove = document.createElement("i");
         remove.setAttribute('data-emailFormId', "" + moreMember);
         moreMember++;
-        remove.setAttribute('class','material-icons');
+        remove.setAttribute('class', 'material-icons');
         remove.innerHTML = "delete_forever";
         emailSpan.appendChild(remove);
         remove.onclick = function () {
@@ -1198,13 +1245,15 @@ function cleraForm() {
 }
 
 function autocomplete(inp, arr) {
-    inp.addEventListener("input", function(e) {
+    inp.addEventListener("input", function (e) {
         let a, b, i, val = this.value;
         //schließt die Liste
         closeAllLists();
-        if (!val) { return false;}
+        if (!val) {
+            return false;
+        }
         currentFocus = -1;
-       //erstellt ein div welches die inhalte des Array anzeigt sobald sie auf das value von dem inpuz passen
+        //erstellt ein div welches die inhalte des Array anzeigt sobald sie auf das value von dem inpuz passen
         a = document.createElement("DIV");
         a.setAttribute("id", this.id + "autocomplete-list");
         a.setAttribute("class", "autocomplete-items");
@@ -1217,7 +1266,7 @@ function autocomplete(inp, arr) {
                 b.innerHTML += arr[i].substr(val.length);
                 /*insert a input field that will hold the current array item's value:*/
                 b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-                b.addEventListener("click", function(e) {
+                b.addEventListener("click", function (e) {
                     //füllt den inhalt des divs in den input bei mausClick
                     inp.value = this.getElementsByTagName("input")[0].value;
                     closeAllLists();
@@ -1226,13 +1275,13 @@ function autocomplete(inp, arr) {
             }
         }
     });
-    inp.addEventListener("keydown", function(e) {
-        if(newKeyUp) {
-            newKeyUp=false;
+    inp.addEventListener("keydown", function (e) {
+        if (newKeyUp) {
+            newKeyUp = false;
             //abfrage damit die Tasten nicht mehrmal ausgeführt werden obwohl nur ein mal gedrückt wird
             setTimeout(function () {
-                newKeyUp=true;
-            },200);
+                newKeyUp = true;
+            }, 200);
             let x = document.getElementById(this.id + "autocomplete-list");
             if (x) x = x.getElementsByTagName("div");
             //wenn Pfeil nach unten gedrückt wird
@@ -1252,6 +1301,7 @@ function autocomplete(inp, arr) {
             }
         }
     });
+
     function addActive(x) {
         if (!x) return false;
         removeActive(x);
@@ -1261,20 +1311,23 @@ function autocomplete(inp, arr) {
         x[currentFocus].classList.add("autocomplete-active");
         console.log(x[currentFocus]);
     }
+
     function removeActive(x) {
-            for (let i = 0; i < x.length; i++) {
-                x[i].classList.remove("autocomplete-active");
-            }
+        for (let i = 0; i < x.length; i++) {
+            x[i].classList.remove("autocomplete-active");
+        }
 
     }
+
     function closeAllLists(elmnt) {
-       let x = document.getElementsByClassName("autocomplete-items");
+        let x = document.getElementsByClassName("autocomplete-items");
         for (let i = 0; i < x.length; i++) {
             if (elmnt != x[i] && elmnt != inp) {
                 x[i].parentNode.removeChild(x[i]);
             }
         }
     }
+
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });

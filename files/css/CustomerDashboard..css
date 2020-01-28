@@ -302,3 +302,11 @@ dialog[open="open"] {
     background-color: DodgerBlue !important;
     color: #ffffff;
 }
+/*Da in Firefox die inputs rot um randet werden wird dies so vermiden*/
+input:-moz-placeholder {
+    box-shadow:none !important;
+}
+
+input:invalid {
+    box-shadow:none;
+}
