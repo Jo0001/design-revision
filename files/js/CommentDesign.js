@@ -12,13 +12,19 @@ function setup() {
             //COMMENTMODE ON
             canvas.addEventListener("mousedown", startDragHandler, false);
             canvas.addEventListener("mouseup", endDragHandler, false);
-			document.getElementsByTagName("html")[0].style.cursor = "crosshair";
-			selectSidebarElementById(createCommentBtn.id);
+            document.getElementsByTagName("html")[0].style.cursor = "crosshair";
+            canvas.style.cursor = "crosshair";
+            commentContainer.style.cursor = "crosshair";
+            commentArea.style.cursor = "crosshair";
+            selectSidebarElementById(createCommentBtn.id);
         } else {
             canvas.removeEventListener("mousedown", startDragHandler, false);
             canvas.removeEventListener("mouseup", endDragHandler, false);
-			document.getElementsByTagName("html")[0].style.cursor = "context-menu";
-			deselectSidebarElementById(createCommentBtn.id);
+            document.getElementsByTagName("html")[0].style.cursor = null;
+            canvas.style.cursor = null;
+            commentContainer.style.cursor = null;
+            commentArea.style.cursor = null;
+            deselectSidebarElementById(createCommentBtn.id);
         }
     });
 	

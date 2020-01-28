@@ -4,12 +4,17 @@
     width: 2%;
 }
 
-.selected{
-	border: solid;
+.selected {
+    border: solid;
 }
 
-.disSelected{
-	border: solid transparent;
+.disSelected {
+    border: solid transparent;
+}
+
+.icon {
+    opacity: 0.7;
+    filter: alpha(opacity=40);
 }
 
 .textField {
@@ -79,7 +84,7 @@
     height: 10px;
     background-color: #00620b;
     bottom: 15px;
-    border-radius: 5px;
+    border-radius: 5rem;
     z-index: 1;
 }
 
@@ -87,6 +92,7 @@
     position: fixed;
     height: 20px;
     background-color: rgb(41, 41, 41);
+    border-radius: 5rem;
     bottom: 10px;
 }
 

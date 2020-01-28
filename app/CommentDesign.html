@@ -9,8 +9,8 @@
 </head>
 <body>
 <!-- The pdf.js library and controls-->
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.js"></script>-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.3.200/pdf.min.js"></script>-->
 <script src="../files/js/viewport.js"></script>
 <script async defer src="../files/js/CommentDesign.js"></script>
 <div id="titleBar">
@@ -21,15 +21,18 @@
 <div id="commentContainer" style="top: 20px; left: 10px;">
     <div id="commentArea" style="display: none; width: 10px; height: 10px; z-index: -3;"></div>
 </div>
+<div class="toolbox" style="top: 40%; outline-style:none;box-shadow:none;border-color:transparent;">
+    <button class="disSelected" id="movePdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
+            alt="Move" class="icon" src="../files/img/move.png"/></button>
+    <br/>
+    <button class="disSelected" id="zoomPdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
+            alt="Zoom" class="icon" src="../files/img/zoom.png"/></button>
+    <br/>
+    <button class="disSelected" id="createComment" style="left: 40px; right: 40px; background-color: Transparent;"><img
+            alt="Comment" class="icon" src="../files/img/addComment.png"/></button>
+
 </div>
-<div class="toolbox" style="top: 40%;">
-    <button id="createComment" class="disSelected" style="left: 40px; right: 40px; background-color: Transparent;"><img src="../files/img/addComment.png" style="opacity: 0.7;
-    filter: alpha(opacity=40);"></img></button>
-	<br></br>
-	<button id="movePdf" class="disSelected" style="left: 40px; right: 40px; background-color: Transparent;"><img src="../files/img/move.png" style="opacity: 0.7;
-    filter: alpha(opacity=40);"></img></button>
-</div>
-<div class="lowerBar">
+<div class="lowerBar" style="outline-style:none;box-shadow:none;border-color:transparent;">
     <button class="button" id="decPage" style=" left: 42%;">-</button>
     <label>
         <input class="textField" id="currentPage" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
