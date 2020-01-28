@@ -1,0 +1,2 @@
+#Deny all traffic from outside
+Deny from all
