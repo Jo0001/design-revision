@@ -11,13 +11,15 @@ function setup() {
         commentMode = !commentMode;
         if (commentMode) {
             //COMMENTMODE ON
-            createCommentBtn.innerHTML = "Kommentarmodus ausschalten";
             canvas.addEventListener("mousedown", startDragHandler, false);
             canvas.addEventListener("mouseup", endDragHandler, false);
+			document.getElementsByTagName("html")[0].style.cursor = "crosshair";
+			createCommentBtn.style.border = "solid";
         } else {
-            createCommentBtn.innerHTML = "Kommentarmodus einschalten";
             canvas.removeEventListener("mousedown", startDragHandler, false);
             canvas.removeEventListener("mouseup", endDragHandler, false);
+			document.getElementsByTagName("html")[0].style.cursor = "context-menu";
+			createCommentBtn.style.border = "solid transparent";
         }
     });
 }

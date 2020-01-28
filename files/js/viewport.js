@@ -203,7 +203,7 @@ function setupViewport() {
     request2.send();
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
-            pdfFileOrUrl = "../user-content/" + response.link;
+			pdfFileOrUrl = "../api/pdf.php?file=" +  response.link;
             loadPDFAndRender(1, pdfFileOrUrl);
         });
     });
