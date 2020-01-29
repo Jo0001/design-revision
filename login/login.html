@@ -10,9 +10,13 @@
           rel="stylesheet">
 </head>
 <body>
+<div class="alert">
+    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+    <strong><span>Sie haben sich erfolglreich Ausgelogt</span></strong>
+</div>
+
 <div class="form">
     <h1>Login</h1>
-
     <form action="login.php" id="login" method="post">
         <label>E-Mail:<br>
             <input id="email" name="email" onkeyup="check_up3()" placeholder="E-mail" required type="email"
@@ -64,8 +68,25 @@
         }
         let success = getURLParameter('success');
         if (success === "logout") {
-            window.location = "../login/logout.html"
+            let alert= document.querySelector('.alert');
+            alert.style.display="block";
+           let message=alert.getElementsByTagName("span");
+           message[1].innerHTML="Sie haben sich erfolglreich Ausgelogt";
+        }
+        let verify=getURLParameter('verify');
+        if(verify==='notVerified'){
+            let alert= document.querySelector('.alert');
+            alert.style.display="block";
+            let message=alert.getElementsByTagName("span");
+            message[1].innerHTML="Sie m&uuml;ssen ihre E-Mail verifiziern";
 
+        }
+        let projects=getURLParameter('projects');
+        if(projects==='noProjects'){
+            let alert= document.querySelector('.alert');
+            alert.style.display="block";
+            let message=alert.getElementsByTagName("span");
+            message[1].innerHTML="Sie m&uuml;ssen warten bis sie einem Projekt zugewießen wurden";
         }
     };
 
