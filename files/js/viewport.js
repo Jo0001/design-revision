@@ -65,12 +65,12 @@ class TargetScaleHandlerClass {
     }
 
     targetScale(val) {
-        if (val < 0.4 && this.innerTargetScale !== val) {
-            this.innerTargetScale = 0.4;
+        if (val < minZoom && this.innerTargetScale !== val) {
+            this.innerTargetScale = minZoom;
             this.timeSinceResize = 10000;
             this.updateScale();
-        } else if (val > 4.5 && this.innerTargetScale !== val) {
-            this.innerTargetScale = 4.5;
+        } else if (val > maxZoom && this.innerTargetScale !== val) {
+            this.innerTargetScale = maxZoom;
             this.timeSinceResize = 10000;
             this.updateScale();
         } else if (this.innerTargetScale !== val) {
@@ -135,6 +135,11 @@ let incPage;
 let sidebarElements = [];
 let moveBtn;
 let zoomBtn;
+//Zoom-Variables
+const minZoom = parseFloat(0.4 + "");
+const maxZoom = parseFloat(4.5 + "");
+let currentZoom;
+let zoomData = {sX: -1, sY: -1};
 
 function setupViewport() {
     //Prevent a contextmenu on page, so people cant download the design.
@@ -204,8 +209,10 @@ function setupViewport() {
     zoomBtn.addEventListener("click", function (e) {
         if (zoomBtn.classList.contains("disSelected")) {
             selectSidebarElementById(zoomBtn.id);
+            canvas.addEventListener("mousedown", startPointZoom);
         } else {
             deselectSidebarElementById(zoomBtn.id);
+            canvas.removeEventListener("mousedown", startPointZoom);
         }
     });
 
@@ -234,7 +241,7 @@ function setupViewport() {
     request2.send();
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
-			pdfFileOrUrl = "../api/pdf.php?file=" +  response.link;
+            pdfFileOrUrl = "../api/pdf.php?file=" + response.link;
             loadPDFAndRender(1, pdfFileOrUrl);
         });
     });
@@ -278,6 +285,7 @@ function setupViewport() {
             }
         }
     }
+
     function listenForMouseWheelTurn(e) {
         let event = window.event || e;
         event.preventDefault();
@@ -297,6 +305,54 @@ function setupViewport() {
         }
         //console.log(delta);
     }
+
+    //Viewport-Zoom
+    function startPointZoom(e) {
+        ensureEventAttributes(e);
+        zoomData.sX = e.clientX;
+        zoomData.sY = e.clientY;
+        currentZoom = parseFloat(targetScaleHandler.innerTargetScale);
+        document.addEventListener("mousemove", zoom);
+        document.addEventListener("mouseup", clearListeners);
+    }
+
+    function zoom(e) {
+        ensureEventAttributes(e);
+        let deltaX = zoomData.sX - e.clientX;
+        let deltaY = zoomData.sY - e.clientY;
+        let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        distance = parseInt(distance + "");
+        distance = distance <= 10 ? 0 : distance;
+        let fullZoomAtPx = document.body.clientWidth * 0.2;
+        let scaleFactor = (distance / fullZoomAtPx).toPrecision(7);
+        scaleFactor = scaleFactor >= 1 ? 1 : scaleFactor;
+        scaleFactor = scaleFactor <= 0 ? 0 : scaleFactor;
+        let deltaZoom;
+        let zoomVal;
+        if (deltaX > 0) {
+            //scale bigger
+            deltaZoom = (maxZoom - currentZoom).toPrecision(2);
+            // console.log(deltaZoom);
+            zoomVal = (currentZoom + (deltaZoom * scaleFactor)).toPrecision(2);
+            // console.log("bg: " + parseFloat(zoomVal).toPrecision(2));
+        } else if (deltaX < 0) {
+            //scale smaller
+            deltaZoom = (currentZoom - minZoom).toPrecision(2);
+            // console.log(deltaZoom);
+            zoomVal = (currentZoom - (deltaZoom * scaleFactor)).toPrecision(2);
+            // console.log("sm: " + parseFloat(zoomVal).toPrecision(2));
+        } else {
+            zoomVal = currentZoom;
+        }
+        let numSteps = parseInt(zoomVal / 0.05 + "");
+        targetScaleHandler.targetScale((numSteps * 0.05).toPrecision(2));
+    }
+
+    function clearListeners(e) {
+        document.removeEventListener("mousemove", zoom);
+        document.removeEventListener("mouseup", clearListeners);
+    }
+
     function redirectAllEvents(target, fromElement) {
         redirect("wheel", target, fromElement);
         redirect("DOMMouseScroll", target, fromElement);
@@ -353,9 +409,10 @@ function selectSidebarElementById(id) {
     document.getElementById(id).classList.remove("disSelected");
     document.getElementById(id).classList.add("selected");
 }
-function deselectSidebarElementById(id){
-	document.getElementById(id).classList.remove("selected");
-	document.getElementById(id).classList.add("disSelected"); 
+
+function deselectSidebarElementById(id) {
+    document.getElementById(id).classList.remove("selected");
+    document.getElementById(id).classList.add("disSelected");
 }
 
 //Error-Correction
@@ -389,6 +446,7 @@ function clearComments() {
     comments = [];
     //TODO Request Comments for page from api
 }
+
 function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.position = "absolute";
     commentDiv.style.left = (comment.x * commentContainer.style.width.replace("px", "")) + "px";
@@ -399,6 +457,7 @@ function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.outlineStyle = "outset";
     commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
 }
+
 function resizeComments() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
@@ -416,6 +475,7 @@ function displayProgressOnBar() {
     let marginLeft = (loadingBar.style.left.replace("px", "") - lowBar.style.left.replace("px", ""));
     loadingBar.style.width = percentLoaded * (lowBar.clientWidth - marginRight - marginLeft) + "px";
 }
+
 function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
     console.log("Started loading pdf: " + loadingTask);
@@ -434,6 +494,7 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
         window.alert(reason);
     });
 }
+
 function loadPdfPage(scale) {
     if (pdfPageNumber.value !== undefined) {
         let num = parseInt(pdfPageNumber.value);
@@ -459,6 +520,7 @@ function scaleViewport(scale) {
         renderIfReady(scale);
     }
 }
+
 async function renderIfReady(scale) {
     if (!isRendering && targetScaleHandler.getTimeMsSinceLastScale() > 100) {
         isRendering = true;

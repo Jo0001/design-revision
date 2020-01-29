@@ -50,9 +50,9 @@
 }
 
 .toolbox {
-    border-radius: 50px;
+    border-radius: 30px;
     position: fixed;
-    padding: 20px 20px;
+    padding: 10px 10px;
     right: 1%;
     background: #0cfad6;
     text-align: center;
