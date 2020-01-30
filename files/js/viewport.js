@@ -180,7 +180,7 @@ function setupViewport() {
     canvasObserver.observe(canvas, {attributes: true});
     canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-    dragElementWhenBtnIsDown(canvas, 1, false);
+    let middleMove = dragElementWhenBtnIsDown(canvas, 1);
     context = canvas.getContext('2d');
 
     //Comment-Setup
@@ -211,9 +211,15 @@ function setupViewport() {
         if (zoomBtn.classList.contains("disSelected")) {
             selectSidebarElementById(zoomBtn.id);
             canvas.addEventListener("mousedown", startPointZoom);
+            canvas.removeEventListener("wheel", listenForMouseWheelTurn, false);
+            canvas.removeEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
+            canvas.removeEventListener("mousedown", middleMove);
         } else {
             deselectSidebarElementById(zoomBtn.id);
             canvas.removeEventListener("mousedown", startPointZoom);
+            canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
+            canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
+            middleMove = dragElementWhenBtnIsDown(canvas, 1)
         }
     });
 
