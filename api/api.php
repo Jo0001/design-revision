@@ -253,7 +253,8 @@ function updateProject()
         } elseif ($_PUT['updateproject'] == "removemember" && !empty(($_PUT['id']))) {
             handleOutput("Success");
         } elseif ($_PUT['updateproject'] == "data" && !empty(($_PUT['id'])) && !empty(($_PUT['data']))) {
-            handleOutput("Success");
+            updateProjectData();
+            // handleOutput("Success");
         } elseif ($_PUT['updateproject'] == "status" && !empty(($_PUT['id'])) && !empty(($_PUT['status']))) {
             handleOutput("Success");
         } elseif ($_PUT['updateproject'] == "file" && !empty(($_PUT['id']))) {
@@ -327,6 +328,50 @@ function deleteProject()
     }
 }
 
+function updateProjectData()
+{
+    //TODO Declare $_PUT public
+    $_PUT = null;
+    parse_str(file_get_contents('php://input'), $_PUT);
+
+    //Check if user is logged in and a projectmember
+    if (isLoggedIn() && isMember()) {
+        $pid = filter_var($_PUT['id'], FILTER_SANITIZE_STRING);
+        $data = filter_var($_PUT['data'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+        //Check if JSON is valid
+        if (!isJson($data)) {
+            //TODO Throw via showError()
+            die("no json");
+        }
+        //TODO Fix db
+        if (isValidProject($pid, $pdo)) {
+
+            $pid = "project_" . $pid;
+            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+
+            $statement = $pdo->prepare("SELECT data FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
+            $statement->execute();
+            $tmpdata = $statement->fetch()[0];
+
+            //Check if entry of db is empty/null
+            $newdata = array(json_decode($data, true));
+            if (!is_null($tmpdata)) {
+                $olddata = json_decode($tmpdata, true);
+                $result = array_merge($olddata, $newdata);
+            } else {
+                $result = $newdata;
+            }
+            $statement = $pdo->prepare("UPDATE " . $pid . " SET data = ?  ORDER BY version DESC LIMIT 1 ");
+            $statement->execute(array(json_encode($result)));
+        } else {
+            showError("Invalid project id", 400);
+        }
+    } else {
+        showError("Not logged in/ project member", 401);
+    }
+
+}
+
 function isValidProject($id, $pdo)
 {
     $statement = $pdo->prepare("SHOW TABLES IN design_revision LIKE 'project_%' ");
@@ -367,6 +412,11 @@ function updateUserProjects($pdo, $id, $pid)
 
 }
 
+function isMember($id)
+{
+    //TODO LOGIC!!
+}
+
 function isAdmin($lastrow, $userid)
 {
     $members = json_decode($lastrow['members'], true);
@@ -396,4 +446,10 @@ function emailToId($email)
     $statement->execute(array($email));
     $tmpid = $statement->fetch();
     return $tmpid[0];
+}
+
+function isJson($string)
+{
+    json_decode($string);
+    return (json_last_error() == JSON_ERROR_NONE);
 }
