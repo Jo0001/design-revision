@@ -117,7 +117,7 @@ function endDragHandler(event) {
         if (commentAreaData.sX !== -1 && commentAreaData.sY !== -1 &&
             commentAreaData.eX !== -1 && commentAreaData.eY !== -1) {
             if (commentAreaData.sX !== commentAreaData.eX && commentAreaData.sY !== commentAreaData.eY) {
-                createComment(commentArea);
+                createNewComment(commentArea);
             }
         }
         resetAreaData();
@@ -125,7 +125,7 @@ function endDragHandler(event) {
 }
 
 //Comment-Creation
-function createComment(commentArea) {
+function createNewComment(commentArea) {
     let xInPx = parseFloat(commentArea.style.left.replace("px", ""));
     let yInPx = parseFloat(commentArea.style.top.replace("px", ""));
     let wInPx = parseFloat(commentArea.style.width.replace("px", ""));
@@ -136,7 +136,7 @@ function createComment(commentArea) {
     let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
     let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
 
-    let comment = new Comment(pdfPageNumber, xInCoords, yInCoords, wInCoords, hInCoords,
+    let comment = new Comment(pageNumberContainer, xInCoords, yInCoords, wInCoords, hInCoords,
         "Somebody", "Message....", false);
     comments.push(comment);
     //TODO upload Data to API

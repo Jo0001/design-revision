@@ -103,13 +103,14 @@ let pdf;
 let pdfPage = undefined;
 let pdfFileOrUrl = "../user-content/test4.pdf";
 let targetScaleHandler = new TargetScaleHandlerClass();
-let pdfPageNumber;
+let pageNumberContainer;
 let isRendering = false;
 let firstTimeDisplay = true;
 let context;
 let preventZoomAndMovement = false;
 let viewport;
 //Comment-Variables
+let projectId;
 let commentContainer;
 let comments = [];
 let canvasObserver = new MutationObserver(function (mutations) {
@@ -150,27 +151,27 @@ function setupViewport() {
     //Rescale Loading bar so we cant get over 100%
     window.addEventListener('resize', displayProgressOnBar);
     //Get dom elements
-    pdfPageNumber = document.getElementById("currentPage");
+    pageNumberContainer = document.getElementById("currentPage");
     decPage = document.getElementById("decPage");
     incPage = document.getElementById("incPage");
     canvas = document.getElementById('pdf');
     let titleCard = document.getElementById("titleCard");
 
     //Turn-Page-Logic
-    pdfPageNumber.addEventListener("click", function () {
-        pdfPageNumber.value = "";
+    pageNumberContainer.addEventListener("click", function () {
+        pageNumberContainer.value = "";
     });
-    pdfPageNumber.addEventListener("input", function () {
+    pageNumberContainer.addEventListener("input", function () {
         clearComments();
         loadPdfPage(targetScaleHandler.scale);
     });
     decPage.addEventListener("click", function () {
-        pdfPageNumber.value = parseInt(pdfPageNumber.value) - 1;
+        pageNumberContainer.value = parseInt(pageNumberContainer.value) - 1;
         clearComments();
         loadPdfPage(targetScaleHandler.scale);
     });
     incPage.addEventListener("click", function () {
-        pdfPageNumber.value = parseInt(pdfPageNumber.value) + 1;
+        pageNumberContainer.value = parseInt(pageNumberContainer.value) + 1;
         clearComments();
         loadPdfPage(targetScaleHandler.scale);
     });
@@ -217,7 +218,7 @@ function setupViewport() {
     });
 
     //Demo-Data
-    let projectId = getURLParameter('id');
+    projectId = getURLParameter('id');
     if (projectId === "") {
         projectId = "20ced965";
         console.log("Using demo Project id=20ced965, because I received no parameter projectId.")
@@ -369,23 +370,22 @@ function setupViewport() {
         }
     }
 
-
-    //API-Request-Stuff
-    function handleServerResponse(request, successCallback) {
-        if (request.readyState === 4 && request.status === 200) {
-            successCallback(JSON.parse(request.response));
-        } else if (request.readyState === 4 && request.status === 401) {
-            window.alert("keine Berechtigung");
-        } else if (request.readyState === 4 && request.status === 403) {
-            window.alert("Forbidden");
-        } else if (request.readyState === 4 && request.status === 404) {
-            window.alert("Nichts gefunden");
-        }
-    }
-
     function getURLParameter(name) {
         let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [undefined, ""])[1]);
         return (value !== 'null') ? value : undefined;
+    }
+}
+
+//API-Request-Stuff
+function handleServerResponse(request, successCallback) {
+    if (request.readyState === 4 && request.status === 200) {
+        successCallback(JSON.parse(request.response));
+    } else if (request.readyState === 4 && request.status === 401) {
+        window.alert("keine Berechtigung");
+    } else if (request.readyState === 4 && request.status === 403) {
+        window.alert("Forbidden");
+    } else if (request.readyState === 4 && request.status === 404) {
+        window.alert("Nichts gefunden");
     }
 }
 
@@ -444,15 +444,39 @@ function clearComments() {
         commentDiv.remove();
     }
     comments = [];
-    //TODO Request Comments for page from api
+    //Json Comments aus Api hohlen
+    let request3 = new XMLHttpRequest();
+    let requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+    request3.open('GET', requestURL);
+    request3.send();
+    request3.addEventListener('readystatechange', function (e) {
+        handleServerResponse(request3, function (response) {
+            let allPdfComments = JSON.parse(response.data);
+            for (let index = 0; index < allPdfComments.length; index++) {
+                let comment = allPdfComments[index];
+                if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
+                    // console.log(comment);
+                    comments.push(comment);
+                    createComment(comment);
+                }
+            }
+        });
+    });
+}
+
+function createComment(comment) {
+    let commentDiv = document.createElement("div");
+    commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
+    setCommentAttributes(commentDiv, comment);
+    commentContainer.appendChild(commentDiv);
 }
 
 function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.position = "absolute";
-    commentDiv.style.left = (comment.x * commentContainer.style.width.replace("px", "")) + "px";
-    commentDiv.style.top = (comment.y * commentContainer.style.height.replace("px", "")) + "px";
-    commentDiv.style.width = (comment.w * commentContainer.style.width.replace("px", "")) + "px";
-    commentDiv.style.height = (comment.h * commentContainer.style.height.replace("px", "")) + "px";
+    commentDiv.style.left = (parseFloat(comment.x) * commentContainer.style.width.replace("px", "")) + "px";
+    commentDiv.style.top = (parseFloat(comment.y) * commentContainer.style.height.replace("px", "")) + "px";
+    commentDiv.style.width = (parseFloat(comment.w) * commentContainer.style.width.replace("px", "")) + "px";
+    commentDiv.style.height = (parseFloat(comment.h) * commentContainer.style.height.replace("px", "")) + "px";
     commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
     commentDiv.style.outlineStyle = "outset";
     commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
@@ -496,12 +520,13 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
 }
 
 function loadPdfPage(scale) {
-    if (pdfPageNumber.value !== undefined) {
-        let num = parseInt(pdfPageNumber.value);
+    if (pageNumberContainer.value !== undefined) {
+        let num = parseInt(pageNumberContainer.value);
         num = num >= 1 ? num : 1;
         num = num <= pdf.numPages ? num : pdf.numPages;
-        pdfPageNumber.value = num;
-        pdf.getPage(parseInt(pdfPageNumber.value)).then(function (localPage) {
+        pageNumberContainer.value = num;
+        clearComments();//to get comments
+        pdf.getPage(parseInt(pageNumberContainer.value)).then(function (localPage) {
             pdfPage = localPage;
             renderIfReady(scale);
         });
