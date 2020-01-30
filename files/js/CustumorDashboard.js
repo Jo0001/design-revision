@@ -116,7 +116,7 @@ function generate() {
                 customerdiv.setAttribute('data-email', userObject.user.email + counter);
                 company.innerHTML = userObject.user.company;
                 if (!(userObject.user.status === "VERIFIED")) {
-                    window.location = window.location.origin + "/design-revision/login/verifizieren.html"
+                    window.location = window.location.origin + "/design-revision/login/login.html?verify=notVerified";
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
@@ -124,8 +124,10 @@ function generate() {
                     customerdiv.remove();
                     clearInterval(checkForprojects);
                     ableNewProject = false;
-                    window.alert("Noch keine Projekte");
-                    window.location = window.location.origin + "/design-revision/login/login.html";
+                    setTimeout(function () {
+                        window.location = window.location.origin + "/design-revision/login/login.html?projects=noProjects";
+                    },100)
+
                 } else {
                     let tmp1 = tmp[0];
                     for (let i = 1; i < tmp.length; i++) {

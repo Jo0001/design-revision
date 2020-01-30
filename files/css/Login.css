@@ -96,3 +96,30 @@ input:-moz-placeholder {
 input:invalid {
     box-shadow:none;
 }
+.alert {
+    display: none;
+    margin-left: 5%;
+    margin-right: 5%;
+    border-radius: 30px;
+    padding: 1%;
+    font-size: 24px;
+    border: 4px solid black;
+    background-color: #07af87;
+    color: black;
+    text-align: center;
+}
+
+.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 40px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.closebtn:hover {
+    color: black;
+}
