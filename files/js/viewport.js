@@ -138,7 +138,7 @@ let moveBtn;
 let zoomBtn;
 //Zoom-Variables
 const minZoom = parseFloat(0.4 + "");
-const maxZoom = parseFloat(4.5 + "");
+const maxZoom = parseFloat(4.0 + "");
 let currentZoom;
 let zoomData = {sX: -1, sY: -1};
 
@@ -162,17 +162,14 @@ function setupViewport() {
         pageNumberContainer.value = "";
     });
     pageNumberContainer.addEventListener("input", function () {
-        clearComments();
         loadPdfPage(targetScaleHandler.scale);
     });
     decPage.addEventListener("click", function () {
         pageNumberContainer.value = parseInt(pageNumberContainer.value) - 1;
-        clearComments();
         loadPdfPage(targetScaleHandler.scale);
     });
     incPage.addEventListener("click", function () {
         pageNumberContainer.value = parseInt(pageNumberContainer.value) + 1;
-        clearComments();
         loadPdfPage(targetScaleHandler.scale);
     });
 
@@ -234,24 +231,24 @@ function setupViewport() {
     let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
     let request = new XMLHttpRequest();
     request.open('GET', requestURL);
-    request.send();
     request.addEventListener('readystatechange', function (e) {
         handleServerResponse(request, function (response) {
             titleCard.innerText = titleCard.innerHTML.replace("/", response.project.name);
         });
     });
+    request.send();
 
     //Json PDF aus Api hohlen
     let request2 = new XMLHttpRequest();
     requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
     request2.open('GET', requestURL);
-    request2.send();
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
             pdfFileOrUrl = "../api/pdf.php?file=" + response.link;
             loadPDFAndRender(1, pdfFileOrUrl);
         });
     });
+    request2.send();
 
     //Viewport-Movement
     function dragElementWhenBtnIsDown(element, btn) {

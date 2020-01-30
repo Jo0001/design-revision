@@ -136,10 +136,21 @@ function createNewComment(commentArea) {
     let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
     let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
 
-    let comment = new Comment(pageNumberContainer, xInCoords, yInCoords, wInCoords, hInCoords,
+    let comment = new Comment(pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
         "Somebody", "Message....", false);
     comments.push(comment);
     //TODO upload Data to API
+    console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));
+    let data = "updateproject=data&id=" + projectId + "&data=" + JSON.stringify(comment);
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.response);
+        }
+    });
+    xhr.open("PUT", window.location.origin + "/design-revision/api/");
+    xhr.send(data);
 
     let commentDiv = document.createElement("div");
     commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
