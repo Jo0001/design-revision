@@ -333,39 +333,33 @@ function updateProjectData()
     //TODO Declare $_PUT public
     $_PUT = null;
     parse_str(file_get_contents('php://input'), $_PUT);
+    $pid = filter_var($_PUT['id'], FILTER_SANITIZE_STRING);
+    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $pid = "project_" . $pid;
 
     //Check if user is logged in and a projectmember
-    if (isLoggedIn() && isMember()) {
-        $pid = filter_var($_PUT['id'], FILTER_SANITIZE_STRING);
+    if (isLoggedIn() && isValidProject($pid, $pdo) && isMember($pid, getUser('pk_id'))) {
         $data = filter_var($_PUT['data'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
         //Check if JSON is valid
         if (!isJson($data)) {
-            //TODO Throw via showError()
-            die("no json");
+            showError("No JSON Data", 400);
         }
-        //TODO Fix db
-        if (isValidProject($pid, $pdo)) {
 
-            $pid = "project_" . $pid;
-            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $statement = $pdo->prepare("SELECT data FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
+        $statement->execute();
+        $tmpdata = $statement->fetch()[0];
 
-            $statement = $pdo->prepare("SELECT data FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
-            $statement->execute();
-            $tmpdata = $statement->fetch()[0];
-
-            //Check if entry of db is empty/null
-            $newdata = array(json_decode($data, true));
-            if (!is_null($tmpdata)) {
-                $olddata = json_decode($tmpdata, true);
-                $result = array_merge($olddata, $newdata);
-            } else {
-                $result = $newdata;
-            }
-            $statement = $pdo->prepare("UPDATE " . $pid . " SET data = ?  ORDER BY version DESC LIMIT 1 ");
-            $statement->execute(array(json_encode($result)));
+        //Check if entry of db is empty/null
+        $newdata = array(json_decode($data, true));
+        if (!is_null($tmpdata)) {
+            $olddata = json_decode($tmpdata, true);
+            $result = array_merge($olddata, $newdata);
         } else {
-            showError("Invalid project id", 400);
+            $result = $newdata;
         }
+        $statement = $pdo->prepare("UPDATE " . $pid . " SET data = ?  ORDER BY version DESC LIMIT 1 ");
+        $statement->execute(array(json_encode($result)));
+
     } else {
         showError("Not logged in/ project member", 401);
     }
@@ -412,9 +406,18 @@ function updateUserProjects($pdo, $id, $pid)
 
 }
 
-function isMember($id)
+function isMember($pid, $userid)
 {
-    //TODO LOGIC!!
+
+    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $members = json_decode(getLatestProjectData($pid, $pdo)['members'], true);
+    foreach ($members as $member) {
+        if ($member['id'] == $userid) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 function isAdmin($lastrow, $userid)
