@@ -1,8 +1,8 @@
 <?php
-require "../libs/auth.php";
+require "../../libs/auth.php";
 if (isLoggedIn() && !empty($_GET['file'])) {
     //TODO Check if user is projectmember
-    $file = "../user-content/" . filter_var($_GET['file'], FILTER_SANITIZE_STRING);
+    $file = "../../user-content/" . filter_var($_GET['file'], FILTER_SANITIZE_STRING);
 
     if (file_exists($file)&& substr($file, -4)==".pdf") {
         $handle = @fopen($file, "rb");

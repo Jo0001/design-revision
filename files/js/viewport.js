@@ -244,7 +244,7 @@ function setupViewport() {
     request2.open('GET', requestURL);
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
-            pdfFileOrUrl = "../api/pdf.php?file=" + response.link;
+            pdfFileOrUrl = "../api/project/pdf.php?file=" + response.link;
             loadPDFAndRender(1, pdfFileOrUrl);
         });
     });

@@ -14,7 +14,7 @@ if (!empty($_GET['name'])) {
     imagefill($im, 0, 0, $bgcolor);
 
     $text = strtoupper($name[0]);
-    $font = '../libs/arial.ttf';
+    $font = '../../libs/arial.ttf';
 
     //center the image
     $xi = imagesx($im);
