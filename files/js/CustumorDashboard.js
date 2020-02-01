@@ -23,8 +23,10 @@ let nameImgSrc;
 let userName;
 let userEmail;
 let userCompany;
-let userProjects=[];
+let userProjects = [];
 let gotUserData = false;
+//update Project id
+let updateProjectId;
 
 
 function emailIsValid(email) {
@@ -103,7 +105,7 @@ function generate() {
         console.log("Took Saved Data");
     } else {
         //Jason user Object aus Api holen
-        requestURL = window.location.origin + "/design-revision/api/?getuser";
+        requestURL = window.location.origin + "/design-revision/api/user/";
         request.open('GET', requestURL, true);
         request.send();
         request.onreadystatechange = function () {
@@ -126,7 +128,7 @@ function generate() {
                     ableNewProject = false;
                     setTimeout(function () {
                         window.location = window.location.origin + "/design-revision/login/login.html?projects=noProjects";
-                    },100)
+                    }, 100)
 
                 } else {
                     let tmp1 = tmp[0];
@@ -206,13 +208,13 @@ function generate() {
                         let search = projectObejct.project.name;
                         customerdiv.setAttribute('data-test', search);
                         //members bekommen
-                            let help = members1[0].id;
-                            let helpRole = members1[0].role;
-                            let length = members1.length;
-                            for (let i = 1; i < length; i++) {
-                                help = help + "," + members1[i].id;
-                                helpRole = helpRole + "," + members1[i].role;
-                            }
+                        let help = members1[0].id;
+                        let helpRole = members1[0].role;
+                        let length = members1.length;
+                        for (let i = 1; i < length; i++) {
+                            help = help + "," + members1[i].id;
+                            helpRole = helpRole + "," + members1[i].role;
+                        }
                         //members generieren
                         members.innerHTML = help;
                         members.style.display = "none";
@@ -274,6 +276,10 @@ function generate() {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
+            let mail = document.getElementById('email');
+            mail.required = true;
+            let AdminOrMember = document.getElementById('AdminOrMember');
+            AdminOrMember.required = true;
             for (let i = 0; i < arrayLength; i++) {
                 content[i].style.background = "white";
                 content[i].style.border = "4px solid black";
@@ -286,7 +292,7 @@ function generate() {
             let projektErsellen = document.getElementById("projektErstellen");
             let projektName = document.getElementById("projectname");
             projektName.required = true;
-            projektName.style.display = "block";
+            projektName.style.visibility="visible";
             projektErsellen.innerHTML = "Projekt erstellen";
             btnAddMember.onclick = function () {
                 addMember();
@@ -298,6 +304,12 @@ function generate() {
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
         let btnAddMember = document.getElementById("btnAddMember");
+        updateProjectId = customerdiv.getAttribute('data-id');
+        console.log(updateProjectId);
+        let mail = document.getElementById('email');
+        mail.required = false;
+        let AdminOrMember = document.getElementById('AdminOrMember');
+        AdminOrMember.required = false;
         let projektErsellen = document.getElementById("projektErstellen");
         let projektName = document.getElementById("projectname");
         let content = document.querySelectorAll('[data-memberid');
@@ -324,7 +336,7 @@ function generate() {
             }
             if (select) {
                 projektName.required = false;
-                projektName.style.display = "none";
+                projektName.style.visibility="hidden";
                 projektErsellen.innerHTML = "Projekt ändern";
                 customerdiv.style.background = "#FFFF99";
                 btnAddMember.onclick = function () {
@@ -567,6 +579,15 @@ let readyStateCheckInterval = setInterval(function () {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     previewContainer.addEventListener('dragover', handleDragOver, false);
     previewContainer.addEventListener('drop', dateiauswahl, false);
+    // i needed to use the on click method to get get ride of the current File because Firexfox does not fire change event when  cancle in data-explore
+    inputFile.addEventListener('click',function () {
+        pdfIcon.style.display = "none";
+        previewDefaulText.style.display = "block";
+        previewDefaulText.style.color = "#cccccc";
+        previewFile.innerHTML = "Keine Datei ausgewählt";
+        previewFile.style.display = "none";
+        sendFile = undefined;
+    });
     inputFile.addEventListener("change", function () {
         const file = this.files[0];
         console.log(file);
@@ -599,7 +620,7 @@ let readyStateCheckInterval = setInterval(function () {
             previewFile.style.display = "none";
             sendFile = undefined;
         }
-    });
+    },false);
     setTimeout(function () {
         document.getElementById('pageLoader').style.display = "none";
     }, 1000);
@@ -923,11 +944,11 @@ function sendNewProject() {
     data.append("name", projectname);
     console.log(projectname);
     data.append("members", tmpArray);
-    data.append("file", sendFile);
+    data.append("file", sendFile, sendFile.name);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.upload.addEventListener("progress", function (event) {
-       update_progress(event,data)
+        update_progress(event, data)
     });
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
@@ -938,7 +959,7 @@ function sendNewProject() {
                 message.style.display = "none";
                 progressBar.style.display = "none";
                 percentage.style.display = "none";
-                location.reload(true);
+                //location.reload(true);
             }, 2000);
 
             console.log(this.responseText);
@@ -961,7 +982,7 @@ function sendDelet(id) {
             console.log(this.responseText);
             setTimeout(function () {
                 message.style.display = "none";
-                location.reload(true);
+                //location.reload(true);
             }, 2000);
 
         }
@@ -975,20 +996,53 @@ function sendDelet(id) {
 
 //Hello
 function sendUpdateProject() {
-    let data = new FormData();
     let sendURL = window.location.origin + "/design-revision/api/";
     let progressBar = document.getElementById("loader");
     let percentage = document.getElementById("percentage");
-    //Daten in Api sollten auf Member Array und File geändert werden
-    data.append("updateproject", "addmember");
-    data.append("id", "value");
-    data.append("role", "value");
-    let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-    xhr.upload.addEventListener("progress", function (event) {
-        update_progress(event,data)
+    let tmpArray = JSON.stringify(sendArray);
+    //Daten in Api sollten auf Member Array und File geändert werden, deshalb "demo Code"
+    let dataMember = new FormData();
+    dataMember.append("updateproject", "member");
+    dataMember.append("members", tmpArray);
+
+    let xhrMember = new XMLHttpRequest();
+    xhrMember.withCredentials = true;
+
+    xhrMember.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+            console.log(this.responseText);
+        }
     });
-    xhr.addEventListener("readystatechange", function () {
+
+    xhrMember.open("POST", sendURL);
+    xhrMember.send(dataMember);
+    //senden des Neuen Status
+    let dataStatus = new FormData();
+    dataStatus.append("updateproject", "status");
+    dataStatus.append("id", updateProjectId);
+    dataStatus.append("status", "Warten auf Kundenrückmeldung");
+
+    let xhrStatus = new XMLHttpRequest();
+    xhrStatus.withCredentials = true;
+
+    xhrStatus.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+    xhrStatus.open("PUT", sendURL);
+    xhrStatus.send(dataStatus);
+    //Senden der File
+    let dataFile = new FormData();
+    dataFile.append("updateproject", "data");
+    dataFile.append("id", updateProjectId);
+    dataFile.append("data", sendFile);
+    let xhrFile = new XMLHttpRequest();
+    xhrFile.withCredentials = true;
+    xhrFile.upload.addEventListener("progress", function (event) {
+        update_progress(event, dataFile)
+    });
+    xhrFile.addEventListener("readystatechange", function () {
         let message = document.getElementById("sendFeedBack");
         message.style.display = "block";
         if (this.readyState === 4) {
@@ -1001,15 +1055,15 @@ function sendUpdateProject() {
             console.log(this.responseText);
         }
     });
-    xhr.onprogress= update_progress;
-    xhr.open("PUT", sendURL);
-    xhr.send(data);
+    xhrFile.open("PUT", sendURL);
+    xhrFile.send(dataFile);
 
 }
+
 function getDataSize(data) {
-   let fd = data;
+    let fd = data;
     let size = 0;
-    for(let pair of fd.entries()) {
+    for (let pair of fd.entries()) {
         if (pair[1] instanceof Blob)
             size += pair[1].size;
         else
@@ -1018,23 +1072,23 @@ function getDataSize(data) {
     return (size);
 
 }
-function update_progress(event,data){
+
+function update_progress(event, data) {
     let progressBar = document.getElementById("loader");
     progressBar.style.display = "block";
-    let size =getDataSize(data);
+    let size = getDataSize(data);
     if (event.lengthComputable) {
-       //there is no better way to get the process ov the upload than by detection the size of the dataForm
+        //there is no better way to get the process ov the upload than by detection the size of the dataForm
         let percentage1 = document.getElementById("percentage");
-        let percentage = Math.floor((event.loaded/size)*100);
-        console.log("percent " + percentage + '%' );
+        let percentage = Math.floor((event.loaded / size) * 100);
+        console.log("percent " + percentage + '%');
         percentage1.style.display = "block";
         percentage1.innerHTML = percentage + " %";
-    }
-    else
-    {
+    } else {
         console.log("Unable to compute progress information since the total size is unknown");
     }
 }
+
 function addMemberWithEmail() {
     let adminOrMember = document.getElementById("AdminOrMember");
     let emailFiled = document.getElementById("email");
@@ -1227,6 +1281,7 @@ function cleraForm() {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     pdfIcon.style.display = "none";
     previewDefaulText.style.display = "block";
+    previewFile.style.color="black";
     previewFile.innerHTML = "Keine Datei ausgewählt";
     previewFile.style.display = "none";
     projectName.value = "";

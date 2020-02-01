@@ -28,17 +28,17 @@
 </div>
 <div class="space"></div>
 <div class="form" id="form1">
-    <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
+        <h2 id="projektErstellen" >Projekt erstellen</h2>
         <label>
             <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
         </label><br>
         <span id="nameToLong"></span><br>
         <span id="emailSpan">
         <label>
-            <input id="email" name="email" placeholder="E-mail" style="width: 55%" type="email">
+            <input id="email" name="email" placeholder="E-mail" style="width: 60%" type="email" required >
         </label>
-            <select id="AdminOrMember" name="AdminOrMember" required>
+            <select id="AdminOrMember" name="AdminOrMember"  required>
                 <option disabled hidden selected value="">Auswählen</option>
                 <option value="Member">Member</option>
                 <option value="Admin">Admin</option>
@@ -46,11 +46,9 @@
         <span id="messageRole"></span><br><span id="messageEmail"></span><br>
         <span id="messageDoubleSelected"></span>
         <input onclick="addEmailField()"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:10%;border: none;cursor: pointer"
-               type="button" value="Weiterer Nutzer auswählen"/>
+               type="button" value="Weiterer Nutzer auswählen"/> <br>
         <input accept="application/pdf" id="inputFile" name="inputFile" style="display: none;" type="file"/>
         <input onclick="document.getElementById('inputFile').click();"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 4%;margin-left:30%;margin-bottom:2%;border: none;cursor: pointer"
                type="button"
                value="Datei suchen"/>
         <div class="image-preview" id="imagePreview">
@@ -60,9 +58,8 @@
             <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>
         </div>
         <input id="btnAddMember" onclick="addMember()"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;justify-content:center;border: none;margin-left:60px;margin-top:10px;cursor: pointer"
                type="button"
-               value="Member ausw&#228;hlen"/>
+               value="Member ausw&#228;hlen"/><br>
         <input id="submitButton" type="submit" value="Speichern">
         <div id="loader"><span id="percentage" style="display: none"></span></div>
     </form>
