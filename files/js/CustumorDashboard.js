@@ -292,7 +292,7 @@ function generate() {
             let projektErsellen = document.getElementById("projektErstellen");
             let projektName = document.getElementById("projectname");
             projektName.required = true;
-            projektName.style.visibility="visible";
+            projektName.style.visibility = "visible";
             projektErsellen.innerHTML = "Projekt erstellen";
             btnAddMember.onclick = function () {
                 addMember();
@@ -336,7 +336,7 @@ function generate() {
             }
             if (select) {
                 projektName.required = false;
-                projektName.style.visibility="hidden";
+                projektName.style.visibility = "hidden";
                 projektErsellen.innerHTML = "Projekt ändern";
                 customerdiv.style.background = "#FFFF99";
                 btnAddMember.onclick = function () {
@@ -580,7 +580,7 @@ let readyStateCheckInterval = setInterval(function () {
     previewContainer.addEventListener('dragover', handleDragOver, false);
     previewContainer.addEventListener('drop', dateiauswahl, false);
     // i needed to use the on click method to get get ride of the current File because Firexfox does not fire change event when  cancle in data-explore
-    inputFile.addEventListener('click',function () {
+    inputFile.addEventListener('click', function () {
         pdfIcon.style.display = "none";
         previewDefaulText.style.display = "block";
         previewDefaulText.style.color = "#cccccc";
@@ -620,7 +620,7 @@ let readyStateCheckInterval = setInterval(function () {
             previewFile.style.display = "none";
             sendFile = undefined;
         }
-    },false);
+    }, false);
     setTimeout(function () {
         document.getElementById('pageLoader').style.display = "none";
     }, 1000);
@@ -988,7 +988,7 @@ function sendDelet(id) {
         }
     });
 
-    xhr.open("DELETE", window.location.origin + "/design-revision/api/");
+    xhr.open("DELETE", window.location.origin + "/design-revision/api/project/delete");
 
     xhr.send(data);
 
@@ -1008,8 +1008,8 @@ function sendUpdateProject() {
     let xhrMember = new XMLHttpRequest();
     xhrMember.withCredentials = true;
 
-    xhrMember.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhrMember.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             console.log(this.responseText);
         }
     });
@@ -1209,6 +1209,7 @@ function putArrayTogether() {
         console.log(duplicates);
         //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
         if (!(duplicates.length < 1)) {
+            message.style.color = "red";
             message.innerHTML = "Zweimal gleiche E-Mail";
             allRight = false;
         } else {
@@ -1219,6 +1220,7 @@ function putArrayTogether() {
         for (let i = 0; i < sendArrayFields.length; i++) {
             let valid = emailIsValid(sendArrayFields[i].email);
             if (!valid) {
+                messageValid.style.color = "red";
                 messageValid.innerHTML = "Eine Mail ist falsch!";
                 allRight = false;
             }
@@ -1243,6 +1245,7 @@ function putArrayTogether() {
         }, []);
         //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
         if (!(duplicates.length < 1)) {
+            message.style.color = "red";
             message.innerHTML = "Zweimal gleiche E-Mail";
             allRight = false;
 
@@ -1251,22 +1254,32 @@ function putArrayTogether() {
         for (let i = 0; i < sendArrayFields.length; i++) {
             let valid = emailIsValid(sendArrayFields[i].email);
             if (!valid) {
+                messageValid.style.color = "red";
                 messageValid.innerHTML = "Eine Mail ist falsch!";
                 allRight = false;
             }
         }
         for (let i = 0; i < sendArrayFields; i++) {
             if (sendArrayFields[i].role === (-1)) {
+                messageRole.style.color = "red";
                 messageRole.innerHTML = "Rollen auswählen";
                 allRight = false;
             }
 
         }
     }
+    //Löscht die Nachrichten an den User nach 10 Sekunden
+    setTimeout(function () {
+        messageValid.innerHTML = "";
+        messageRole.innerHTML = "";
+        message.innerHTML = "";
+    }, 10000);
     if (allRight) {
+        messageValid.innerHTML = "";
         messageRole.innerHTML = "";
         message.innerHTML = "";
     }
+    console.log(allRight);
     return allRight;
 
 }
@@ -1281,7 +1294,7 @@ function cleraForm() {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     pdfIcon.style.display = "none";
     previewDefaulText.style.display = "block";
-    previewFile.style.color="black";
+    previewFile.style.color = "black";
     previewFile.innerHTML = "Keine Datei ausgewählt";
     previewFile.style.display = "none";
     projectName.value = "";
