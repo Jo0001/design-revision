@@ -939,7 +939,7 @@ function sendNewProject() {
     let tmpArray = JSON.stringify(sendArray);
     console.log(projectname);
     console.log(tmpArray);
-    let sendURL = window.location.origin + "/design-revision/api/";
+    let sendURL = window.location.origin + "/design-revision/api/project/create";
     data.append("createproject", "");
     data.append("name", projectname);
     console.log(projectname);

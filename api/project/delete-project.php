@@ -4,6 +4,7 @@ require "../../libs/api-util.php";
 
 $_DELETE = null;
 parse_str(file_get_contents('php://input'), $_DELETE);
+
 if (isset($_DELETE['id'])) {
     $id = "project_" . filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
@@ -14,7 +15,7 @@ if (isset($_DELETE['id'])) {
             $statement = $pdo->prepare("SELECT link FROM " . $id);
             $statement->execute();
             $link = $statement->fetchAll();
-            $target_dir = "../user-content/";
+            $target_dir = "../../user-content/";
             for ($i = 0; $i < count($link); $i++) {
                 //deletes all project files
                 unlink($target_dir . $link[$i][0]);
@@ -36,6 +37,9 @@ if (isset($_DELETE['id'])) {
                 $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
                 $statement->execute(array(json_encode($projects), $tmp));
             }
+            //Drop the table of the project
+            $statement = $pdo->prepare("DROP TABLE " . $id);
+            $statement->execute();
 
             header("HTTP/1.1 204 No Content ");
         } else {

@@ -1,5 +1,12 @@
 RewriteEngine On
 #redirect to the correct files depending on the requestmethod
+
+#exclude the pdf serving file
+RewriteRule ^(pdf.php)($|/) - [L]
+
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule (.*) project.php  [L]
+
 RewriteCond %{REQUEST_METHOD} POST
 RewriteRule (.*) post-project.php  [L]
 
@@ -8,6 +15,3 @@ RewriteRule (.*) put-project.php  [L]
 
 RewriteCond %{REQUEST_METHOD} DELETE
 RewriteRule (.*) delete-project.php  [L]
-
-#Hide .php extension
-DirectoryIndex project.php

@@ -1,24 +1,26 @@
 <?php
 require "../../libs/auth.php";
-if (isLoggedIn() && !empty($_GET['file'])) {
-    //TODO Check if user is projectmember
+require "../../libs/api-util.php";
+if (isLoggedIn()) {
     $file = "../../user-content/" . filter_var($_GET['file'], FILTER_SANITIZE_STRING);
-
-    if (file_exists($file)&& substr($file, -4)==".pdf") {
-        $handle = @fopen($file, "rb");
-        header("Content-type: application/pdf");
-        header("Content-Length: " . filesize($file));
-        header('Content-Transfer-Encoding: binary');
-        readfile_chunked($file);
-        die;
+    if (!empty($_GET['file']) && substr($file, -4) == ".pdf") {
+        //TODO Check if user is projectmember
+        if (file_exists($file)) {
+            $handle = @fopen($file, "rb");
+            header("Content-type: application/pdf");
+            header("Content-Length: " . filesize($file));
+            header('Content-Transfer-Encoding: binary');
+            readfile_chunked($file);
+            die;
+        } else {
+            showError("Found no pdf-file", 404);
+        }
     } else {
-        header("HTTP/1.1 404 Not Found");
-        die;
+        showError("Missing file name", 400);
     }
+
 } else {
-    header('WWW-Authenticate: Login to get the requested data');
-    header("HTTP/1.1 401 Unauthorized ");
-    die;
+    showError("Login to get the requested data", 401);
 }
 
 // Read a file and display its content chunk by chunk

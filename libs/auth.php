@@ -21,7 +21,7 @@ function logIn($email, $password, $location)
         header("Location: $location");
         die;
     } else {
-        header("Location: ../login/login.html?err=1");
+        header("Location: ../login/?err=1");
         die;
     }
 
@@ -47,7 +47,7 @@ function logOut()
 {
     session_unset();
     session_destroy();
-    header("Location: ../login/login.html?success=logout");
+    header("Location: ../login/?success=logout");
     die;
 }
 
