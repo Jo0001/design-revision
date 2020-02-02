@@ -479,6 +479,8 @@ function showRes() {
     let content = document.querySelectorAll('[data-test');
     let arrayLength = content.length;
     let value = document.getElementById("searchform").value;
+    //needed to replace invalid characters
+    value = value.replace(/[|&;$%@"<>()+,]/g, "");
     value = value.toLowerCase();
     let message = document.getElementById("message");
     let dis = [];
@@ -489,6 +491,8 @@ function showRes() {
 //sucht nach CustomerDivs die Datatest haben un macht sie in ein Array
     for (let i = 0; i < arrayLength; i++) {
         let help = content[i].getAttribute("data-test");
+        //needed to replace invalid characters
+        help = help.replace(/[|&;$%@"<>()+,]/g, "");
         help = help.toLowerCase();
         //schaut ob die inhalte desvon data-test mit dem Suchbegriff übereinstimmen
         if (help.match(value)) {
@@ -533,23 +537,37 @@ let readyStateCheckInterval = setInterval(function () {
             console.log(projectName.value.length);
             if (projectName.value.length >= 80) {
                 feedback.style.color = "red";
-                feedback.style.paddingLeft = "100px";
-                feedback.innerHTML = "<strong>Name zu lang!</strong>"
+                feedback.innerHTML = "<strong>Name zu lang!</strong>";
                 nameLenght = true;
             } else {
-                feedback.innerHTML = "";
-                nameLenght = false;
+                let str = projectName.value;
+                if(str.length>0) {
+                    if (str.match(/[a-zäöü]+/) || str.match(/[[A-ZÄÖU]+/)) {
+                        feedback.innerHTML = "";
+                        nameLenght = false;
+                    } else {
+                        feedback.style.color = "red";
+                        feedback.innerHTML = "<strong>Der Name muss mindestens einen Buchstaben enthalten! </strong>";
+                        nameLenght = true;
+
+                    }
+                }else {
+                    feedback.innerHTML = "";
+                    nameLenght = false;
+                }
             }
         });
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
             if (sendFile === undefined || nameLenght) {
-                const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
-                const previewFile = previewContainer.querySelector(".image-preview__file");
-                previewDefaulText.style.display = "block";
-                previewFile.style.display = "none";
-                previewDefaulText.style.color = "red";
+                if(sendFile===undefined) {
+                    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                    const previewFile = previewContainer.querySelector(".image-preview__file");
+                    previewDefaulText.style.display = "block";
+                    previewFile.style.display = "none";
+                    previewDefaulText.style.color = "red";
+                }
             } else {
                 let allRight = putArrayTogether();
                 if (allRight) {
