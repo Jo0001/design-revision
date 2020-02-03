@@ -292,7 +292,7 @@ function generate() {
             let projektErsellen = document.getElementById("projektErstellen");
             let projektName = document.getElementById("projectname");
             projektName.required = true;
-            projektName.style.visibility="visible";
+            projektName.style.visibility = "visible";
             projektErsellen.innerHTML = "Projekt erstellen";
             btnAddMember.onclick = function () {
                 addMember();
@@ -336,7 +336,7 @@ function generate() {
             }
             if (select) {
                 projektName.required = false;
-                projektName.style.visibility="hidden";
+                projektName.style.visibility = "hidden";
                 projektErsellen.innerHTML = "Projekt ändern";
                 customerdiv.style.background = "#FFFF99";
                 btnAddMember.onclick = function () {
@@ -479,6 +479,8 @@ function showRes() {
     let content = document.querySelectorAll('[data-test');
     let arrayLength = content.length;
     let value = document.getElementById("searchform").value;
+    //needed to replace invalid characters
+    value = value.replace(/[|&;$%@"<>()+,]/g, "");
     value = value.toLowerCase();
     let message = document.getElementById("message");
     let dis = [];
@@ -489,6 +491,8 @@ function showRes() {
 //sucht nach CustomerDivs die Datatest haben un macht sie in ein Array
     for (let i = 0; i < arrayLength; i++) {
         let help = content[i].getAttribute("data-test");
+        //needed to replace invalid characters
+        help = help.replace(/[|&;$%@"<>()+,]/g, "");
         help = help.toLowerCase();
         //schaut ob die inhalte desvon data-test mit dem Suchbegriff übereinstimmen
         if (help.match(value)) {
@@ -533,23 +537,37 @@ let readyStateCheckInterval = setInterval(function () {
             console.log(projectName.value.length);
             if (projectName.value.length >= 80) {
                 feedback.style.color = "red";
-                feedback.style.paddingLeft = "100px";
-                feedback.innerHTML = "<strong>Name zu lang!</strong>"
+                feedback.innerHTML = "<strong>Name zu lang!</strong>";
                 nameLenght = true;
             } else {
-                feedback.innerHTML = "";
-                nameLenght = false;
+                let str = projectName.value;
+                if(str.length>0) {
+                    if (str.match(/[a-zäöü]+/) || str.match(/[[A-ZÄÖU]+/)) {
+                        feedback.innerHTML = "";
+                        nameLenght = false;
+                    } else {
+                        feedback.style.color = "red";
+                        feedback.innerHTML = "<strong>Der Name muss mindestens einen Buchstaben enthalten! </strong>";
+                        nameLenght = true;
+
+                    }
+                }else {
+                    feedback.innerHTML = "";
+                    nameLenght = false;
+                }
             }
         });
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
             if (sendFile === undefined || nameLenght) {
-                const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
-                const previewFile = previewContainer.querySelector(".image-preview__file");
-                previewDefaulText.style.display = "block";
-                previewFile.style.display = "none";
-                previewDefaulText.style.color = "red";
+                if(sendFile===undefined) {
+                    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                    const previewFile = previewContainer.querySelector(".image-preview__file");
+                    previewDefaulText.style.display = "block";
+                    previewFile.style.display = "none";
+                    previewDefaulText.style.color = "red";
+                }
             } else {
                 let allRight = putArrayTogether();
                 if (allRight) {
@@ -580,7 +598,7 @@ let readyStateCheckInterval = setInterval(function () {
     previewContainer.addEventListener('dragover', handleDragOver, false);
     previewContainer.addEventListener('drop', dateiauswahl, false);
     // i needed to use the on click method to get get ride of the current File because Firexfox does not fire change event when  cancle in data-explore
-    inputFile.addEventListener('click',function () {
+    inputFile.addEventListener('click', function () {
         pdfIcon.style.display = "none";
         previewDefaulText.style.display = "block";
         previewDefaulText.style.color = "#cccccc";
@@ -620,7 +638,7 @@ let readyStateCheckInterval = setInterval(function () {
             previewFile.style.display = "none";
             sendFile = undefined;
         }
-    },false);
+    }, false);
     setTimeout(function () {
         document.getElementById('pageLoader').style.display = "none";
     }, 1000);
@@ -951,9 +969,12 @@ function sendNewProject() {
         update_progress(event, data)
     });
     xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            let message = document.getElementById("sendFeedBack");
+        let message = document.getElementById("sendFeedBack");
+        if (this.readyState === 4&&this.status===201) {
             message.style.display = "block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Erfolgreich gesendet";
+            console.log(this.responseText);
             //wartet
             setTimeout(function () {
                 message.style.display = "none";
@@ -961,8 +982,10 @@ function sendNewProject() {
                 percentage.style.display = "none";
                 //location.reload(true);
             }, 2000);
-
-            console.log(this.responseText);
+        }else if(this.readyState === 4){
+            message.style.display = "block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Fehler versuchen sie es erneut";
         }
     });
     xhr.open("POST", sendURL);
@@ -977,18 +1000,28 @@ function sendDelet(id) {
     xhr.withCredentials = true;
     let message = document.getElementById("sendFeedBack");
     xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
+        if (this.readyState === 4&&this.status===204) {
             message.style.display = "block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Erfolgreich gesendet";
             console.log(this.responseText);
             setTimeout(function () {
                 message.style.display = "none";
                 //location.reload(true);
             }, 2000);
 
+        }else if(this.readyState === 4){
+            message.style.display="block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Fehler versuchen sie es erneut";
+            setTimeout(function () {
+                message.style.display = "none";
+                //location.reload(true);
+            }, 2000)
         }
     });
 
-    xhr.open("DELETE", window.location.origin + "/design-revision/api/");
+    xhr.open("DELETE", window.location.origin + "/design-revision/api/project/delete");
 
     xhr.send(data);
 
@@ -1008,8 +1041,8 @@ function sendUpdateProject() {
     let xhrMember = new XMLHttpRequest();
     xhrMember.withCredentials = true;
 
-    xhrMember.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhrMember.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             console.log(this.responseText);
         }
     });
@@ -1209,6 +1242,7 @@ function putArrayTogether() {
         console.log(duplicates);
         //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
         if (!(duplicates.length < 1)) {
+            message.style.color = "red";
             message.innerHTML = "Zweimal gleiche E-Mail";
             allRight = false;
         } else {
@@ -1219,6 +1253,7 @@ function putArrayTogether() {
         for (let i = 0; i < sendArrayFields.length; i++) {
             let valid = emailIsValid(sendArrayFields[i].email);
             if (!valid) {
+                messageValid.style.color = "red";
                 messageValid.innerHTML = "Eine Mail ist falsch!";
                 allRight = false;
             }
@@ -1243,6 +1278,7 @@ function putArrayTogether() {
         }, []);
         //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
         if (!(duplicates.length < 1)) {
+            message.style.color = "red";
             message.innerHTML = "Zweimal gleiche E-Mail";
             allRight = false;
 
@@ -1251,22 +1287,32 @@ function putArrayTogether() {
         for (let i = 0; i < sendArrayFields.length; i++) {
             let valid = emailIsValid(sendArrayFields[i].email);
             if (!valid) {
+                messageValid.style.color = "red";
                 messageValid.innerHTML = "Eine Mail ist falsch!";
                 allRight = false;
             }
         }
         for (let i = 0; i < sendArrayFields; i++) {
             if (sendArrayFields[i].role === (-1)) {
+                messageRole.style.color = "red";
                 messageRole.innerHTML = "Rollen auswählen";
                 allRight = false;
             }
 
         }
     }
+    //Löscht die Nachrichten an den User nach 10 Sekunden
+    setTimeout(function () {
+        messageValid.innerHTML = "";
+        messageRole.innerHTML = "";
+        message.innerHTML = "";
+    }, 10000);
     if (allRight) {
+        messageValid.innerHTML = "";
         messageRole.innerHTML = "";
         message.innerHTML = "";
     }
+    console.log(allRight);
     return allRight;
 
 }
@@ -1281,7 +1327,7 @@ function cleraForm() {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     pdfIcon.style.display = "none";
     previewDefaulText.style.display = "block";
-    previewFile.style.color="black";
+    previewFile.style.color = "black";
     previewFile.innerHTML = "Keine Datei ausgewählt";
     previewFile.style.display = "none";
     projectName.value = "";
