@@ -1,4 +1,8 @@
 <?php
+$pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+
+
+
 /*
  * Handle Output & Errors
  */

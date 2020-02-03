@@ -99,7 +99,7 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                         array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
 
                         $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
-                        sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                        sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
                     }
                 }
 
