@@ -969,9 +969,12 @@ function sendNewProject() {
         update_progress(event, data)
     });
     xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            let message = document.getElementById("sendFeedBack");
+        let message = document.getElementById("sendFeedBack");
+        if (this.readyState === 4&&this.status===201) {
             message.style.display = "block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Erfolgreich gesendet";
+            console.log(this.responseText);
             //wartet
             setTimeout(function () {
                 message.style.display = "none";
@@ -979,8 +982,10 @@ function sendNewProject() {
                 percentage.style.display = "none";
                 //location.reload(true);
             }, 2000);
-
-            console.log(this.responseText);
+        }else if(this.readyState === 4){
+            message.style.display = "block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Fehler versuchen sie es erneut";
         }
     });
     xhr.open("POST", sendURL);
@@ -995,14 +1000,24 @@ function sendDelet(id) {
     xhr.withCredentials = true;
     let message = document.getElementById("sendFeedBack");
     xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
+        if (this.readyState === 4&&this.status===204) {
             message.style.display = "block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Erfolgreich gesendet";
             console.log(this.responseText);
             setTimeout(function () {
                 message.style.display = "none";
                 //location.reload(true);
             }, 2000);
 
+        }else if(this.readyState === 4){
+            message.style.display="block";
+            let m=message.getElementsByTagName("h1");
+            m[0].innerHTML="Fehler versuchen sie es erneut";
+            setTimeout(function () {
+                message.style.display = "none";
+                //location.reload(true);
+            }, 2000)
         }
     });
 
