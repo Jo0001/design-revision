@@ -3,4 +3,4 @@ reset.php
 auth.php
 signup.php
 setpassword.php
-playground.php->api
+.htaccess in app

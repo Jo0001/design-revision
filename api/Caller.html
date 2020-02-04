@@ -12,10 +12,10 @@
 <script>
     function send() {
         //let data = "id=f50b92d1&member={\"role\":123,\"email\":\"jonkjolk@gmx.de\"}";
-        let data = "id=f50b92d1&member={\"role\":123,\"email\":\"luke-skywalker@gmx-topmail.de\"}";
+        let data = "id=73401dae&member={\"role\":123,\"email\":\"luke-skywalker@gmx-topmail.de\"}";
         document.getElementById("output").innerHTML = "";
         let code = document.getElementById("code");
-        code.innerText = "";
+        code.innerText = "loading";
 
         let xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
@@ -31,7 +31,7 @@
                 }
             }
         });
-        xhr.open("PUT", "http://localhost/design-revision/api/project/addmember");
+        xhr.open("PUT", window.origin+"/design-revision/api/project/addmember");
         xhr.send(data);
     }
 
