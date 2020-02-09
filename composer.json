@@ -1,6 +1,6 @@
 {
   "name": "jo0001/design-revision",
-  "description": "This is Test",
+  "description": "This is for testing the php files",
   "type": "library",
   "homepage": "https://github.com/Jo0001/design-revision",
   "time": "2020-02-09",
@@ -17,6 +17,9 @@
   },
   "scripts": {
     "tests": [
+      "php libs/util.php",
+      "php libs/auth.php",
+      "php libs/api-util.php",
       "php api/project/project.php",
       "php api/project/delete-project.php",
       "php api/project/post-project.php",
@@ -28,8 +31,7 @@
       "php login/login.php",
       "php login/reset.php",
       "php login/signup.php",
-      "php simulate/setpassword.php",
-      "php api.php"
+      "php simulate/setpassword.php"
     ]
   }
 }
