@@ -1,0 +1,35 @@
+{
+  "name": "jo0001/design-revision",
+  "description": "This is Test",
+  "type": "library",
+  "homepage": "https://github.com/Jo0001/design-revision",
+  "time": "2020-02-09",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jo0001",
+      "homepage": "https://github.com/Jo0001/",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "phpmailer/phpmailer": "~6.1"
+  },
+  "scripts": {
+    "tests": [
+      "php api/project/project.php",
+      "php api/project/delete-project.php",
+      "php api/project/post-project.php",
+      "php api/project/put-project.php",
+      "php api/project/pdf.php",
+      "php api/user/user.php",
+      "php api/user/avatar.php",
+      "php app/verify.php",
+      "php login/login.php",
+      "php login/reset.php",
+      "php login/signup.php",
+      "php simulate/setpassword.php",
+      "php api.php"
+    ]
+  }
+}
