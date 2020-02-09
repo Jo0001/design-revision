@@ -303,6 +303,7 @@ function generate() {
     };
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
+        if (select) {
         let btnAddMember = document.getElementById("btnAddMember");
         updateProjectId = customerdiv.getAttribute('data-id');
         console.log(updateProjectId);
@@ -334,7 +335,7 @@ function generate() {
                 }
                 a = true;
             }
-            if (select) {
+
                 projektName.required = false;
                 projektName.style.visibility = "hidden";
                 projektErsellen.innerHTML = "Projekt ändern";
@@ -715,6 +716,9 @@ function addMember() {
                 let email = parent.getAttribute("data-email");
                 let role = 1;
                 let include = true;
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display="inline";
+                buttonAdmin.style.display="none";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -741,6 +745,9 @@ function addMember() {
                 let email = parent.getAttribute("data-email");
                 let role = 0;
                 let include = true;
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display="none";
+                buttonAdmin.style.display="inline";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -765,6 +772,9 @@ function addMember() {
             let buttonDeletMember = document.createElement("button");
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display="inline";
+                buttonAdmin.style.display="none";
                 let parent = buttonDeletMember.parentNode;
                 let email = parent.getAttribute("data-email");
                 for (let k in jasonmembers) {
@@ -783,6 +793,9 @@ function addMember() {
             });
             content[i].appendChild(buttonDeletMember);
             select = false;
+            //sorgt für Dynamische Buttons
+            buttonMember.style.display="inline";
+            buttonAdmin.style.display="none";
         }
     } else {
         console.log(sendArray);
@@ -852,13 +865,16 @@ function changeClientState(members, role, id) {
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < arrayLength; i++) {
             let buttonAdmin = document.createElement("button");
-            buttonAdmin.innerHTML = "Admin";
+            let buttonMember = document.createElement("button");
             //Button Click event
             buttonAdmin.addEventListener('click', function () {
                 let parent = buttonAdmin.parentNode;
                 let email = parent.getAttribute("data-email");
                 let role = 1;
                 let include = true;
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display="inline";
+                buttonAdmin.style.display="none";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -877,14 +893,17 @@ function changeClientState(members, role, id) {
                 sendArray = jasonmembers;
                 parent.style.background = "#FFA500";
             });
+            buttonAdmin.innerHTML="Admin";
             content[i].appendChild(buttonAdmin);
-            let buttonMember = document.createElement("button");
             //Butto Click event
             buttonMember.addEventListener('click', function () {
                 let parent = buttonMember.parentNode;
                 let email = parent.getAttribute("data-email");
                 let role = "0";
                 let include = true;
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display="none";
+                buttonAdmin.style.display="inline";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -912,6 +931,9 @@ function changeClientState(members, role, id) {
             buttonDeletMember.addEventListener('click', function () {
                 let parent = buttonDeletMember.parentNode;
                 let email = parent.getAttribute("data-email");
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display="inline";
+                buttonAdmin.style.display="none";
                 for (let k in jasonmembers) {
                     if (jasonmembers.hasOwnProperty(k)) {
                         if (jasonmembers[k].email == email) {
@@ -926,6 +948,19 @@ function changeClientState(members, role, id) {
                 parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
+            console.log(content[i].style.backgroundColor);
+            //schaut ob der Account schon im Projekt ist
+            if(content[i].style.backgroundColor==="rgb(0, 255, 102)"){
+                buttonMember.style.display = "none";
+                buttonAdmin.style.display = "inline";
+            }else if(content[i].style.backgroundColor==="rgb(255, 165, 0)"){
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
+            }
+            else {
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
+            }
             if (i == id) {
                 buttonMember.style.display = "none";
                 buttonAdmin.style.display = "none";
@@ -1027,7 +1062,6 @@ function sendDelet(id) {
 
 }
 
-//Hello
 function sendUpdateProject() {
     let sendURL = window.location.origin + "/design-revision/api/";
     let progressBar = document.getElementById("loader");
@@ -1090,6 +1124,46 @@ function sendUpdateProject() {
     });
     xhrFile.open("PUT", sendURL);
     xhrFile.send(dataFile);
+
+}
+function addProjectMember(projectId,member) {
+    let data = new FormData();
+    data.append("id", projectId);
+    data.append("member", member);
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhr.send(data);
+
+}
+function removeProjectMember(projectId,member) {
+   let data = new FormData();
+    data.append("id", projectId);
+    data.append("member", member);
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+            console.log(this.responseText);
+        }
+    });
+
+    xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhr.send(data);
 
 }
 
