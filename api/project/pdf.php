@@ -2,8 +2,8 @@
 require "../../libs/auth.php";
 require "../../libs/api-util.php";
 if (isLoggedIn()) {
-    $file = "../../user-content/" . filter_var($_GET['file'], FILTER_SANITIZE_STRING);
-    if (!empty($_GET['file']) && substr($file, -4) == ".pdf") {
+    if (!empty($_GET['file']) && substr(filter_var($_GET['file'], FILTER_SANITIZE_STRING), -4) == ".pdf") {
+        $file = "../../user-content/" . filter_var($_GET['file'], FILTER_SANITIZE_STRING);
         //TODO Check if user is projectmember
         if (file_exists($file)) {
             $handle = @fopen($file, "rb");
