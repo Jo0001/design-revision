@@ -11,8 +11,8 @@
 <button disabled id="code" style="color: black"></button>
 <script>
     function send() {
-        //let data = "id=f50b92d1&member={\"role\":123,\"email\":\"jonkjolk@gmx.de\"}";
-        let data = "id=73401dae&member={\"role\":123,\"email\":\"luke-skywalker@gmx-topmail.de\"}";
+       // let data = "id=73401dae&member={\"role\":123,\"email\":\"jonkjolk@gmx.de\"}";
+        let data = "id=73401dae&member={\"role\":1,\"email\":\"luke-skywalker@gmx-topmail.de\"}";
         document.getElementById("output").innerHTML = "";
         let code = document.getElementById("code");
         code.innerText = "loading";
@@ -35,7 +35,7 @@
         xhr.send(data);
     }
 
-    send();
+
 </script>
 </body>
 </html>

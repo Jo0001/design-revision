@@ -76,8 +76,9 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                         $status = $results['status'];
                         //Inform user per email about the new project
                         if ($status == "INVITE") {
-                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
-                            sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                            // $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
+                            // sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                            informNewbie($tmp, $projectname);
                         } else {
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
                             sendMail($tmp, $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
@@ -98,17 +99,18 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                         $role = array_column($members, 'role', 'email')[$tmp];
                         array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
 
-                        $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
-                        sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                        // $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
+                        //   sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                        informNewbie($tmp, $projectname);
                     }
                 }
 
                 $statement = $pdo->prepare("INSERT INTO " . $t_name . " (p_name, link, members,status,lastedit) VALUES (?, ?, ?,?,?)");
-                $statement->execute(array($name, $filename, json_encode($memberids), 'WAITING_FOR_RESPONSE', $date));
+                $statement->execute(array($projectname, $filename, json_encode($memberids), 'WAITING_FOR_RESPONSE', $date));
 
                 header("HTTP/1.1 201 Created ");
                 //Just for development
-                handleOutput("Successful uploaded file");
+                handleOutput("Successful saved the new project");
             } else {
                 showError("Something went seriously wrong", 500);
             }
