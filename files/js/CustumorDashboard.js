@@ -27,7 +27,7 @@ let userProjects = [];
 let gotUserData = false;
 //update Project id
 let updateProjectId;
-
+let arrayBefore =[];
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -73,8 +73,8 @@ function generate() {
     let company = document.createElement("p");
     let statusDiv = document.createElement("div");
     let textStatus = document.createElement("p");
-    let members = document.createElement("p");
-    let role = document.createElement("p");
+    let members = document.createElement("b");
+    let role = document.createElement("b");
     let includedPorjects = document.createElement("p");
     //custumordiv generieren
     customerdiv.className = "clients";
@@ -227,8 +227,6 @@ function generate() {
                         customerdiv.appendChild(role);
                         arrayRole = role.innerHTML;
                         arrayRole = arrayRole.split(",");
-                        members.remove();
-                        role.remove();
                     } else if (request1.readyState === 4 && request1.status === 401) {
                         customerdiv.remove();
                         //window.alert("Nicht eingelogt");
@@ -276,6 +274,7 @@ function generate() {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
+            sendArray=[];
             let mail = document.getElementById('email');
             mail.required = true;
             let AdminOrMember = document.getElementById('AdminOrMember');
@@ -304,37 +303,57 @@ function generate() {
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
         if (select) {
-        let btnAddMember = document.getElementById("btnAddMember");
-        updateProjectId = customerdiv.getAttribute('data-id');
-        console.log(updateProjectId);
-        let mail = document.getElementById('email');
-        mail.required = false;
-        let AdminOrMember = document.getElementById('AdminOrMember');
-        AdminOrMember.required = false;
-        let projektErsellen = document.getElementById("projektErstellen");
-        let projektName = document.getElementById("projectname");
-        let content = document.querySelectorAll('[data-memberid');
-        let arrayLength = content.length;
-        if (doubleClickSelect) {
-            for (let i = 0; i < arrayLength; i++) {
-                content[i].style.background = "white";
-                content[i].style.border = "4px solid black";
+            let content = document.querySelectorAll('[data-memberid');
+            let helpArray=[];
+
+            let j = 0;
+            for (let i = 0; i < content.length; i++) {
+                if (arrayMember.includes(content[i].getAttribute("data-memberId"))) {
+                    helpArray[j] = content[i].getAttribute("data-email");
+                    j++;
+                }
             }
-            if (a === false) {
+            for (let i = 0; i < arrayMember.length; i++) {
+                if (content.length > arrayMember[i]) {
+                    let mail = helpArray[i];
+                    let member = {"email": mail, "role": arrayRole[i]};
+                   arrayBefore.push(member);
+                   sendArray.push(member);
+                }
+            }
+            console.log(sendArray);
+            console.log(arrayBefore);
+            let btnAddMember = document.getElementById("btnAddMember");
+            updateProjectId = customerdiv.getAttribute('data-id');
+            console.log(updateProjectId);
+            let mail = document.getElementById('email');
+            mail.required = false;
+            let AdminOrMember = document.getElementById('AdminOrMember');
+            AdminOrMember.required = false;
+            let projektErsellen = document.getElementById("projektErstellen");
+            let projektName = document.getElementById("projectname");
+
+            let arrayLength = content.length;
+            if (doubleClickSelect) {
                 for (let i = 0; i < arrayLength; i++) {
-                    let temp = content[i].lastChild;
-                    if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
-                        temp.style.display = "none";
+                    content[i].style.background = "white";
+                    content[i].style.border = "4px solid black";
+                }
+                if (a === false) {
+                    for (let i = 0; i < arrayLength; i++) {
+                        let temp = content[i].lastChild;
+                        if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                            temp.style.display = "none";
+                        }
                     }
+                    //löschen nachricht verstecken
+                    if (boolStatus) {
+                        let delet = document.getElementById("form1");
+                        //messageMember verstecken
+                        delet.lastChild.style.display = "none";
+                    }
+                    a = true;
                 }
-                //löschen nachricht verstecken
-                if (boolStatus) {
-                    let delet = document.getElementById("form1");
-                    //messageMember verstecken
-                    delet.lastChild.style.display = "none";
-                }
-                a = true;
-            }
 
                 projektName.required = false;
                 projektName.style.visibility = "hidden";
@@ -542,7 +561,7 @@ let readyStateCheckInterval = setInterval(function () {
                 nameLenght = true;
             } else {
                 let str = projectName.value;
-                if(str.length>0) {
+                if (str.length > 0) {
                     if (str.match(/[a-zäöü]+/) || str.match(/[[A-ZÄÖU]+/)) {
                         feedback.innerHTML = "";
                         nameLenght = false;
@@ -552,7 +571,7 @@ let readyStateCheckInterval = setInterval(function () {
                         nameLenght = true;
 
                     }
-                }else {
+                } else {
                     feedback.innerHTML = "";
                     nameLenght = false;
                 }
@@ -562,7 +581,7 @@ let readyStateCheckInterval = setInterval(function () {
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
             if (sendFile === undefined || nameLenght) {
-                if(sendFile===undefined) {
+                if (sendFile === undefined) {
                     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
                     const previewFile = previewContainer.querySelector(".image-preview__file");
                     previewDefaulText.style.display = "block";
@@ -717,8 +736,8 @@ function addMember() {
                 let role = 1;
                 let include = true;
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display="inline";
-                buttonAdmin.style.display="none";
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -746,8 +765,8 @@ function addMember() {
                 let role = 0;
                 let include = true;
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display="none";
-                buttonAdmin.style.display="inline";
+                buttonMember.style.display = "none";
+                buttonAdmin.style.display = "inline";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -773,8 +792,8 @@ function addMember() {
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display="inline";
-                buttonAdmin.style.display="none";
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
                 let parent = buttonDeletMember.parentNode;
                 let email = parent.getAttribute("data-email");
                 for (let k in jasonmembers) {
@@ -794,8 +813,8 @@ function addMember() {
             content[i].appendChild(buttonDeletMember);
             select = false;
             //sorgt für Dynamische Buttons
-            buttonMember.style.display="inline";
-            buttonAdmin.style.display="none";
+            buttonMember.style.display = "inline";
+            buttonAdmin.style.display = "none";
         }
     } else {
         console.log(sendArray);
@@ -873,8 +892,8 @@ function changeClientState(members, role, id) {
                 let role = 1;
                 let include = true;
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display="inline";
-                buttonAdmin.style.display="none";
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -893,7 +912,7 @@ function changeClientState(members, role, id) {
                 sendArray = jasonmembers;
                 parent.style.background = "#FFA500";
             });
-            buttonAdmin.innerHTML="Admin";
+            buttonAdmin.innerHTML = "Admin";
             content[i].appendChild(buttonAdmin);
             //Butto Click event
             buttonMember.addEventListener('click', function () {
@@ -902,8 +921,8 @@ function changeClientState(members, role, id) {
                 let role = "0";
                 let include = true;
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display="none";
-                buttonAdmin.style.display="inline";
+                buttonMember.style.display = "none";
+                buttonAdmin.style.display = "inline";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[i]) {
@@ -932,8 +951,8 @@ function changeClientState(members, role, id) {
                 let parent = buttonDeletMember.parentNode;
                 let email = parent.getAttribute("data-email");
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display="inline";
-                buttonAdmin.style.display="none";
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
                 for (let k in jasonmembers) {
                     if (jasonmembers.hasOwnProperty(k)) {
                         if (jasonmembers[k].email == email) {
@@ -950,14 +969,13 @@ function changeClientState(members, role, id) {
             content[i].appendChild(buttonDeletMember);
             console.log(content[i].style.backgroundColor);
             //schaut ob der Account schon im Projekt ist
-            if(content[i].style.backgroundColor==="rgb(0, 255, 102)"){
+            if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
                 buttonMember.style.display = "none";
                 buttonAdmin.style.display = "inline";
-            }else if(content[i].style.backgroundColor==="rgb(255, 165, 0)"){
+            } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
                 buttonMember.style.display = "inline";
                 buttonAdmin.style.display = "none";
-            }
-            else {
+            } else {
                 buttonMember.style.display = "inline";
                 buttonAdmin.style.display = "none";
             }
@@ -1005,10 +1023,10 @@ function sendNewProject() {
     });
     xhr.addEventListener("readystatechange", function () {
         let message = document.getElementById("sendFeedBack");
-        if (this.readyState === 4&&this.status===201) {
+        if (this.readyState === 4 && this.status === 201) {
             message.style.display = "block";
-            let m=message.getElementsByTagName("h1");
-            m[0].innerHTML="Erfolgreich gesendet";
+            let m = message.getElementsByTagName("h1");
+            m[0].innerHTML = "Erfolgreich gesendet";
             console.log(this.responseText);
             //wartet
             setTimeout(function () {
@@ -1017,10 +1035,10 @@ function sendNewProject() {
                 percentage.style.display = "none";
                 //location.reload(true);
             }, 2000);
-        }else if(this.readyState === 4){
+        } else if (this.readyState === 4) {
             message.style.display = "block";
-            let m=message.getElementsByTagName("h1");
-            m[0].innerHTML="Fehler versuchen sie es erneut";
+            let m = message.getElementsByTagName("h1");
+            m[0].innerHTML = "Fehler versuchen sie es erneut";
         }
     });
     xhr.open("POST", sendURL);
@@ -1035,20 +1053,20 @@ function sendDelet(id) {
     xhr.withCredentials = true;
     let message = document.getElementById("sendFeedBack");
     xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4&&this.status===204) {
+        if (this.readyState === 4 && this.status === 204) {
             message.style.display = "block";
-            let m=message.getElementsByTagName("h1");
-            m[0].innerHTML="Erfolgreich gesendet";
+            let m = message.getElementsByTagName("h1");
+            m[0].innerHTML = "Erfolgreich gesendet";
             console.log(this.responseText);
             setTimeout(function () {
                 message.style.display = "none";
                 //location.reload(true);
             }, 2000);
 
-        }else if(this.readyState === 4){
-            message.style.display="block";
-            let m=message.getElementsByTagName("h1");
-            m[0].innerHTML="Fehler versuchen sie es erneut";
+        } else if (this.readyState === 4) {
+            message.style.display = "block";
+            let m = message.getElementsByTagName("h1");
+            m[0].innerHTML = "Fehler versuchen sie es erneut";
             setTimeout(function () {
                 message.style.display = "none";
                 //location.reload(true);
@@ -1067,24 +1085,25 @@ function sendUpdateProject() {
     let progressBar = document.getElementById("loader");
     let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
-    //Daten in Api sollten auf Member Array und File geändert werden, deshalb "demo Code"
-    let dataMember = new FormData();
-    dataMember.append("updateproject", "member");
-    dataMember.append("members", tmpArray);
+    let tmpArray1 = JSON.stringify(arrayBefore);
+    console.log(sendArray);
+    console.log(arrayBefore);
+        $.each(JSON.parse(tmpArray) , function (key, value) {
+            if(!(tmpArray1.indexOf(value.email) > -1)){
+                addProjectMember(updateProjectId,value.email,value.role);
+            }
+        });
 
-    let xhrMember = new XMLHttpRequest();
-    xhrMember.withCredentials = true;
-
-    xhrMember.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            console.log(this.responseText);
+    $.each(JSON.parse(tmpArray1) , function (key, value) {
+        if(tmpArray.indexOf(value.email) === -1){
+            removeProjectMember(updateProjectId,value.email,value.role);
         }
     });
 
-    xhrMember.open("POST", sendURL);
-    xhrMember.send(dataMember);
+
+
     //senden des Neuen Status
-    let dataStatus = new FormData();
+   /* let dataStatus = new FormData();
     dataStatus.append("updateproject", "status");
     dataStatus.append("id", updateProjectId);
     dataStatus.append("status", "Warten auf Kundenrückmeldung");
@@ -1123,19 +1142,23 @@ function sendUpdateProject() {
         }
     });
     xhrFile.open("PUT", sendURL);
-    xhrFile.send(dataFile);
+    xhrFile.send(dataFile);*/
 
 }
-function addProjectMember(projectId,member) {
+
+function addProjectMember(projectId, memberMail, memberRole) {
+    let member={"email": memberMail, "role": memberRole};
+    let tmpMember = JSON.stringify(member);
+    console.log("Add:"+tmpMember);
     let data = new FormData();
     data.append("id", projectId);
-    data.append("member", member);
+    data.append("member", tmpMember);
 
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             console.log(this.responseText);
         }
     });
@@ -1146,20 +1169,23 @@ function addProjectMember(projectId,member) {
     xhr.send(data);
 
 }
-function removeProjectMember(projectId,member) {
-   let data = new FormData();
+
+function removeProjectMember(projectId, memberMail, memberRole) {
+    let member={"email": memberMail, "role": memberRole};
+    let tmpMember = JSON.stringify(member);
+    console.log("Remove:"+tmpMember);
+    let data = new FormData();
     data.append("id", projectId);
-    data.append("member", member);
+    data.append("member", tmpMember);
 
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function() {
-        if(this.readyState === 4) {
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
             console.log(this.responseText);
         }
     });
-
     xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -1332,8 +1358,8 @@ function putArrayTogether() {
                 allRight = false;
             }
         }
-        for (let i = 0; i < sendArrayFields; i++) {
-            if (sendArrayFields[i].role === (-1)) {
+        for (let i = 0; i < sendArrayFields.length; i++) {
+            if (sendArrayFields[i].role == (-1)) {
                 messageRole.innerHTML = "Rollen auswählen";
                 allRight = false;
             }
@@ -1366,14 +1392,15 @@ function putArrayTogether() {
                 allRight = false;
             }
         }
-        for (let i = 0; i < sendArrayFields; i++) {
-            if (sendArrayFields[i].role === (-1)) {
+        for (let i = 0; i < sendArrayFields.length; i++) {
+            if (sendArrayFields[i].role == (-1)) {
                 messageRole.style.color = "red";
                 messageRole.innerHTML = "Rollen auswählen";
                 allRight = false;
             }
 
         }
+        sendArray=helpSendArray;
     }
     //Löscht die Nachrichten an den User nach 10 Sekunden
     setTimeout(function () {
@@ -1386,6 +1413,9 @@ function putArrayTogether() {
         messageRole.innerHTML = "";
         message.innerHTML = "";
     }
+
+    console.log("Field:"+JSON.stringify(sendArrayFields));
+    console.log("Send:"+JSON.stringify(sendArray));
     console.log(allRight);
     return allRight;
 
