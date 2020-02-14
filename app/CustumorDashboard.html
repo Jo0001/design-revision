@@ -6,13 +6,13 @@
     <title>Customer Dashboard</title>
     <link href="../files/css/CustomerDashboard..css" rel="stylesheet">
     <script src="../files/js/CustumorDashboard.js"></script>
-    <link href="../files/img/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
 </head>
 <body>
 <div class="topDivs">
-        <img alt="tick" height="100%" src="../files/img/logo.png"
+        <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
              style="float: left"
              width="100">
     <div id="pageLoader"></div>
@@ -28,17 +28,17 @@
 </div>
 <div class="space"></div>
 <div class="form" id="form1">
-    <h2 id="projektErstellen" style="text-align: center">Projekt erstellen</h2>
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
+        <h2 id="projektErstellen" >Projekt erstellen</h2>
         <label>
             <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
         </label><br>
         <span id="nameToLong"></span><br>
         <span id="emailSpan">
         <label>
-            <input id="email" name="email" placeholder="E-mail" style="width: 55%" type="email">
+            <input id="email" name="email" placeholder="E-mail" style="width: 60%" type="email" required >
         </label>
-            <select id="AdminOrMember" name="AdminOrMember" required>
+            <select id="AdminOrMember" name="AdminOrMember"  required>
                 <option disabled hidden selected value="">Auswählen</option>
                 <option value="Member">Member</option>
                 <option value="Admin">Admin</option>
@@ -46,23 +46,20 @@
         <span id="messageRole"></span><br><span id="messageEmail"></span><br>
         <span id="messageDoubleSelected"></span>
         <input onclick="addEmailField()"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 10px;margin-left:10%;border: none;cursor: pointer"
-               type="button" value="Weiterer Nutzer auswählen"/>
+               type="button" value="Weiterer Nutzer auswählen"/> <br>
         <input accept="application/pdf" id="inputFile" name="inputFile" style="display: none;" type="file"/>
         <input onclick="document.getElementById('inputFile').click();"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;margin-top: 4%;margin-left:30%;margin-bottom:2%;border: none;cursor: pointer"
                type="button"
                value="Datei suchen"/>
         <div class="image-preview" id="imagePreview">
-            <img alt="PDF" id="pdfIcon" src="../files/img/pdf.icon.png"
+            <img alt="PDF" id="pdfIcon" src="https://cdn-design-revision.netlify.com/files/img/pdf.icon.png"
                  style="display:none;width: 25%;height: 80%;padding-left: 5px"/><br>
             <span class="image-preview__file"></span>
             <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>
         </div>
         <input id="btnAddMember" onclick="addMember()"
-               style=" text-align: center;background-color: #333;color: #fff;font-size: 20px;padding:8px 10px;justify-content:center;border: none;margin-left:60px;margin-top:10px;cursor: pointer"
                type="button"
-               value="Member ausw&#228;hlen"/>
+               value="Member ausw&#228;hlen"/><br>
         <input id="submitButton" type="submit" value="Speichern">
         <div id="loader"><span id="percentage" style="display: none"></span></div>
     </form>
@@ -76,7 +73,7 @@
 </dialog>
 <h1 id="message" style="color: red;text-align: center;display: none">Keine Treffer</h1>
 <div class="sendFeedBack" id="sendFeedBack">
-    <h1>Erfolgreich gesendet</h1>
+    <h1>Hello World</h1>
 </div>
 </body>
 </html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Caller v1</title>
+</head>
+<body>
+<button onclick="send()">Test</button>
+<br>
+<div id="output" style="border: 2px solid #707979; width: 800px; min-height: 50px"></div>
+<button disabled id="code" style="color: black"></button>
+<script>
+    function send() {
+        //let data = "id=f50b92d1&member={\"role\":123,\"email\":\"jonkjolk@gmx.de\"}";
+        let data = "id=73401dae&member={\"role\":123,\"email\":\"luke-skywalker@gmx-topmail.de\"}";
+        document.getElementById("output").innerHTML = "";
+        let code = document.getElementById("code");
+        code.innerText = "loading";
+
+        let xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                console.log(this.responseText);
+                document.getElementById("output").innerHTML = this.responseText + "<br><br>";
+                document.getElementById("code").innerText = this.statusText + " (" + this.status + ")";
+                if (this.status < 400) {
+                    code.style.backgroundColor = "#197900";
+                } else {
+                    code.style.backgroundColor = "#ab2300";
+                }
+            }
+        });
+        xhr.open("PUT", window.origin+"/design-revision/api/project/addmember");
+        xhr.send(data);
+    }
+
+    send();
+</script>
+</body>
+</html>
