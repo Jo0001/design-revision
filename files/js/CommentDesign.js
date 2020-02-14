@@ -6,7 +6,7 @@ function setup() {
     createCommentBtn = document.getElementById("createComment");
     commentArea = document.getElementById("commentArea");
     //Comment-Setup
-	sidebarElements.push(createCommentBtn);
+    sidebarGroup.add(createCommentBtn);
     createCommentBtn.addEventListener("click", function (e) {
         if (createCommentBtn.classList.contains("disSelected")) {
             //COMMENTMODE ON
@@ -16,7 +16,7 @@ function setup() {
             canvas.style.cursor = "crosshair";
             commentContainer.style.cursor = "crosshair";
             commentArea.style.cursor = "crosshair";
-            selectSidebarElementById(createCommentBtn.id);
+            sidebarGroup.selectSidebarElementById(createCommentBtn.id);
         } else {
             canvas.removeEventListener("mousedown", startDragHandler, false);
             canvas.removeEventListener("mouseup", endDragHandler, false);
@@ -24,10 +24,10 @@ function setup() {
             canvas.style.cursor = null;
             commentContainer.style.cursor = null;
             commentArea.style.cursor = null;
-            deselectSidebarElementById(createCommentBtn.id);
+            sidebarGroup.deselectSidebarElementById(createCommentBtn.id);
         }
     });
-	
+
 }
 
 //CommentArea-Methods
@@ -137,7 +137,7 @@ function createNewComment(commentArea) {
     let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
 
     let comment = new Comment(pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
-        "Somebody", "Message....", false);
+        user.id, "Message....", false);
     comments.push(comment);
     //TODO upload Data to API
     console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));

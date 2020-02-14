@@ -84,6 +84,41 @@ class TargetScaleHandlerClass {
     }
 }
 
+class ButtonGroup {
+    constructor() {
+        this.groupElements = [];
+    }
+
+    //Button-Sidebar-Group-Handling
+    getSelectedSidebarElement() {
+        let tmp = undefined;
+        for (let index = 0; index < this.groupElements.length; index++) {
+            if (!this.groupElements[index].classList.contains("disSelected")) {
+                tmp = this.groupElements[index];
+            }
+        }
+        return tmp;
+    }
+
+    add(elmt) {
+        this.groupElements.push(elmt);
+    }
+
+    selectSidebarElementById(id) {
+        let tmp;
+        if ((tmp = this.getSelectedSidebarElement()) !== undefined) {
+            tmp.click();
+        }
+        document.getElementById(id).classList.remove("disSelected");
+        document.getElementById(id).classList.add("selected");
+    }
+
+    deselectSidebarElementById(id) {
+        document.getElementById(id).classList.remove("selected");
+        document.getElementById(id).classList.add("disSelected");
+    }
+}
+
 class Comment {
     constructor(page, x, y, w, h, authorId, commentText, isImplemented) {
         this.page = page;
@@ -97,6 +132,9 @@ class Comment {
     }
 }
 
+//Settings
+let user;
+let requestURL;
 //Rendering-Variables
 let canvas;
 let pdf;
@@ -133,7 +171,7 @@ let percentLoaded;
 let decPage;
 let incPage;
 //Toolbar-Variables
-let sidebarElements = [];
+let sidebarGroup = new ButtonGroup();
 let moveBtn;
 let zoomBtn;
 //Zoom-Variables
@@ -181,38 +219,49 @@ function setupViewport() {
     context = canvas.getContext('2d');
 
     //Comment-Setup
-    //TODO Request logged in user and save for comment-author
     commentContainer = document.getElementById('commentContainer');
     commentContainerObserver.observe(commentContainer, {attributes: true});
     redirectAllEvents(canvas, commentContainer);
 
+    //Save logged in UserId
+    let request3 = new XMLHttpRequest();
+    requestURL = window.location.origin + "/design-revision/api/user/";
+    request3.open('GET', requestURL);
+    request3.addEventListener('readystatechange', function (e) {
+        handleServerResponse(request3, function (response) {
+            console.log(response.user.email);
+            user = response.user;
+        });
+    });
+    request3.send();
+
     //Move-Button-Setup
     moveBtn = document.getElementById("movePdf");
-    sidebarElements.push(moveBtn);
+    sidebarGroup.add(moveBtn);
     let handlerId;
     moveBtn.addEventListener("click", function (e) {
         if (moveBtn.classList.contains("disSelected")) {
-            selectSidebarElementById(moveBtn.id);
+            sidebarGroup.selectSidebarElementById(moveBtn.id);
             handlerId = dragElementWhenBtnIsDown(canvas, 0);
             canvas.style.cursor = "all-scroll";
         } else {
-            deselectSidebarElementById(moveBtn.id);
+            sidebarGroup.deselectSidebarElementById(moveBtn.id);
             canvas.style.cursor = null;
             canvas.removeEventListener("mousedown", handlerId);
         }
     });
     //Zoom-Button-Setup
     zoomBtn = document.getElementById("zoomPdf");
-    sidebarElements.push(zoomBtn);
+    sidebarGroup.add(zoomBtn);
     zoomBtn.addEventListener("click", function (e) {
         if (zoomBtn.classList.contains("disSelected")) {
-            selectSidebarElementById(zoomBtn.id);
+            sidebarGroup.selectSidebarElementById(zoomBtn.id);
             canvas.addEventListener("mousedown", startPointZoom);
             canvas.removeEventListener("wheel", listenForMouseWheelTurn, false);
             canvas.removeEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
             canvas.removeEventListener("mousedown", middleMove);
         } else {
-            deselectSidebarElementById(zoomBtn.id);
+            sidebarGroup.deselectSidebarElementById(zoomBtn.id);
             canvas.removeEventListener("mousedown", startPointZoom);
             canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
             canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
@@ -228,7 +277,7 @@ function setupViewport() {
     }
 
     //Request Project-Data from API
-    let requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
+    requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
     let request = new XMLHttpRequest();
     request.open('GET', requestURL);
     request.addEventListener('readystatechange', function (e) {
@@ -244,7 +293,7 @@ function setupViewport() {
     request2.open('GET', requestURL);
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
-            pdfFileOrUrl = "../api/pdf.php?file=" + response.link;
+            pdfFileOrUrl = "../api/project/pdf.php?file=" + response.link;
             loadPDFAndRender(1, pdfFileOrUrl);
         });
     });
@@ -390,32 +439,6 @@ function handleServerResponse(request, successCallback) {
     } else if (request.readyState === 4 && request.status === 404) {
         window.alert("Nichts gefunden");
     }
-}
-
-
-//Button-Sidebar-Group-Handling
-function getSelectedSidebarElement() {
-    let tmp = undefined;
-    for (let index = 0; index < sidebarElements.length; index++) {
-        if (!sidebarElements[index].classList.contains("disSelected")) {
-            tmp = sidebarElements[index];
-        }
-    }
-    return tmp;
-}
-
-function selectSidebarElementById(id) {
-    let tmp;
-    if ((tmp = getSelectedSidebarElement()) !== undefined) {
-        tmp.click();
-    }
-    document.getElementById(id).classList.remove("disSelected");
-    document.getElementById(id).classList.add("selected");
-}
-
-function deselectSidebarElementById(id) {
-    document.getElementById(id).classList.remove("selected");
-    document.getElementById(id).classList.add("disSelected");
 }
 
 //Error-Correction
