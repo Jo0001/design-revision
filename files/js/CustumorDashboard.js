@@ -27,7 +27,7 @@ let userProjects = [];
 let gotUserData = false;
 //update Project id
 let updateProjectId;
-let arrayBefore =[];
+let arrayBefore = [];
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -274,7 +274,7 @@ function generate() {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
-            sendArray=[];
+            sendArray = [];
             let mail = document.getElementById('email');
             mail.required = true;
             let AdminOrMember = document.getElementById('AdminOrMember');
@@ -304,7 +304,7 @@ function generate() {
     customerdiv.addEventListener('dblclick', function (e) {
         if (select) {
             let content = document.querySelectorAll('[data-memberid');
-            let helpArray=[];
+            let helpArray = [];
 
             let j = 0;
             for (let i = 0; i < content.length; i++) {
@@ -317,8 +317,8 @@ function generate() {
                 if (content.length > arrayMember[i]) {
                     let mail = helpArray[i];
                     let member = {"email": mail, "role": arrayRole[i]};
-                   arrayBefore.push(member);
-                   sendArray.push(member);
+                    arrayBefore.push(member);
+                    sendArray.push(member);
                 }
             }
             console.log(sendArray);
@@ -580,6 +580,7 @@ let readyStateCheckInterval = setInterval(function () {
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
+            let replace=false;
             if (sendFile === undefined || nameLenght) {
                 if (sendFile === undefined) {
                     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
@@ -589,12 +590,14 @@ let readyStateCheckInterval = setInterval(function () {
                     previewDefaulText.style.color = "red";
                 }
             } else {
+
                 let allRight = putArrayTogether();
                 if (allRight) {
                     if (updateOrCreate) {
                         sendNewProject();
                     } else {
                         sendUpdateProject();
+                        replace=true;
                     }
                     cleraForm();
                 }
@@ -676,7 +679,6 @@ function dateiauswahl(evt) {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     const pdfIcon = document.getElementById("pdfIcon");
     if (f.type === "application/pdf") {
-        console.log(document.getElementById("inputFile").value);
         sendFile = f;
         const date = new Date(f.lastModified);
         let output = f.name + " - " + f.size + " bytes, zuletzt Bearbeitet: " + date.toDateString();
@@ -740,13 +742,13 @@ function addMember() {
                 buttonAdmin.style.display = "none";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
-                    if (jasonmembers[i]) {
-                        if (jasonmembers[i].email == email) {
-                            jasonmembers[i].role = 1;
-                            include = false;
-                        }
+
+                    if (jasonmembers[j].email == email) {
+                        jasonmembers[j].role = 1;
+                        include = false;
                     }
                 }
+
                 if (include) {
                     let member = {"email": email, "role": role};
                     jasonmembers.push(member);
@@ -769,13 +771,13 @@ function addMember() {
                 buttonAdmin.style.display = "inline";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
-                    if (jasonmembers[i]) {
-                        if (jasonmembers[i].email == email) {
-                            jasonmembers[i].role = 0;
-                            include = false;
-                        }
+
+                    if (jasonmembers[j].email == email) {
+                        jasonmembers[j].role = 0;
+                        include = false;
                     }
                 }
+
 
                 if (include) {
                     let member = {"email": email, "role": role};
@@ -896,13 +898,14 @@ function changeClientState(members, role, id) {
                 buttonAdmin.style.display = "none";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
-                    if (jasonmembers[i]) {
-                        if (jasonmembers[j].email == email) {
-                            jasonmembers[i].role = 1;
-                            include = false;
-                        }
+
+                    if (jasonmembers[j].email == email) {
+                        jasonmembers[j].role = 1;
+                        include = false;
                     }
+
                 }
+                console.log("includes " + include);
                 if (include) {
                     let member = {"email": email, "role": role};
                     jasonmembers.push(member);
@@ -925,13 +928,12 @@ function changeClientState(members, role, id) {
                 buttonAdmin.style.display = "inline";
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
-                    if (jasonmembers[i]) {
-                        if (jasonmembers[j].email == email) {
+                    if (jasonmembers[j].email == email) {
 
-                            jasonmembers[i].role = 0;
-                            include = false;
-                        }
+                        jasonmembers[j].role = 0;
+                        include = false;
                     }
+
                 }
 
                 if (include) {
@@ -1088,108 +1090,107 @@ function sendUpdateProject() {
     let tmpArray1 = JSON.stringify(arrayBefore);
     console.log(sendArray);
     console.log(arrayBefore);
-        $.each(JSON.parse(tmpArray) , function (key, value) {
-            if(!(tmpArray1.indexOf(value.email) > -1)){
-                addProjectMember(updateProjectId,value.email,value.role);
-            }
-        });
-
-    $.each(JSON.parse(tmpArray1) , function (key, value) {
-        if(tmpArray.indexOf(value.email) === -1){
-            removeProjectMember(updateProjectId,value.email,value.role);
+    $.each(JSON.parse(tmpArray), function (key, value) {
+        if (!(tmpArray1.indexOf(value.email) > -1)) {
+            addProjectMember(updateProjectId, value.email, value.role);
         }
     });
 
+    $.each(JSON.parse(tmpArray1), function (key, value) {
+        if (tmpArray.indexOf(value.email) === -1) {
+            removeProjectMember(updateProjectId, value.email, value.role);
+        }
+    });
 
 
     //senden des Neuen Status
-   /* let dataStatus = new FormData();
-    dataStatus.append("updateproject", "status");
-    dataStatus.append("id", updateProjectId);
-    dataStatus.append("status", "Warten auf Kundenrückmeldung");
+    /* let dataStatus = new FormData();
+     dataStatus.append("updateproject", "status");
+     dataStatus.append("id", updateProjectId);
+     dataStatus.append("status", "Warten auf Kundenrückmeldung");
 
-    let xhrStatus = new XMLHttpRequest();
-    xhrStatus.withCredentials = true;
+     let xhrStatus = new XMLHttpRequest();
+     xhrStatus.withCredentials = true;
 
-    xhrStatus.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            console.log(this.responseText);
-        }
-    });
-    xhrStatus.open("PUT", sendURL);
-    xhrStatus.send(dataStatus);
-    //Senden der File
-    let dataFile = new FormData();
-    dataFile.append("updateproject", "data");
-    dataFile.append("id", updateProjectId);
-    dataFile.append("data", sendFile);
-    let xhrFile = new XMLHttpRequest();
-    xhrFile.withCredentials = true;
-    xhrFile.upload.addEventListener("progress", function (event) {
-        update_progress(event, dataFile)
-    });
-    xhrFile.addEventListener("readystatechange", function () {
-        let message = document.getElementById("sendFeedBack");
-        message.style.display = "block";
-        if (this.readyState === 4) {
-            //wartet 6 sekunden
-            setTimeout(function () {
-                progressBar.style.display = "none";
-                message.style.display = "none";
-                percentage.style.display = "none";
-            }, 2000);
-            console.log(this.responseText);
-        }
-    });
-    xhrFile.open("PUT", sendURL);
-    xhrFile.send(dataFile);*/
+     xhrStatus.addEventListener("readystatechange", function () {
+         if (this.readyState === 4) {
+             console.log(this.responseText);
+         }
+     });
+     xhrStatus.open("PUT", sendURL);
+     xhrStatus.send(dataStatus);
+     //Senden der File
+     let dataFile = new FormData();
+     dataFile.append("updateproject", "data");
+     dataFile.append("id", updateProjectId);
+     dataFile.append("data", sendFile);
+     let xhrFile = new XMLHttpRequest();
+     xhrFile.withCredentials = true;
+     xhrFile.upload.addEventListener("progress", function (event) {
+         update_progress(event, dataFile)
+     });
+     xhrFile.addEventListener("readystatechange", function () {
+         let message = document.getElementById("sendFeedBack");
+         message.style.display = "block";
+         if (this.readyState === 4) {
+             //wartet 6 sekunden
+             setTimeout(function () {
+                 progressBar.style.display = "none";
+                 message.style.display = "none";
+                 percentage.style.display = "none";
+             }, 2000);
+             console.log(this.responseText);
+         }
+     });
+     xhrFile.open("PUT", sendURL);
+     xhrFile.send(dataFile);*/
 
 }
 
 function addProjectMember(projectId, memberMail, memberRole) {
-    let member={"email": memberMail, "role": memberRole};
+    let member = {"email": memberMail, "role": memberRole};
     let tmpMember = JSON.stringify(member);
-    console.log("Add:"+tmpMember);
-    let data = new FormData();
-    data.append("id", projectId);
-    data.append("member", tmpMember);
+    console.log("Add:" + tmpMember);
+    /* let data = new FormData();
+     data.append("id", projectId);
+     data.append("member", tmpMember);
 
-    let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+     let xhr = new XMLHttpRequest();
+     xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            console.log(this.responseText);
-        }
-    });
+     xhr.addEventListener("readystatechange", function () {
+         if (this.readyState === 4) {
+             console.log(this.responseText);
+         }
+     });
 
-    xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+     xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
+     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    xhr.send(data);
+     xhr.send(data);*/
 
 }
 
 function removeProjectMember(projectId, memberMail, memberRole) {
-    let member={"email": memberMail, "role": memberRole};
+    let member = {"email": memberMail, "role": memberRole};
     let tmpMember = JSON.stringify(member);
-    console.log("Remove:"+tmpMember);
-    let data = new FormData();
-    data.append("id", projectId);
-    data.append("member", tmpMember);
+    console.log("Remove:" + tmpMember);
+    /*   let data = new FormData();
+       data.append("id", projectId);
+       data.append("member", tmpMember);
 
-    let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+       let xhr = new XMLHttpRequest();
+       xhr.withCredentials = true;
 
-    xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-            console.log(this.responseText);
-        }
-    });
-    xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+       xhr.addEventListener("readystatechange", function () {
+           if (this.readyState === 4) {
+               console.log(this.responseText);
+           }
+       });
+       xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
+       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    xhr.send(data);
+       xhr.send(data);*/
 
 }
 
@@ -1400,7 +1401,7 @@ function putArrayTogether() {
             }
 
         }
-        sendArray=helpSendArray;
+        sendArray = helpSendArray;
     }
     //Löscht die Nachrichten an den User nach 10 Sekunden
     setTimeout(function () {
@@ -1414,8 +1415,8 @@ function putArrayTogether() {
         message.innerHTML = "";
     }
 
-    console.log("Field:"+JSON.stringify(sendArrayFields));
-    console.log("Send:"+JSON.stringify(sendArray));
+    console.log("Field:" + JSON.stringify(sendArrayFields));
+    console.log("Send:" + JSON.stringify(sendArray));
     console.log(allRight);
     return allRight;
 
