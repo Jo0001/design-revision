@@ -67,47 +67,46 @@ function addmember()
         $pid = "project_" . $pid;
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
 
-        //TODO CHeck if isnt already a member
+        if (isLoggedIn()) {
 
-        if (isValidProject($pid, $pdo) && isJson($member)) {
-            if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
+            if (isValidProject($pid, $pdo) && isJson($member)) {
+                if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
 
-                $statement = $pdo->prepare("SELECT email FROM `users` ");
-                $statement->execute();
-                $tmpmails = $statement->fetchAll();
-                //Create a one dimensional array with all emails from the db
-                $useremails = array();
-                foreach ($tmpmails as $tmp) {
-                    array_push($useremails, $tmp['email']);
-                }
+                    $statement = $pdo->prepare("SELECT email FROM `users` ");
+                    $statement->execute();
+                    $tmpmails = $statement->fetchAll();
+                    //Create a one dimensional array with all emails from the db
+                    $useremails = array();
+                    foreach ($tmpmails as $tmp) {
+                        array_push($useremails, $tmp['email']);
+                    }
 
-                //convert json post to php array format
-                $member = json_decode($member, true);
+                    //convert json post to php array format
+                    $member = json_decode($member, true);
 
-                //Remove double entries from the array//TODO Really needed??
-                $member = array_unique($member, SORT_REGULAR);
+                    //Remove double entries from the array//TODO Really needed??
+                    $member = array_unique($member, SORT_REGULAR);
 
-                $memberids = array();//TODO
+                    $role = $member['role'];
 
-                $projectname = getLatestProjectData($pid, $pdo)['p_name'];
+                    $projectname = getLatestProjectData($pid, $pdo)['p_name'];
 
 
-                $pid = explode("project_", $pid)[1];
+                    //Converts everything to lowercase
+                    $member = array_map('nestedLowercase', $member);
 
-                //Converts everything to lowercase
-                $member = array_map('nestedLowercase', $member);
+                    //check if user has already an account
+                    if (in_array($member['email'], $useremails)) {
+                        $id = emailToId($member['email']);
 
-                $done = false;
-                foreach ($useremails as $tmp) {
-                    //check if user has an account
-                    if ($member['email'] == $tmp) {
-                        $id = emailToId($tmp);
-
-                        //get array with all roles and emails as index and select the one equal to the current email and save it
-                        $role = $member['role'];
-                        array_push($memberids, array("id" => (int)$id, "role" => $role));
+                        if (isMember($pid, $id)) {
+                            showError("Is already a member", 400);
+                        }
 
                         updateUserProjects($pdo, $id, $pid);
+
+                        //Save the new user as member to the project
+                        updateProjectMember($pid, $id, $role, $pdo);
 
                         $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
                         $statement->execute(array($id));
@@ -116,36 +115,33 @@ function addmember()
                         $status = $results['status'];
                         //Inform user per email about the new project
                         if ($status == "INVITE") {
-                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $tmp;
-                            sendMail($tmp, $tmp, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+                            informNewbie($member['email'], $projectname);
                         } else {
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
-                            sendMail($tmp, $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
+                            sendMail($member['email'], $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
                         }
-                        $done = true;
-                        break;
 
+                    } else {
+                        $pid = explode("project_", $pid)[1];
+                        $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
+                        $statement->execute(array($member['email'], json_encode(array($pid))));
+
+                        //Save the new user as member to the project
+                        updateProjectMember($pid, (int)$pdo->lastInsertId(), $role, $pdo);
+
+                        informNewbie($member['email'], $projectname);
                     }
+
+                    handleOutput("Successful added member ");
+
+                } else {
+                    showError("Not member/ not an admin", 403);
                 }
-
-                if (!$done) {
-                    $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
-                    $statement->execute(array($member['email'], json_encode(array($pid))));
-                    $role = $member['role'];
-                    array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
-
-                    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $member['email'];
-                    sendMail($member['email'], $member['email'], "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
-
-                }
-
-                handleOutput("Successful added member ");
-
             } else {
-                showError("Not member/ not an admin", 403);
+                showError("Invalid Request", 400);
             }
         } else {
-            showError("Invalid Request", 400);
+            showError("Login to perform that action", 401);
         }
 
     } else {

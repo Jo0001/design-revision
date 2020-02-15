@@ -2,7 +2,6 @@
 $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
 
 
-
 /*
  * Handle Output & Errors
  */
@@ -62,16 +61,36 @@ function getLatestProjectData($id, $pdo)
     return $statement->fetch();
 }
 
-//$id => Userid, $pid => project id
+
+//$pid => project_id
+function updateProjectMember($pid, $id, $role, $pdo)
+{
+    $statement = $pdo->prepare("SELECT members FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
+    $statement->execute();
+    $members = $statement->fetch()['members'];
+
+    $members = json_decode($members);
+    $member = array("id" => (int)$id, "role" => $role);
+    array_push($members, $member);
+    $statement = $pdo->prepare("UPDATE " . $pid . " SET members = ?  ORDER BY version DESC LIMIT 1 ");
+    $statement->execute(array(json_encode($members)));
+}
+
+//$id => Userid, $pid => project_id
 function updateUserProjects($pdo, $id, $pid)
 {
+    $pid = explode("project_", $pid)[1];
     //fetch all projectdata of the user
     $statement = $pdo->prepare("SELECT projects FROM `users` WHERE pk_id = ? ");
     $statement->execute(array($id));
     $tmpprojects = json_decode($statement->fetch()[0]);
 
     //and save the new project to the user
-    array_push($tmpprojects, $pid);
+    if (!is_null($tmpprojects)) {
+        array_push($tmpprojects, $pid);
+    } else {
+        $tmpprojects = array($pid);
+    }
     $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
     $statement->execute(array(json_encode($tmpprojects), $id));
 
@@ -97,16 +116,15 @@ function getUser($value)
 
 function isMember($pid, $userid)
 {
-
     $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
     $members = json_decode(getLatestProjectData($pid, $pdo)['members'], true);
+
     foreach ($members as $member) {
         if ($member['id'] == $userid) {
             return true;
-        } else {
-            return false;
         }
     }
+
 }
 
 function isAdmin($lastrow, $userid)
@@ -144,4 +162,10 @@ function isJson($string)
 {
     json_decode($string);
     return (json_last_error() == JSON_ERROR_NONE);
+}
+
+function informNewbie($email, $projectname)
+{
+    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $email;
+    sendMail($email, $email, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
 }
