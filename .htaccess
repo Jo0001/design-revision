@@ -1,3 +1,6 @@
 #Disable directory browsing
 DirectoryIndex login
 Options -Indexes
+
+#TODO Increment the value every time before you commit/push stuff
+Header add X-Build-Version 1.0
