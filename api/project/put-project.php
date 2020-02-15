@@ -8,17 +8,24 @@ $page = explode("?", basename(filter_var($_SERVER['REQUEST_URI']), FILTER_SANITI
 $_PUT = null;
 parse_str(file_get_contents('php://input'), $_PUT);
 
-if ($page == "addmember") {
+if ($page === "addmember") {
     addmember();
-} elseif ($page == "removemember") {
+} elseif ($page === "removemember") {
     removemember();
-} elseif ($page == "updatecomments") {
-    updateProjectData();
+} elseif ($page === "updatecomments" || $page === "addcomments") {
+    //TODO Change to addcomments
+    addComments();
+} elseif ($page === "solvecomment") {
+    solveComment();
+} elseif ($page === "updatestatus") {
+    updateStatus();
+} elseif ($page === "updatefile") {
+    updateFile();
 } else {
     showError("Bad Request", 400);
 }
 
-function updateProjectData()
+function addComments()
 {
 
     if (isset($_PUT['id']) && isset($_PUT['comment'])) {
@@ -157,5 +164,20 @@ function removemember()
     } else {
         showError("Missing id/member data", 400);
     }
+    handleOutput("Just a demo without real logic");
+}
+
+function updateStatus()
+{
+    handleOutput("Just a demo without ANY logic");
+}
+
+function updateFile()
+{
+    handleOutput("Just a demo without ANY logic");
+}
+
+function solveComment()
+{
     handleOutput("Just a demo without ANY logic");
 }

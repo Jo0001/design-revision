@@ -253,7 +253,7 @@ function updateProject()
         } elseif ($_PUT['updateproject'] == "removemember" && !empty(($_PUT['id']))) {
             handleOutput("Success");
         } elseif ($_PUT['updateproject'] == "data" && !empty(($_PUT['id'])) && !empty(($_PUT['data']))) {
-            updateProjectData();
+            addComments();
             // handleOutput("Success");
         } elseif ($_PUT['updateproject'] == "status" && !empty(($_PUT['id'])) && !empty(($_PUT['status']))) {
             handleOutput("Success");

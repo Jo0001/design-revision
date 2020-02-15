@@ -25,7 +25,7 @@ function showError($error, $code)
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.0));
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.1));
     handleOutput($err);
     die;
 }
