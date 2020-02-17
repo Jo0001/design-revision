@@ -169,15 +169,34 @@ function removemember()
 
 function updateStatus()
 {
-    handleOutput("Just a demo without ANY logic");
+    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['status'])) {
+        $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
+        $status = filter_var($GLOBALS['_PUT'] ['status'], FILTER_SANITIZE_STRING);
+        handleOutput("Just a demo without logic");
+    } else {
+        showError("Missing project id/status", 400);
+    }
+
 }
 
 function updateFile()
 {
-    handleOutput("Just a demo without ANY logic");
+    if (isset($GLOBALS['_PUT'] ['id'])) {
+        $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
+        handleOutput("Just a demo without logic");
+    } else {
+        showError("Missing project id", 400);
+    }
 }
 
 function solveComment()
 {
-    handleOutput("Just a demo without ANY logic");
+    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['comment'])) {
+        $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
+        $cid = filter_var($GLOBALS['_PUT'] ['comment'], FILTER_SANITIZE_STRING);
+        handleOutput("Just a demo without logic");
+    } else {
+        showError("Missing project/comment id", 400);
+    }
+
 }
