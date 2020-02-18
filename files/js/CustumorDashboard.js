@@ -113,7 +113,7 @@ function generate() {
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
                 clientname.innerHTML = userObject.user.name + counter;
-                nameimg.setAttribute("src", "http://localhost/design-revision/api/user/avatar.php?name="+userObject.user.name);
+                nameimg.setAttribute("src", window.location.origin+"/design-revision/api/user/avatar.php?name="+userObject.user.name);
                 clientemail.innerHTML = userObject.user.email + " " + counter;
                 customerdiv.setAttribute('data-email', userObject.user.email + counter);
                 company.innerHTML = userObject.user.company;
@@ -149,7 +149,7 @@ function generate() {
                     userName = clientname.innerHTML;
                     userEmail = clientemail.innerHTML;
                     userCompany = company.innerHTML;
-                    nameImgSrc = "http://localhost/design-revision/api/user/avatar.php?name="+userObject.user.name;
+                    nameImgSrc = window.location.origin+"/design-revision/api/user/avatar.php?name="+userObject.user.name;
                     gotUserData = true;
                 }
                 customerdiv.setAttribute('data-memberId', "" + counter);
