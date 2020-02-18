@@ -113,7 +113,7 @@ function generate() {
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
                 clientname.innerHTML = userObject.user.name + counter;
-                nameimg.setAttribute("src", userObject.user.avatar);
+                nameimg.setAttribute("src", "http://localhost/design-revision/api/user/avatar.php?name="+userObject.user.name);
                 clientemail.innerHTML = userObject.user.email + " " + counter;
                 customerdiv.setAttribute('data-email', userObject.user.email + counter);
                 company.innerHTML = userObject.user.company;
@@ -149,7 +149,7 @@ function generate() {
                     userName = clientname.innerHTML;
                     userEmail = clientemail.innerHTML;
                     userCompany = company.innerHTML;
-                    nameImgSrc = userObject.user.avatar;
+                    nameImgSrc = "http://localhost/design-revision/api/user/avatar.php?name="+userObject.user.name;
                     gotUserData = true;
                 }
                 customerdiv.setAttribute('data-memberId', "" + counter);
@@ -180,7 +180,7 @@ function generate() {
                 customerdiv.remove();
             } else {
                 counterForId++;
-                requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectid;
+                requestURL = window.location.origin + "/design-revision/api/project/?id=" + projectid;
                 request1.open('GET', requestURL, true);
                 request1.send();
                 request1.onreadystatechange = function () {
