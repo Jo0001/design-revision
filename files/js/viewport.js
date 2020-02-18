@@ -277,7 +277,7 @@ function setupViewport() {
     }
 
     //Request Project-Data from API
-    requestURL = window.location.origin + "/design-revision/api/?getproject&id=" + projectId;
+    requestURL = window.location.origin + "/design-revision/api/project/?id=" + projectId;
     let request = new XMLHttpRequest();
     request.open('GET', requestURL);
     request.addEventListener('readystatechange', function (e) {
@@ -289,7 +289,7 @@ function setupViewport() {
 
     //Json PDF aus Api hohlen
     let request2 = new XMLHttpRequest();
-    requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+    requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
     request2.open('GET', requestURL);
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
@@ -472,7 +472,7 @@ function clearComments() {
     comments = [];
     //Json Comments aus Api hohlen
     let request3 = new XMLHttpRequest();
-    let requestURL = window.location.origin + "/design-revision/api/?getproject=data&id=" + projectId;
+    let requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
     request3.open('GET', requestURL);
     request3.send();
     request3.addEventListener('readystatechange', function (e) {

@@ -2,5 +2,5 @@
 DirectoryIndex Caller.htmlx
 
 #Just for David
-RewriteEngine on
-RewriteRule ^ - [R=410,L]
+#RewriteEngine on
+#RewriteRule ^ - [R=410,L]
