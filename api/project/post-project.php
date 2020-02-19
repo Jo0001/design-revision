@@ -59,6 +59,8 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                 //Converts everything to lowercase
                 $members = array_map('nestedLowercase', $members);
 
+                $name = getUser('name');
+
                 foreach ($useremails as $tmp) {
                     //check if user has an account
                     if (in_array($tmp, array_column($members, 'email'))) {
@@ -72,11 +74,11 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                         $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
                         $statement->execute(array($id));
                         $results = $statement->fetch();
-                        $name = $results['name'];
+
                         $status = $results['status'];
                         //Inform user per email about the new project
                         if ($status == "INVITE") {
-                            informNewbie($tmp, $projectname);
+                            informNewbie($tmp, $projectname, $name);
                         } else {
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
                             sendMail($tmp, $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
@@ -97,7 +99,7 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                         $role = array_column($members, 'role', 'email')[$tmp];
                         array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
 
-                        informNewbie($tmp, $projectname);
+                        informNewbie($tmp, $projectname,$name);
                     }
                 }
 
