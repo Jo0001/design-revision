@@ -141,15 +141,16 @@ function createNewComment(commentArea) {
     comments.push(comment);
     //TODO upload Data to API
     console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));
-    let data = "updateproject=data&id=" + projectId + "&data=" + JSON.stringify(comment);
+    let data = "id=" + projectId + "&comment=" + JSON.stringify(comment);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-            console.log(this.response);
+            console.log(this.responseText);
         }
     });
-    xhr.open("PUT", window.location.origin + "/design-revision/api/");
+    xhr.open("PUT", window.location.origin + "/design-revision/api/project/addcomments");
+    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
     xhr.send(data);
 
     let commentDiv = document.createElement("div");
