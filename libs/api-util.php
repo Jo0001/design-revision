@@ -164,8 +164,8 @@ function isJson($string)
     return (json_last_error() == JSON_ERROR_NONE);
 }
 
-function informNewbie($email, $projectname)
+function informNewbie($email, $projectname,$name)
 {
     $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $email;
-    sendMail($email, $email, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", null, $link, $projectname, 1));
+    sendMail($email, $email, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", $name, $link, $projectname, 1));
 }
