@@ -28,7 +28,7 @@ if ($page === "addmember") {
 function addComments()
 {
 
-    if (isset($_PUT['id']) && isset($_PUT['comment'])) {
+    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['comment'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
         $pid = "project_" . $pid;
@@ -56,6 +56,7 @@ function addComments()
             }
             $statement = $pdo->prepare("UPDATE " . $pid . " SET data = ?  ORDER BY version DESC LIMIT 1 ");
             $statement->execute(array(json_encode($result)));
+            header("HTTP/1.1 204 No Content");
 
         } else {
             showError("Not logged in/ project member", 401);
