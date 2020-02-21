@@ -166,7 +166,7 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
     });
 });
 //Progressbar-Variables
-let percentLoaded;
+let percentLoaded = 1;
 //Page-Turn-Logic
 let decPage;
 let incPage;
@@ -520,16 +520,23 @@ function resizeComments() {
 //Pre-Render
 function displayProgressOnBar() {
     let loadingBar = document.getElementById("loading");
-    let lowBar = document.getElementById("loadingBar");
     loadingBar.style.width = percentLoaded + "%";
+    if (percentLoaded >= 100) {
+        percentLoaded = undefined;
+    }
 }
 
 function loadPDFAndRender(scale, pdfFileOrUrl) {
     let loadingTask = pdfjsLib.getDocument(pdfFileOrUrl);
     console.log("Started loading pdf: " + loadingTask);
-    loadingTask.onProgress = function (progress) {
-        percentLoaded = Math.round(progress.loaded / progress.total);
+    let updateBar = setInterval(function () {
+        if (percentLoaded === undefined) {
+            clearInterval(updateBar);
+        }
         displayProgressOnBar();
+    }, 10);
+    loadingTask.onProgress = function (progress) {
+        percentLoaded = (progress.loaded / progress.total) * 100;
     };
     loadingTask.promise.then(function (localPdf) {
         pdf = localPdf;
