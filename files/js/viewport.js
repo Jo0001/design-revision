@@ -521,9 +521,7 @@ function resizeComments() {
 function displayProgressOnBar() {
     let loadingBar = document.getElementById("loading");
     let lowBar = document.getElementById("loadingBar");
-    let marginRight = (loadingBar.style.right.replace("px", "") - lowBar.style.right.replace("px", ""));
-    let marginLeft = (loadingBar.style.left.replace("px", "") - lowBar.style.left.replace("px", ""));
-    loadingBar.style.width = percentLoaded * (lowBar.clientWidth - marginRight - marginLeft) + "px";
+    loadingBar.style.width = percentLoaded + "%";
 }
 
 function loadPDFAndRender(scale, pdfFileOrUrl) {
@@ -531,8 +529,6 @@ function loadPDFAndRender(scale, pdfFileOrUrl) {
     console.log("Started loading pdf: " + loadingTask);
     loadingTask.onProgress = function (progress) {
         percentLoaded = Math.round(progress.loaded / progress.total);
-        percentLoaded = percentLoaded > 0.01 ? percentLoaded : 0.01;
-        percentLoaded = percentLoaded <= 0.99 ? percentLoaded : 1;
         displayProgressOnBar();
     };
     loadingTask.promise.then(function (localPdf) {

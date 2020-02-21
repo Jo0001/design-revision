@@ -1,7 +1,8 @@
 .button {
     position: fixed;
-    margin-top: 0.6%;
-    width: 2%;
+    margin-top: 0.4%;
+    width: 2rem;
+    height: 2rem
 }
 
 .selected {
@@ -20,8 +21,8 @@
 .textField {
     min-width: 21px;
     position: fixed;
-    margin-top: 0.9%;
-    width: 2%;
+    margin-top: 0.9rem;
+    width: 2em;
     color: white;
     text-align: center;
     border: none;
@@ -34,16 +35,16 @@
 .lowerBar {
     background-color: rgb(18, 18, 18);
     position: fixed;
-    bottom: 0;
-    height: 9%;
+    height: 10%;
     width: 100%;
+    bottom: 0;
     left: 0;
 }
 
 .pageNumField {
-    position: absolute;
-    left: 47.8%;
-    width: 4%;
+    position: fixed;
+    left: 49%;
+    width: 1px;
     text-align: center;
     color: white;
     font-size: 18px;
@@ -56,6 +57,37 @@
     right: 1%;
     background: #0cfad6;
     text-align: center;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    z-index: 1;
+    justify-content: flex-start;
+    border-radius: 100px;
+    align-items: center;
+    position: relative;
+    padding: 0 5px;
+    display: flex;
+    height: 40em;
+    width: 500px;
+}
+
+.progress-value {
+    animation: load 3s normal forwards;
+    box-shadow: 0 10px 40px -10px rgb(20, 100, 20);
+    border-radius: 100px;
+    background: rgb(20, 100, 20);
+    height: 30em;
+    width: 10px;
+}
+
+@keyframes load {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 100%;
+    }
 }
 
 #pdf {
@@ -79,23 +111,6 @@
     border-radius: 3px;
 }
 
-#loading {
-    position: fixed;
-    height: 10px;
-    background-color: #00620b;
-    bottom: 15px;
-    border-radius: 5rem;
-    z-index: 1;
-}
-
-#loadingBar {
-    position: fixed;
-    height: 20px;
-    background-color: rgb(41, 41, 41);
-    border-radius: 5rem;
-    bottom: 10px;
-}
-
 #titleCard {
     text-align: center;
     color: black;
@@ -103,7 +118,7 @@
 }
 
 #titleBar {
-    position: absolute;
+    position: fixed;
     border-radius: 20px;
     right: 1%;
     left: 1%;
@@ -113,12 +128,10 @@
 
 body {
     background-color: rgb(92, 92, 92);
-    width: 100%;
     overflow: hidden;
-    line-height: 1;
 }
 
-html {
+html, body {
     min-height: 100%;
 }
 
