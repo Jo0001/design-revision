@@ -4,3 +4,4 @@ auth.php
 signup.php
 setpassword.php
 .htaccess in app
+put-project in /updatestatus ->'TODO'

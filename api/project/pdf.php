@@ -4,7 +4,6 @@ require "../../libs/api-util.php";
 if (isLoggedIn()) {
     if (!empty($_GET['file']) && substr(filter_var($_GET['file'], FILTER_SANITIZE_STRING), -4) == ".pdf") {
         $file = "../../user-content/" . filter_var($_GET['file'], FILTER_SANITIZE_STRING);
-        //TODO Check if user is projectmember
         if (file_exists($file)) {
             $handle = @fopen($file, "rb");
             header("Content-type: application/pdf");

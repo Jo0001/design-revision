@@ -77,7 +77,7 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
 
                         $status = $results['status'];
                         //Inform user per email about the new project
-                        if ($status == "INVITE") {
+                        if ($status == INVITE) {
                             informNewbie($tmp, $projectname, $name);
                         } else {
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
@@ -99,7 +99,7 @@ if (!empty($_POST['name']) && !empty($_POST['members'])) {
                         $role = array_column($members, 'role', 'email')[$tmp];
                         array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
 
-                        informNewbie($tmp, $projectname,$name);
+                        informNewbie($tmp, $projectname, $name);
                     }
                 }
 

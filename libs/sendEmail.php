@@ -33,8 +33,9 @@ function sendMail($toAdr, $toName, $subject, $content)
 
         $mail->send();
         echo 'Message has been sent to '.$toAdr;
+        return true;
     } catch (Exception $e) {
-        header("HTTP/1.1 500 Internal Server Error");
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        return false;
     }
 }

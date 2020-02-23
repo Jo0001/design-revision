@@ -1,5 +1,4 @@
 <?php
-//TODO Needs testing with more users
 function generateHash($pdo)
 {
     do {
@@ -22,7 +21,7 @@ function parseHTML($file_path, $name, $link, $project_name, $project_version)
 }
 
 /**
- * @return time-difference in seconds
+ * @return int ->time-difference in seconds
  */
 function dateDifference($d1, $d2)
 {

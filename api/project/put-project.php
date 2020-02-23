@@ -12,8 +12,7 @@ if ($page === "addmember") {
     addmember();
 } elseif ($page === "removemember") {
     removemember();
-} elseif ($page === "updatecomments" || $page === "addcomments") {
-    //TODO Change to addcomments
+} elseif ($page === "addcomments") {
     addComments();
 } elseif ($page === "solvecomment") {
     solveComment();
@@ -68,7 +67,7 @@ function addComments()
 
 function addmember()
 {
-    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['member'])) {
+    if (!empty($GLOBALS['_PUT'] ['id']) && !empty($GLOBALS['_PUT'] ['member'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
         $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
 
@@ -103,6 +102,8 @@ function addmember()
                     //Converts everything to lowercase
                     $member = array_map('nestedLowercase', $member);
 
+                    $name = getUser('name');
+
                     //check if user has already an account
                     if (in_array($member['email'], $useremails)) {
                         $id = emailToId($member['email']);
@@ -119,11 +120,10 @@ function addmember()
                         $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
                         $statement->execute(array($id));
                         $results = $statement->fetch();
-                        $name = $results['name'];
                         $status = $results['status'];
                         //Inform user per email about the new project
-                        if ($status == "INVITE") {
-                            informNewbie($member['email'], $projectname);
+                        if ($status == INVITE) {
+                            informNewbie($member['email'], $projectname, $name);//TODO Needs testing
                         } else {
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
                             sendMail($member['email'], $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
@@ -137,7 +137,7 @@ function addmember()
                         //Save the new user as member to the project
                         updateProjectMember($pid, (int)$pdo->lastInsertId(), $role, $pdo);
 
-                        informNewbie($member['email'], $projectname);
+                        informNewbie($member['email'], $projectname, $name);
                     }
 
                     handleOutput("Successful added member ");
@@ -159,7 +159,7 @@ function addmember()
 
 function removemember()
 {
-    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['member'])) {
+    if (!empty($GLOBALS['_PUT'] ['id']) && !empty($GLOBALS['_PUT'] ['member'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
         $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
     } else {
@@ -170,14 +170,78 @@ function removemember()
 
 function updateStatus()
 {
-    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['status'])) {
+    if (!empty($GLOBALS['_PUT'] ['id']) && !empty($GLOBALS['_PUT'] ['status'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
         $status = filter_var($GLOBALS['_PUT'] ['status'], FILTER_SANITIZE_STRING);
-        handleOutput("Just a demo without logic");
+
+        $pid = "project_" . $pid;
+        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        if (isLoggedIn()) {
+            if (isValidProject($pid, $pdo)) {
+                $projectdata = getLatestProjectData($pid, $pdo);
+                $currentStatus = $projectdata['status'];
+                if (isMember($pid, getUser('pk_id'))) {
+                    if ($status === TODO) {
+                        //Inform agency
+                        if ($currentStatus === WAITING_FOR_RESPONSE) {
+                            changeStatus($pdo, $pid, TODO);
+                            $members = json_decode($projectdata['members'], true);
+                            $projectname = getLatestProjectData($pid, $pdo)[0];
+                            $user = getUser('name');
+                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . explode("project_", $pid)[1];
+                            $version = getLatestProjectData($pid, $pdo)[1];
+
+                            foreach ($members as $member) {
+                                if ($member['role'] == 1) {
+                                    sendMail(IdToEmail($pdo, $member['id']), IdToName($pdo, $member['id']), $user . "hat Änderungen in '" . $projectname . "' gespeichert", parseHTML("../../libs/templates/emailNeueAenderungen.html", $user, $link, $projectname, $version));
+                                }
+                            }
+                            header("HTTP/1.1 204 No Content");
+                        } else {
+                            showError("something went wrong", 400);
+                        }
+
+                    } else if ($status === IN_PROGRESS) {
+                        //Just show as work in progress
+                        if ($currentStatus === TODO) {
+                            changeStatus($pdo, $pid, IN_PROGRESS);
+                            header("HTTP/1.1 204 No Content");
+                        } else {
+                            showError("something went wrong", 400);
+                        }
+
+
+                    } else if ($status === DONE) {
+                        if ($currentStatus === IN_PROGRESS) {
+                            //Send confirm Mail
+                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/printverify.php?id=" . explode("project_", $pid)[1];
+                            //TODO Generate 6-digit long code and save it to the project db
+                            $securitycode = null;
+                            for ($i = 0; $i < 6; $i++) {
+                                $securitycode .= mt_rand(0, 9);
+                            }
+                            //TODO Send Confirm Mail
+                            //TODO Add verify site
+                        } else {
+                            showError("something went wrong", 400);
+                        }
+
+
+                    } else {
+                        showError("Unknown status. See the docs for help", 400);
+                    }
+                } else {
+                    showError("Not a member", 403);
+                }
+            } else {
+                showError("Invalid Project/status", 400);
+            }
+        } else {
+            showError("Log in to perform this action", 401);
+        }
     } else {
         showError("Missing project id/status", 400);
     }
-
 }
 
 function updateFile()
