@@ -186,8 +186,7 @@ function setupViewport() {
         e.preventDefault();
         return false;
     });
-    //Rescale Loading bar so we cant get over 100%
-    window.addEventListener('resize', displayProgressOnBar);
+
     //Get dom elements
     pageNumberContainer = document.getElementById("currentPage");
     decPage = document.getElementById("decPage");
