@@ -215,13 +215,15 @@ function updateStatus()
                         if ($currentStatus === IN_PROGRESS) {
                             //Send confirm Mail
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/printverify.php?id=" . explode("project_", $pid)[1];
-                            //TODO Generate 6-digit long code and save it to the project db
                             $securitycode = null;
                             for ($i = 0; $i < 6; $i++) {
                                 $securitycode .= mt_rand(0, 9);
                             }
-                            //TODO Send Confirm Mail
-                            //TODO Add verify site
+                            $statement = $pdo->prepare("UPDATE " . $pid . " SET `securitycode` = ?  ORDER BY version DESC LIMIT 1");
+                            $statement->execute(array($securitycode));
+                            $projectname = getLatestProjectData($pid, $pdo)[0];
+                            sendMail(getUser('email'), getUser('name'), "Druckfreigabebestätigung von \"" . $projectname . "\"", parseHTML("../../libs/templates/printverify.html", null, $link, $projectname, $securitycode));
+                            header("HTTP/1.1 204 No Content");
                         } else {
                             showError("something went wrong", 400);
                         }
