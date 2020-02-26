@@ -159,11 +159,27 @@ function removemember()
 {
     if (!empty($GLOBALS['_PUT'] ['id']) && !empty($GLOBALS['_PUT'] ['member'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+        $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING);
+        if (isLoggedIn()) {
+            $pid = "project_" . $pid;
+            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+            if (isValidProject($pid, $pdo)) {
+                if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
+                    //TODO Check if $member is a real member + delete from project members and project-id from user
+                    handleOutput("Just a demo without real logic");
+
+                } else {
+                    showError("Forbidden", 403);
+                }
+            } else {
+                showError("Invalid Request", 400);
+            }
+        } else {
+            showError("Login to perform this action", 401);
+        }
     } else {
-        showError("Missing id/member data", 400);
+        showError("Missing id/member id", 400);
     }
-    handleOutput("Just a demo without real logic");
 }
 
 function updateStatus()
@@ -249,7 +265,23 @@ function solveComment()
     if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['comment'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
         $cid = filter_var($GLOBALS['_PUT'] ['comment'], FILTER_SANITIZE_STRING);
-        handleOutput("Just a demo without logic");
+        if (isLoggedIn()) {
+            $pid = "project_" . $pid;
+            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+            if (isValidProject($pid, $pdo)) {
+                if (isMember($pid, getUser('pk_id'))) {
+
+                    handleOutput("Just a demo without real logic");
+                    //TODO Search comment, change commentstatus & timestamp
+                } else {
+                    showError("Not a member", 403);
+                }
+            } else {
+                showError("Invalid request", 400);
+            }
+        } else {
+            showError("Login to perform this action", 401);
+        }
     } else {
         showError("Missing project/comment id", 400);
     }
