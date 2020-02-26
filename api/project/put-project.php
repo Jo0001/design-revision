@@ -18,8 +18,6 @@ if ($page === "addmember") {
     solveComment();
 } elseif ($page === "updatestatus") {
     updateStatus();
-} elseif ($page === "updatefile") {
-    updateFile();
 } else {
     showError("Bad Request", 400);
 }
@@ -193,7 +191,7 @@ function updateStatus()
 
                             foreach ($members as $member) {
                                 if ($member['role'] == 1) {
-                                    sendMail(IdToEmail($pdo, $member['id']), IdToName($pdo, $member['id']), $user . "hat Änderungen in '" . $projectname . "' gespeichert", parseHTML("../../libs/templates/emailNeueAenderungen.html", $user, $link, $projectname, $version));
+                                    sendMail(IdToEmail($pdo, $member['id']), IdToName($pdo, $member['id']), $user . "hat Änderungswünsche in '" . $projectname . "' gespeichert", parseHTML("../../libs/templates/emailNeueAenderungen.html", $user, $link, $projectname, $version));
                                 }
                             }
                             header("HTTP/1.1 204 No Content");
@@ -239,20 +237,10 @@ function updateStatus()
                 showError("Invalid Project/status", 400);
             }
         } else {
-            showError("Log in to perform this action", 401);
+            showError("Login to perform this action", 401);
         }
     } else {
         showError("Missing project id/status", 400);
-    }
-}
-
-function updateFile()
-{
-    if (isset($GLOBALS['_PUT'] ['id'])) {
-        $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        handleOutput("Just a demo without logic");
-    } else {
-        showError("Missing project id", 400);
     }
 }
 
