@@ -5,7 +5,7 @@ let customerid;
 let projectid;
 let ableNewProject = true;
 let bool1 = false;
-let boolStatus;
+
 let select = true;
 let doubleClickSelect = true;
 let autoComplete = [];
@@ -38,6 +38,7 @@ function generate() {
     //Variablen erstellen
     let request = new XMLHttpRequest();
     let request1 = new XMLHttpRequest();
+    let boolStatus;
     let requestURL;
     let b = document.body;
     let arrayMember;
@@ -205,6 +206,30 @@ function generate() {
                         }
                         versionen.innerHTML = "Versionen: " + projectObejct.project.version;
                         textStatus.innerHTML = projectObejct.project.status;
+                        // changing the Status to German words
+
+                        switch (textStatus.innerHTML) {
+                            case "WAITING_FOR_RESPONSE": textStatus.innerHTML="Warten auf Kundenrückmeldung";
+                                break;
+                            case "IN_PROGRESS": textStatus.innerHTML="Wird bearbeitet";
+                                break;
+                            case "TODO": textStatus.innerHTML="Zu bearbeiten";
+                                break;
+                            case "DONE": textStatus.innerHTML="Fertig/Druckfreigabe";
+                                break;
+                            default: textStatus.innerHTML="Unbekannter Status";
+                        }
+                        //Abfrage für den Status ob der Kunde gelöscht werden kann
+
+                        if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
+                            statusImg.setAttribute("src", "../files/img/XBereit.png");
+                            boolStatus = true;
+
+                        } else {
+                            statusImg.setAttribute("src", "../files/img/XWarten.png");
+                            boolStatus = false;
+                        }
+
                         let members1 = projectObejct.project.members;
                         let search = projectObejct.project.name;
                         customerdiv.setAttribute('data-test', search);
@@ -259,16 +284,6 @@ function generate() {
     customerdiv.appendChild(statusDiv);
     //Status erstellem
     statusDiv.appendChild(textStatus);
-    //Abfrage für den Status
-
-    //todo zum test != sonst ===
-    if (textStatus.innerHTML != "Fertig/Druckfreigabe") {
-        statusImg.setAttribute("src", "../files/img/XBereit.png");
-        boolStatus = true;
-    } else {
-        statusImg.setAttribute("src", "../files/img/XWarten.png");
-        boolStatus = false;
-    }
     //Abfrage ob der Kunden gelöscht werden kann
 
     customerdiv.onclick = function () {
@@ -1177,9 +1192,21 @@ function addProjectMember(projectId, memberMail, memberRole) {
      xhr.withCredentials = true;
 
      xhr.addEventListener("readystatechange", function () {
-         if (this.readyState === 4) {
-             console.log(this.responseText);
+       let message=  document.getElementById('AddOrDelete');
+         if (this.readyState === 4&&this.status===200) {
+             message.style.display="block";
+             message.innerHTML="Member wurde hinzugefügt";
+             message.style.color="black";
+         }else if(this.readyState===4){
+             message.style.display="block";
+             message.innerHTML="Member konnte nicht hinzugefügt werden";
+             message.style.color="red";
          }
+         setTimeout(function () {
+            message.style.display="none";
+            message.innerHTML="";
+         },4000);
+         console.log(this.responseText);
      });
 
      xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
@@ -1207,9 +1234,21 @@ function removeProjectMember(projectId, memberMail, memberRole) {
        xhr.withCredentials = true;
 
        xhr.addEventListener("readystatechange", function () {
-           if (this.readyState === 4) {
-               console.log(this.responseText);
+           let message=  document.getElementById('AddOrDelete');
+           if (this.readyState === 4&&this.status===200) {
+               message.style.display="block";
+               message.innerHTML="Member wurde gelöscht"
+               message.style.color="black";
+           } else if(this.readyState===4){
+               message.style.display="block";
+               message.innerHTML="Membr konnte nicht gelöscht werden";
+               message.style.color="red";
            }
+           setTimeout(function () {
+               message.style.display="none";
+               message.innerHTML="";
+           },4000);
+           console.log(this.responseText);
        });
        xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
