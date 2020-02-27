@@ -18,6 +18,7 @@ let updateOrCreate = true;
 let nameLenght = false;
 let moreMember = 1;
 let tmpClients;
+let sendUserEmail = true;
 //Variables for getUser method
 let nameImgSrc;
 let userName;
@@ -113,7 +114,7 @@ function generate() {
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
                 clientname.innerHTML = userObject.user.name + counter;
-                nameimg.setAttribute("src", window.location.origin+"/design-revision/api/user/avatar.php?name="+userObject.user.name);
+                nameimg.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObject.user.name);
                 clientemail.innerHTML = userObject.user.email + " " + counter;
                 customerdiv.setAttribute('data-email', userObject.user.email + counter);
                 company.innerHTML = userObject.user.company;
@@ -149,7 +150,7 @@ function generate() {
                     userName = clientname.innerHTML;
                     userEmail = clientemail.innerHTML;
                     userCompany = company.innerHTML;
-                    nameImgSrc = window.location.origin+"/design-revision/api/user/avatar.php?name="+userObject.user.name;
+                    nameImgSrc = window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObject.user.name;
                     gotUserData = true;
                 }
                 customerdiv.setAttribute('data-memberId', "" + counter);
@@ -580,24 +581,26 @@ let readyStateCheckInterval = setInterval(function () {
 
         let CustumorDashForm = document.getElementById("CustumorDashForm");
         CustumorDashForm.addEventListener('submit', function (evt) {
-            let replace=false;
-            if (sendFile === undefined || nameLenght) {
-                if (sendFile === undefined) {
-                    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
-                    const previewFile = previewContainer.querySelector(".image-preview__file");
-                    previewDefaulText.style.display = "block";
-                    previewFile.style.display = "none";
-                    previewDefaulText.style.color = "red";
-                }
+            let replace = false;
+            if (nameLenght) {
+                //do nothing
             } else {
 
                 let allRight = putArrayTogether();
                 if (allRight) {
                     if (updateOrCreate) {
-                        sendNewProject();
+                        if (sendFile === undefined) {
+                            const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                            const previewFile = previewContainer.querySelector(".image-preview__file");
+                            previewDefaulText.style.display = "block";
+                            previewFile.style.display = "none";
+                            previewDefaulText.style.color = "red";
+                        } else {
+                            sendNewProject();
+                        }
                     } else {
                         sendUpdateProject();
-                        replace=true;
+                        replace = true;
                     }
                     cleraForm();
                 }
@@ -1030,18 +1033,19 @@ function sendNewProject() {
             let m = message.getElementsByTagName("h1");
             m[0].innerHTML = "Erfolgreich gesendet";
             console.log(this.responseText);
-            //wartet
-            setTimeout(function () {
-                message.style.display = "none";
-                progressBar.style.display = "none";
-                percentage.style.display = "none";
-                //location.reload(true);
-            }, 2000);
+
         } else if (this.readyState === 4) {
             message.style.display = "block";
             let m = message.getElementsByTagName("h1");
             m[0].innerHTML = "Fehler versuchen sie es erneut";
         }
+        //wartet
+        setTimeout(function () {
+            message.style.display = "none";
+            progressBar.style.display = "none";
+            percentage.style.display = "none";
+            //location.reload(true);
+        }, 2000);
     });
     xhr.open("POST", sendURL);
     xhr.send(data);
@@ -1083,67 +1087,83 @@ function sendDelet(id) {
 }
 
 function sendUpdateProject() {
-    let sendURL = window.location.origin + "/design-revision/api/";
     let progressBar = document.getElementById("loader");
     let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
     let tmpArray1 = JSON.stringify(arrayBefore);
     console.log(sendArray);
     console.log(arrayBefore);
-    $.each(JSON.parse(tmpArray), function (key, value) {
-        if (!(tmpArray1.indexOf(value.email) > -1)) {
-            addProjectMember(updateProjectId, value.email, value.role);
+    let b = true;
+    if (sendUserEmail) {
+        $.each(JSON.parse(tmpArray), function (key, value) {
+            if (!(tmpArray1.indexOf(value.email) > -1)) {
+                addProjectMember(updateProjectId, value.email, value.role);
+                b = false;
+            }
+        });
+
+        $.each(JSON.parse(tmpArray1), function (key, value) {
+            if (tmpArray.indexOf(value.email) === -1) {
+                removeProjectMember(updateProjectId, value.email, value.role);
+                b = false;
+            }
+        });
+    }
+    if (sendFile === undefined) {
+        if (b) {
+            const previewContainer = document.getElementById("imagePreview");
+            const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+            const previewFile = previewContainer.querySelector(".image-preview__file");
+            previewDefaulText.style.display = "block";
+            previewDefaulText.style.color = "red";
+            previewFile.innerHTML = "Bitte PDF hinzufügen";
+            previewFile.style.display = "none";
+            console.log("Hello");
+            setTimeout(function () {
+                if (sendFile === undefined) {
+                    previewDefaulText.style.display = "block";
+                    previewDefaulText.style.color = "#cccccc";
+                    previewFile.innerHTML = "Keine Datei ausgewählt";
+                    previewFile.style.display = "none";
+
+                }
+            },4000);
         }
-    });
+    } else {
+        //Senden der File
+        let dataFile = new FormData();
+        dataFile.append("id", updateProjectId);
+        dataFile.append("file", sendFile, sendFile.name);
+        let xhrFile = new XMLHttpRequest();
+        xhrFile.withCredentials = true;
+        xhrFile.upload.addEventListener("progress", function (event) {
+            update_progress(event, dataFile)
+        });
+        xhrFile.addEventListener("readystatechange", function () {
+            let message = document.getElementById("sendFeedBack");
+            message.style.display = "block";
+            if (this.readyState === 4 && this.status === 200) {
+                message.style.display = "block";
+                let m = message.getElementsByTagName("h1");
+                m[0].innerHTML = "Erfolgreich gesendet";
+                console.log(this.responseText);
+                //wartet
 
-    $.each(JSON.parse(tmpArray1), function (key, value) {
-        if (tmpArray.indexOf(value.email) === -1) {
-            removeProjectMember(updateProjectId, value.email, value.role);
-        }
-    });
-
-
-    //senden des Neuen Status
-    /* let dataStatus = new FormData();
-     dataStatus.append("updateproject", "status");
-     dataStatus.append("id", updateProjectId);
-     dataStatus.append("status", "Warten auf Kundenrückmeldung");
-
-     let xhrStatus = new XMLHttpRequest();
-     xhrStatus.withCredentials = true;
-
-     xhrStatus.addEventListener("readystatechange", function () {
-         if (this.readyState === 4) {
-             console.log(this.responseText);
-         }
-     });
-     xhrStatus.open("PUT", sendURL);
-     xhrStatus.send(dataStatus);
-     //Senden der File
-     let dataFile = new FormData();
-     dataFile.append("updateproject", "data");
-     dataFile.append("id", updateProjectId);
-     dataFile.append("data", sendFile);
-     let xhrFile = new XMLHttpRequest();
-     xhrFile.withCredentials = true;
-     xhrFile.upload.addEventListener("progress", function (event) {
-         update_progress(event, dataFile)
-     });
-     xhrFile.addEventListener("readystatechange", function () {
-         let message = document.getElementById("sendFeedBack");
-         message.style.display = "block";
-         if (this.readyState === 4) {
-             //wartet 6 sekunden
-             setTimeout(function () {
-                 progressBar.style.display = "none";
-                 message.style.display = "none";
-                 percentage.style.display = "none";
-             }, 2000);
-             console.log(this.responseText);
-         }
-     });
-     xhrFile.open("PUT", sendURL);
-     xhrFile.send(dataFile);*/
+            } else if (this.readyState === 4) {
+                message.style.display = "block";
+                let m = message.getElementsByTagName("h1");
+                m[0].innerHTML = "Fehler versuchen sie es erneut";
+            }
+            setTimeout(function () {
+                message.style.display = "none";
+                progressBar.style.display = "none";
+                percentage.style.display = "none";
+                //location.reload(true);
+            }, 2000);
+        });
+        xhrFile.open("PUT", window.location.origin + "/design-revision/api/project/updatefile");
+        xhrFile.send(dataFile);
+    }
 
 }
 
@@ -1151,10 +1171,8 @@ function addProjectMember(projectId, memberMail, memberRole) {
     let member = {"email": memberMail, "role": memberRole};
     let tmpMember = JSON.stringify(member);
     console.log("Add:" + tmpMember);
-    /* let data = new FormData();
-     data.append("id", projectId);
-     data.append("member", tmpMember);
-
+    //used raw Data else it did not work
+   let data = "id="+projectId+"&member="+tmpMember;
      let xhr = new XMLHttpRequest();
      xhr.withCredentials = true;
 
@@ -1167,7 +1185,7 @@ function addProjectMember(projectId, memberMail, memberRole) {
      xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-     xhr.send(data);*/
+     xhr.send(data);
 
 }
 
@@ -1175,10 +1193,16 @@ function removeProjectMember(projectId, memberMail, memberRole) {
     let member = {"email": memberMail, "role": memberRole};
     let tmpMember = JSON.stringify(member);
     console.log("Remove:" + tmpMember);
-    /*   let data = new FormData();
-       data.append("id", projectId);
-       data.append("member", tmpMember);
-
+    let memberID;
+    //holt mithilfe der E_Mail die Id des Members
+    let content = document.querySelectorAll('[data-email');
+    for (let i = 0; i < content.length ; i++) {
+        if(content[i].getAttribute('data-email')===memberMail){
+            memberID=content[i].getAttribute('data-memberId');
+        }
+    }
+    console.log(memberID);
+     let data ="id="+projectId+"&member="+memberID;
        let xhr = new XMLHttpRequest();
        xhr.withCredentials = true;
 
@@ -1190,7 +1214,7 @@ function removeProjectMember(projectId, memberMail, memberRole) {
        xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-       xhr.send(data);*/
+       xhr.send(data);
 
 }
 
@@ -1351,20 +1375,30 @@ function putArrayTogether() {
                 sendArray[i] = sendArrayFields[i];
             }
         }
-        for (let i = 0; i < sendArrayFields.length; i++) {
-            let valid = emailIsValid(sendArrayFields[i].email);
-            if (!valid) {
-                messageValid.style.color = "red";
-                messageValid.innerHTML = "Eine Mail ist falsch!";
-                allRight = false;
+        let aNull = true;
+        for (let i = 0; i < sendArray.length; i++) {
+            if (sendArray[i].email === "" || sendArray[i].email === undefined) {
+                aNull = false;
+                sendUserEmail = false;
             }
         }
-        for (let i = 0; i < sendArrayFields.length; i++) {
-            if (sendArrayFields[i].role == (-1)) {
-                messageRole.innerHTML = "Rollen auswählen";
-                allRight = false;
+        if (aNull) {
+            sendUserEmail = true;
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                let valid = emailIsValid(sendArrayFields[i].email);
+                if (!valid) {
+                    messageValid.style.color = "red";
+                    messageValid.innerHTML = "Eine Mail ist falsch!";
+                    allRight = false;
+                }
             }
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                if (sendArrayFields[i].role == (-1)) {
+                    messageRole.innerHTML = "Rollen auswählen";
+                    allRight = false;
+                }
 
+            }
         }
     } else {
         for (let i = 0; i < sendArrayFields.length; i++) {
@@ -1384,22 +1418,31 @@ function putArrayTogether() {
             allRight = false;
 
         }
-
-        for (let i = 0; i < sendArrayFields.length; i++) {
-            let valid = emailIsValid(sendArrayFields[i].email);
-            if (!valid) {
-                messageValid.style.color = "red";
-                messageValid.innerHTML = "Eine Mail ist falsch!";
-                allRight = false;
+        let aNull = true;
+        for (let i = 0; i < sendArray.length; i++) {
+            if (sendArray[i].email === "" || sendArray[i].email === undefined) {
+                aNull = false;
+                sendUserEmail = false;
             }
         }
-        for (let i = 0; i < sendArrayFields.length; i++) {
-            if (sendArrayFields[i].role == (-1)) {
-                messageRole.style.color = "red";
-                messageRole.innerHTML = "Rollen auswählen";
-                allRight = false;
+        if (aNull) {
+            sendUserEmail = true;
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                let valid = emailIsValid(sendArrayFields[i].email);
+                if (!valid) {
+                    messageValid.style.color = "red";
+                    messageValid.innerHTML = "Eine Mail ist falsch!";
+                    allRight = false;
+                }
             }
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                if (sendArrayFields[i].role == (-1)) {
+                    messageRole.style.color = "red";
+                    messageRole.innerHTML = "Rollen auswählen";
+                    allRight = false;
+                }
 
+            }
         }
         sendArray = helpSendArray;
     }
