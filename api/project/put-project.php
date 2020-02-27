@@ -159,15 +159,42 @@ function removemember()
 {
     if (!empty($GLOBALS['_PUT'] ['id']) && !empty($GLOBALS['_PUT'] ['member'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING);
+        $member = (int)filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING);
         if (isLoggedIn()) {
             $pid = "project_" . $pid;
             $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
             if (isValidProject($pid, $pdo)) {
                 if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
-                    //TODO Check if $member is a real member + delete from project members and project-id from user
-                    handleOutput("Just a demo without real logic");
 
+                    if (isMember($pid, $member)) {
+                        //Delete userid from project memberslist and save to db
+                        $members = json_decode(getLatestProjectData($pid, $pdo)['members'], true);
+                        foreach ($members as $tmp => $temp) {
+                            if ($temp['id'] === $member) {
+                                unset($members[$tmp]);
+                                break;
+                            }
+                        }
+                        //Convert Object back to array und reindex
+                        $members = (array)$members;
+                        $members = array_values($members);
+                        $statement = $pdo->prepare("UPDATE " . $pid . " SET members = ?  ORDER BY version DESC LIMIT 1 ");
+                        $statement->execute(array(json_encode($members)));
+
+                        //Delete project-id from user
+                        $statement = $pdo->prepare("SELECT projects from users WHERE pk_id = ?");
+                        $statement->execute(array($member));
+                        $userprojects = json_decode($statement->fetch()['projects']);
+                        $pid = explode("project_", $pid)[1];
+                        unset($userprojects[array_search($pid, $userprojects, true)]);
+                        $userprojects = array_values($userprojects);
+                        $statement = $pdo->prepare("UPDATE users SET projects = ? WHERE pk_id = ?");
+                        $statement->execute(array(json_encode($userprojects), $member));
+
+                        header("HTTP/1.1 204 No Content");
+                    } else {
+                        showError("Not a member", 400);
+                    }
                 } else {
                     showError("Forbidden", 403);
                 }

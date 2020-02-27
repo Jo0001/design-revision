@@ -10,7 +10,7 @@ if ($page === "create") {
 } elseif ($page === "updatefile") {
     updateFile();
 } else {
-    showError("Bad Request-x", 400);
+    showError("Bad Request", 400);
 }
 
 function createProject()
