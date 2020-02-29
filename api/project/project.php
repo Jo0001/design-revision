@@ -15,12 +15,49 @@ if (!is_null($id)) {
         $id = "project_" . $id;
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
         if (isValidProject($id, $pdo)) {
-            //TODO CHeck if is member!!
             $project = getLatestProjectData($id, $pdo);
             if (isMember($id, getUser('pk_id'))) {
                 $page = explode("?", basename(filter_var($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL))[0];
                 if ($page == "data") {
-                    handleOutput(array("link" => $project['link'], "data" => $project['data']));
+                    $statement = $pdo->prepare("SELECT data FROM " . $id);
+                    $statement->execute();
+                    $rawdata = $statement->fetchAll();
+                    $output = array();
+                    //Check what we should give out
+                    if (!empty($_GET['type'])) {
+                        $type = filter_var($_GET['type'], FILTER_SANITIZE_STRING);
+                        if ($type === "solved") {
+                            foreach ($rawdata as $tmp) {
+                                $data = json_decode($tmp['data'], true);
+                                foreach ($data as $tmp2) {
+                                    if ($tmp2['isImplemented'] === true) {
+                                        array_push($output, $tmp2);
+                                    }
+                                }
+                            }
+
+                        } elseif ($type === "unsolved") {
+                            foreach ($rawdata as $tmp) {
+                                $data = json_decode($tmp['data'], true);
+                                foreach ($data as $tmp2) {
+                                    if ($tmp2['isImplemented'] === false) {
+                                        array_push($output, $tmp2);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            showError("Unknown type", 400);
+                        }
+
+                    } else {
+                        foreach ($rawdata as $tmp) {
+                            foreach (json_decode($tmp[0]) as $tmp2) {
+                                array_push($output, $tmp2);
+                            }
+                        }
+                    }
+                    handleOutput(array("link" => $project['link'], "data" => $output));
                 } else if ($page == "history") {
                     $statement = $pdo->prepare("SELECT link, lastedit FROM " . $id);
                     $statement->execute();
