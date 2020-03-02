@@ -230,6 +230,11 @@ function setupViewport() {
         handleServerResponse(request3, function (response) {
             console.log(response.user.email);
             user = response.user;
+            try {
+                loaded();
+            } catch (e) {
+
+            }
         });
     });
     request3.send();
@@ -476,7 +481,7 @@ function clearComments() {
     request3.send();
     request3.addEventListener('readystatechange', function (e) {
         handleServerResponse(request3, function (response) {
-            let allPdfComments = JSON.parse(response.data);
+            let allPdfComments = response.data;
             for (let index = 0; index < allPdfComments.length; index++) {
                 let comment = allPdfComments[index];
                 if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {

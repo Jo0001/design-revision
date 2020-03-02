@@ -21,21 +21,27 @@
 <div id="commentContainer" style="top: 20px; left: 10px;">
     <div id="commentArea" style="display: none; width: 10px; height: 10px; z-index: -3;"></div>
 </div>
-<div style="position: relative; top: 50%; left: 33%; background-color: #333333; z-index: 10; width: 35%;
- height: 250px">
+<div id="messageDialog"
+     style="position: relative; top: 50%; left: 33%; background-color: #333333; z-index: 10; width: 35%; min-width; height: 250px; display: none;">
     <table>
         <tr>
             <h1 style="color: white; font-size: 24px; left: 15px; top: 10px; position: relative;">Kommentar
                 erstellen:</h1>
-            <p style="position: absolute; top: 0; color: white; right: 20px">email@thingymagics.com</p>
+            <p id="emailDisplay" style="position: absolute; top: 0; color: white; right: 20px">
+                email@thingymagics.com</p>
         </tr>
         <tr>
-            <textarea style="position: absolute; left: 15px; width: 92%; height: 60%; resize: none;"></textarea>
+            <textarea id="commentMsg"
+                      style="position: absolute; left: 15px; width: 92%; height: 60%; resize: none;"></textarea>
         </tr>
         <tr>
             <div style="bottom: 40px; position: absolute;">
-                <button style="background-color: #00620b; left: 12px; position: absolute;">Speichern</button>
-                <button style="background-color: #910000; left: 122px; position: absolute;">Verwerfen</button>
+                <button id="saveCommentBtn" style="background-color: #00620b; left: 12px; position: absolute;">
+                    Speichern
+                </button>
+                <button id="discardCommentBtn" style="background-color: #910000; left: 122px; position: absolute;">
+                    Verwerfen
+                </button>
             </div>
         </tr>
     </table>
