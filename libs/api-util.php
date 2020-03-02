@@ -25,7 +25,7 @@ function showError($error, $code)
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.5,"documentation"=>"https://documenter.getpostman.com/view/9645782/SWLZgW2n"));
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.6, "documentation" => "https://documenter.getpostman.com/view/9645782/SWLZgW2n"));
     handleOutput($err);
     die;
 }
@@ -124,7 +124,7 @@ function isMember($pid, $userid)
             return true;
         }
     }
-
+    return false;//TODO NEEDS TESTING
 }
 
 function isAdmin($lastrow, $userid)
@@ -158,18 +158,19 @@ function emailToId($email)
     return $tmpid[0];
 }
 
-function IdToEmail($pdo,$id){
+function IdToEmail($pdo, $id)
+{
     $statement = $pdo->prepare("SELECT email from users where pk_id = ?");
-    $statement->execute(array($id));
-  return $statement->fetch()[0];
-}
-
-function IdToName($pdo,$id){
-    $statement = $pdo->prepare("SELECT name from users where pk_id = ?");
     $statement->execute(array($id));
     return $statement->fetch()[0];
 }
 
+function IdToName($pdo, $id)
+{
+    $statement = $pdo->prepare("SELECT name from users where pk_id = ?");
+    $statement->execute(array($id));
+    return $statement->fetch()[0];
+}
 
 
 function isJson($string)
@@ -178,24 +179,25 @@ function isJson($string)
     return (json_last_error() == JSON_ERROR_NONE);
 }
 
-function informNewbie($email, $projectname,$name)
+function informNewbie($email, $projectname, $name)
 {
     $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $email;
     sendMail($email, $email, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", $name, $link, $projectname, 1));
 }
 
-function changeStatus($pdo,$pid,$status){
+function changeStatus($pdo, $pid, $status)
+{
     $statement = $pdo->prepare("UPDATE " . $pid . " SET status = ?, lastedit = CURRENT_TIMESTAMP ORDER BY version DESC LIMIT 1 ");
     $result = $statement->execute(array($status));
 }
 
 //constants
 //user:
-define("INVITE","INVITE");
-define("REGISTERED","REGISTERED");
-define("VERIFIED","VERIFIED");
+define("INVITE", "INVITE");
+define("REGISTERED", "REGISTERED");
+define("VERIFIED", "VERIFIED");
 //projects
-define("WAITING_FOR_RESPONSE","WAITING_FOR_RESPONSE");
-define("TODO","TODO");
-define("IN_PROGRESS","IN_PROGRESS");
-define("DONE","DONE");
+define("WAITING_FOR_RESPONSE", "WAITING_FOR_RESPONSE");
+define("TODO", "TODO");
+define("IN_PROGRESS", "IN_PROGRESS");
+define("DONE", "DONE");

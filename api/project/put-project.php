@@ -121,9 +121,9 @@ function addmember()
                         $status = $results['status'];
                         //Inform user per email about the new project
                         if ($status == INVITE) {
-                            informNewbie($member['email'], $projectname, $name);//TODO Needs testing
+                            informNewbie($member['email'], $projectname, $name);
                         } else {
-                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
+                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;//TODO Needs testing
                             sendMail($member['email'], $name, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
                         }
 
@@ -289,17 +289,20 @@ function updateStatus()
 
 function solveComment()
 {
-    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['comment'])) {
+    if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['cid'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        $cid = filter_var($GLOBALS['_PUT'] ['comment'], FILTER_SANITIZE_STRING);
+        $cid = filter_var($GLOBALS['_PUT'] ['cid'], FILTER_SANITIZE_STRING);
         if (isLoggedIn()) {
             $pid = "project_" . $pid;
             $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
             if (isValidProject($pid, $pdo)) {
                 if (isMember($pid, getUser('pk_id'))) {
 
-                    handleOutput("Just a demo without real logic");
+                    //  handleOutput("Just a demo without real logic");
                     //TODO Search comment, change commentstatus & timestamp
+
+
+
                 } else {
                     showError("Not a member", 403);
                 }
