@@ -14,7 +14,8 @@ if (!empty($_GET['name'])) {
 
         $white = imagecolorallocate($im, 255, 255, 255);
 
-        $bgcolor = imagecolorallocatealpha($im, 255, 20, 0, 50);
+       // $bgcolor = imagecolorallocatealpha($im, 255, 20, 0, 50);
+        $bgcolor = imagecolorallocatealpha($im, random_int ( 10 , 255 ), random_int ( 10 , 255 ), random_int ( 10 , 255 ), 50);
         imagefill($im, 0, 0, $bgcolor);
 
         $text = strtoupper($name[0]);
