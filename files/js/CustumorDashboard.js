@@ -1,11 +1,12 @@
 let a = true;
 let counter = 0;
 let counterForId = 0;
+let counterForUser = 0;
 let customerid;
 let projectid;
 let ableNewProject = true;
 let bool1 = false;
-
+let boolstatus;
 let select = true;
 let doubleClickSelect = true;
 let autoComplete = [];
@@ -23,6 +24,7 @@ let sendUserEmail = true;
 let nameImgSrc;
 let userName;
 let userEmail;
+let userId;
 let userCompany;
 let userProjects = [];
 let gotUserData = false;
@@ -38,13 +40,16 @@ function generate() {
     //Variablen erstellen
     let request = new XMLHttpRequest();
     let request1 = new XMLHttpRequest();
-    let boolStatus;
+    let boolStatus1;
     let requestURL;
     let b = document.body;
     let arrayMember;
     let arrayRole;
+    let gotProject = false;
     let projectsArray = [];
     let requestredy = false;
+    let customerSpan = document.createElement("span");
+    b.appendChild(customerSpan);
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
     let statusImg = document.createElement("img");
@@ -80,7 +85,7 @@ function generate() {
     let includedPorjects = document.createElement("p");
     //custumordiv generieren
     customerdiv.className = "clients";
-    b.appendChild(customerdiv);
+    customerSpan.appendChild(customerdiv);
     nameimg.setAttribute("alt", "tick");
     nameimg.style.borderRadius = "200px";
     nameimg.style.padding = "40px";
@@ -97,8 +102,7 @@ function generate() {
         clientemail.innerHTML = userEmail;
         company.innerHTML = userCompany;
         nameimg.setAttribute("src", nameImgSrc);
-        customerdiv.setAttribute('data-email', userEmail + counter);
-        customerdiv.setAttribute('data-memberId', "" + counter);
+
         counter++;
         requestredy = true;
         for (let i = 0; i < userProjects.length; i++) {
@@ -114,10 +118,10 @@ function generate() {
             if (request.readyState === 4 && request.status === 200) {
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
+                userId = userObject.user.id;
                 clientname.innerHTML = userObject.user.name + counter;
                 nameimg.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObject.user.name);
                 clientemail.innerHTML = userObject.user.email + " " + counter;
-                customerdiv.setAttribute('data-email', userObject.user.email + counter);
                 company.innerHTML = userObject.user.company;
                 if (!(userObject.user.status === "VERIFIED")) {
                     window.location = window.location.origin + "/design-revision/login/login.html?verify=notVerified";
@@ -126,7 +130,7 @@ function generate() {
                 let tmp = userObject.user.projects;
                 if (tmp === null) {
                     customerdiv.remove();
-                    clearInterval(checkForprojects);
+                    clearInterval(checkForProjects);
                     ableNewProject = false;
                     setTimeout(function () {
                         window.location = window.location.origin + "/design-revision/login/login.html?projects=noProjects";
@@ -152,10 +156,10 @@ function generate() {
                     userEmail = clientemail.innerHTML;
                     userCompany = company.innerHTML;
                     nameImgSrc = window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObject.user.name;
-                    gotUserData = true;
+
                 }
-                customerdiv.setAttribute('data-memberId', "" + counter);
                 counter++;
+                gotUserData = true;
 
             } else if (request.readyState === 4 && request.status === 403) {
                 console.log("Forbidden");
@@ -163,16 +167,16 @@ function generate() {
                 document.location = window.location.origin + "/design-revision/login/login.html";
             } else if (request.readyState === 4 && request.status === 404) {
                 window.alert("Nichts gefunden");
-            } else if (request1.readyState === 4 && request1.status === 400) {
+            } else if (request.readyState === 4 && request.status === 400) {
                 window.alert("Unbekannter AnfrageParameter");
             }
         };
     }
-    let checkForprojects = setInterval(function () {
+    let checkForProjects = setInterval(function () {
         if (requestredy) {
-            clearInterval(checkForprojects);
+            clearInterval(checkForProjects);
             projectid = projectsArray[counterForId];
-            let link = window.location.origin + "/design-revision/simulate/edit.php?id=" + projectid;
+            let link = window.location.origin + "/design-revision/app/CommentDesign.html?id=" + projectid;
             projektname.href = link;
             versionen.href = window.location.origin + "/design-revision/app/VersionOverview.html?id=" + projectid;
             //customerdiv id geben
@@ -209,25 +213,30 @@ function generate() {
                         // changing the Status to German words
 
                         switch (textStatus.innerHTML) {
-                            case "WAITING_FOR_RESPONSE": textStatus.innerHTML="Warten auf Kundenrückmeldung";
+                            case "WAITING_FOR_RESPONSE":
+                                textStatus.innerHTML = "Warten auf Kundenrückmeldung";
                                 break;
-                            case "IN_PROGRESS": textStatus.innerHTML="Wird bearbeitet";
+                            case "IN_PROGRESS":
+                                textStatus.innerHTML = "Wird bearbeitet";
                                 break;
-                            case "TODO": textStatus.innerHTML="Zu bearbeiten";
+                            case "TODO":
+                                textStatus.innerHTML = "Zu bearbeiten";
                                 break;
-                            case "DONE": textStatus.innerHTML="Fertig/Druckfreigabe";
+                            case "DONE":
+                                textStatus.innerHTML = "Fertig/Druckfreigabe";
                                 break;
-                            default: textStatus.innerHTML="Unbekannter Status";
+                            default:
+                                textStatus.innerHTML = "Unbekannter Status";
                         }
                         //Abfrage für den Status ob der Kunde gelöscht werden kann
 
                         if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
                             statusImg.setAttribute("src", "../files/img/XBereit.png");
-                            boolStatus = true;
+                            boolStatus1 = true;
 
                         } else {
                             statusImg.setAttribute("src", "../files/img/XWarten.png");
-                            boolStatus = false;
+                            boolStatus1 = false;
                         }
 
                         let members1 = projectObejct.project.members;
@@ -253,6 +262,8 @@ function generate() {
                         customerdiv.appendChild(role);
                         arrayRole = role.innerHTML;
                         arrayRole = arrayRole.split(",");
+                        gotProject = true;
+
                     } else if (request1.readyState === 4 && request1.status === 401) {
                         customerdiv.remove();
                         //window.alert("Nicht eingelogt");
@@ -268,7 +279,59 @@ function generate() {
                 };
             }
         }
-    }, 200);
+    }, 1000);
+    let checkForProjectsToCreateMember = setInterval(function () {
+        if (requestredy && gotProject) {
+            clearInterval(checkForProjectsToCreateMember);
+            for (let i = 0; i < arrayMember.length; i++) {
+                let request2 = new XMLHttpRequest();
+                if (arrayMember[i] != userId) {
+                    console.log(JSON.stringify(arrayMember) + "ID=" + projectsArray[counterForUser]);
+                    request2.open('GET', window.location.origin + "/design-revision/api/user/?id=" + arrayMember[i] + "&pid=" + projectsArray[counterForUser], true);
+                    request2.send();
+                    request2.onreadystatechange = function () {
+                        if (request2.readyState === 4 && request2.status === 200) {
+                            let userObj = JSON.parse(request2.response);
+                            let userDiv = document.createElement("div");
+                            let userAvatar = document.createElement("IMG");
+                            userDiv.appendChild(userAvatar);
+                            userDiv.className = "clients";
+                            customerSpan.appendChild(userDiv);
+                            console.log(userObj.user.name);
+                            let userName = document.createElement("p");
+                            userName.innerHTML = userObj.user.name;
+                            userDiv.appendChild(userName);
+                            let userEmail = document.createElement("p");
+                            userEmail.innerHTML = userObj.user.email + arrayMember[i];
+                            userDiv.appendChild(userEmail);
+                            userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
+                            userAvatar.setAttribute("alt", "tick");
+                            userAvatar.style.borderRadius = "200px";
+                            userAvatar.style.padding = "3px";
+                            userAvatar.style.transform = "scale(0.7)";
+                            let userCompany = document.createElement("p");
+                            userCompany.innerHTML = userObj.user.company;
+                            userDiv.appendChild(userCompany);
+                            userDiv.setAttribute('data-email', userObj.user.email + arrayMember[i]);
+                            userDiv.setAttribute('data-memberId', arrayMember[i]);
+                            userDiv.style.display = "none";
+
+                        } else if (request2.readyState === 4 && request2.status === 403) {
+                            console.log("Forbidden");
+                        } else if (request2.readyState === 4 && request2.status === 401) {
+                            document.location = window.location.origin + "/design-revision/login/login.html";
+                        } else if (request2.readyState === 4 && request2.status === 404) {
+                            window.alert("Nichts gefunden");
+                        } else if (request2.readyState === 4 && request2.status === 400) {
+                            window.alert("Unbekannter AnfrageParameter");
+                        }
+                    };
+                }
+            }
+            counterForUser++;
+
+        }
+    }, 50);
 
 
     customerdiv.appendChild(clientname);
@@ -287,6 +350,7 @@ function generate() {
     //Abfrage ob der Kunden gelöscht werden kann
 
     customerdiv.onclick = function () {
+        boolstatus = boolStatus1;
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
@@ -302,7 +366,7 @@ function generate() {
             let id1 = clientname.innerHTML + projektname.innerHTML;
             customerdiv.setAttribute("id", id1);
             customerdiv.style.background = "white";
-            clientDivClick(clientname.innerHTML, projektname.innerHTML, id1, boolStatus, arrayMember, arrayRole);
+            clientDivClick(customerdiv, clientname.innerHTML, projektname.innerHTML, id1, boolStatus1, arrayMember, arrayRole);
             let btnAddMember = document.getElementById("btnAddMember");
             let projektErsellen = document.getElementById("projektErstellen");
             let projektName = document.getElementById("projectname");
@@ -319,9 +383,12 @@ function generate() {
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
         if (select) {
+            //Disable search in clicked Mode
+            document.getElementById('searchform').style.display="none";
+
             let content = document.querySelectorAll('[data-memberid');
             let helpArray = [];
-
+            boolstatus = boolStatus1;
             let j = 0;
             for (let i = 0; i < content.length; i++) {
                 if (arrayMember.includes(content[i].getAttribute("data-memberId"))) {
@@ -354,6 +421,7 @@ function generate() {
                 for (let i = 0; i < arrayLength; i++) {
                     content[i].style.background = "white";
                     content[i].style.border = "4px solid black";
+                    content[i].style.display="none";
                 }
                 if (a === false) {
                     for (let i = 0; i < arrayLength; i++) {
@@ -361,14 +429,8 @@ function generate() {
                         if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
                             temp.style.display = "none";
                         }
+                        document.getElementById('loeschen').style.display="none";
                     }
-                    //löschen nachricht verstecken
-                    if (boolStatus) {
-                        let delet = document.getElementById("form1");
-                        //messageMember verstecken
-                        delet.lastChild.style.display = "none";
-                    }
-                    a = true;
                 }
 
                 projektName.required = false;
@@ -381,7 +443,9 @@ function generate() {
                 };
                 updateOrCreate = false;
                 doubleClickSelect = false;
-                a = false;
+                a=false;
+                customerdiv.style.border="4px solid black";
+
             }
         }
     });
@@ -429,13 +493,20 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
-    let divForm = document.getElementById("form1");
-    let loeschen = document.createElement("p");
+function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, role) {
+    let loeschen = document.getElementById("loeschen");
     let content = document.querySelectorAll('[data-memberId');
     let arrayLength = content.length;
     let help;
     if (a) {
+        //Display the required User
+        let userDivs = customerDiv.parentElement;
+        userDivs = userDivs.childNodes;
+        for (let i = 1; i < userDivs.length; i++) {
+            userDivs[i].style.display = "block";
+        }
+        //Disable search in clicked Mode
+        document.getElementById('searchform').style.display="none";
         tmpClients = members;
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-memberId");
@@ -462,33 +533,41 @@ function clientDivClick(name1, projekt1, id1, boolStatus, members, role) {
         let customerdiv1 = document.getElementById(customerid);
         //Abfrage ob der Kunde gelöscht werden kann
         if (boolStatus) {
-            loeschen.innerHTML = "Kunde löschen";
+            loeschen.style.display="block";
             loeschen.onclick = function () {
                 customerDelate(members, content, arrayLength);
             };
-            loeschen.setAttribute("id", "p1");
-            divForm.appendChild(loeschen);
             customerdiv1.style.border = "4px solid red";
         } else {
             customerdiv1.style.background = "#0cfad6";
+            loeschen.style.display = "none";
         }
         a = false;
 
     } else {
-        //Abfrage ob der Kunde gelöscht werden kann
-        if (boolStatus) {
-            divForm.lastChild.style.display = "none";
-        }
+        //Enable search in clicked Mode
+        document.getElementById('searchform').style.display="block";
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.background = "white";
         customerdiv1.style.border = "4px solid black";
-        a = true;
+        a=true;
+        if(boolstatus){
+            loeschen.style.display="none";
+        }
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-memberId");
             if (tmpClients.includes(help)) {
                 content[i].style.background = "white";
                 content[i].lastChild.style.display = "none";
 
+            }
+        }
+        //Hide the required Userers from the Project
+        for (let i = 0; i < content.length; i++) {
+            let help = content[i].lastElementChild;
+            content[i].style.display = "none";
+            if(help.innerHTML==="Ist Mitglied in dem Gewählten project"||help.innerHTML==="Ist Admin in dem Gewählten project"){
+                help.remove();
             }
         }
     }
@@ -561,6 +640,9 @@ let readyStateCheckInterval = setInterval(function () {
                 generate();
             } else {
                 clearInterval(userInterval);
+                let spacing = document.createElement('div');
+                spacing.style.height="400px";
+                document.body.appendChild(spacing);
             }
 
         }, 200);
@@ -725,16 +807,14 @@ function handleDragOver(evt) {
 
 function addMember() {
     let content = document.querySelectorAll('[data-email');
+    let projecst = document.querySelectorAll('[data-id');
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
+    let userIDs = [];
 
     if (select) {
         if (a === false) {
-            //löschen nachricht verstecken
-            let delet = document.getElementById("form1");
-            //messageMember verstecken
-            delet.lastChild.style.display = "none";
             for (let i = 0; i < arrayLength; i++) {
                 let temp = content[i].lastChild;
                 if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
@@ -744,9 +824,13 @@ function addMember() {
             a = true;
         }
         addButton.value = "Zu Projekt hinzufügen";
+        for (let i = 0; i < projecst.length; i++) {
+            projecst[i].style.display = "none";
+        }
         for (let i = 0; i < arrayLength; i++) {
+
+            content[i].style.display = "block";
             content[i].style.background = "white";
-            content[i].style.border = "4px solid black";
             let buttonAdmin = document.createElement("button");
             buttonAdmin.innerHTML = "Admin";
             //Button Click event
@@ -835,6 +919,12 @@ function addMember() {
             //sorgt für Dynamische Buttons
             buttonMember.style.display = "inline";
             buttonAdmin.style.display = "none";
+            if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
+                userIDs[i] = content[i].getAttribute('data-memberId');
+                content[i].style.display = "block";
+            } else {
+                content[i].style.display = "none";
+            }
         }
     } else {
         console.log(sendArray);
@@ -842,37 +932,49 @@ function addMember() {
         select = true;
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
-            content[i].lastChild.remove();
-            content[i].lastChild.remove();
-            content[i].lastChild.remove();
+            if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
+                userIDs[i] = content[i].getAttribute('data-memberId');
+                content[i].lastChild.remove();
+                content[i].lastChild.remove();
+                content[i].lastChild.remove();
+            }
+            content[i].style.display = "none";
+
+        }
+        for (let i = 0; i < projecst.length; i++) {
+            projecst[i].style.display = "block";
         }
     }
-
 }
 
 function changeClientState(members, role, id) {
     let content = document.querySelectorAll('[data-memberId');
+    let projects = document.querySelectorAll('[data-Id');
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
     let helpArray = [];
+    let userIDs = [];
     if (select) {
-        if (a === false) {
-            for (let i = 0; i < arrayLength; i++) {
-                content[i].style.background = "white";
-                content[i].style.border = "4px solid black";
+        for (let i = 0; i < projects.length; i++) {
+            projects[i].style.display = "none";
+        }
+        for (let i = 0; i < arrayLength; i++) {
+            if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 let temp = content[i].lastChild;
                 if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
                     temp.style.display = "none";
+
+
                 }
+                userIDs[i] = content[i].getAttribute('data-memberId');
+                content[i].style.display = "block";
             }
-            //löschen nachricht verstecken
-            let delet = document.getElementById("form1");
-            //messageMember verstecken
-            if (boolStatus)
-                delet.lastChild.style.display = "none";
-            a = true;
+
         }
+        //löschen nachricht verstecken
+        let delet = document.getElementById("form1");
+        //messageMember verstecken
 
         for (let i = 0; i < arrayLength; i++) {
             let help = content[i].getAttribute("data-memberId");
@@ -1012,10 +1114,14 @@ function changeClientState(members, role, id) {
         select = true;
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
-            content[i].style.border = "4px solid black";
             content[i].lastChild.remove();
             content[i].lastChild.remove();
             content[i].lastChild.remove();
+            content[i].style.display = "none";
+
+        }
+        for (let i = 0; i < projects.length; i++) {
+            projects[i].style.display = "block";
         }
     }
 
@@ -1142,7 +1248,7 @@ function sendUpdateProject() {
                     previewFile.style.display = "none";
 
                 }
-            },4000);
+            }, 4000);
         }
     } else {
         //Senden der File
@@ -1187,32 +1293,32 @@ function addProjectMember(projectId, memberMail, memberRole) {
     let tmpMember = JSON.stringify(member);
     console.log("Add:" + tmpMember);
     //used raw Data else it did not work
-   let data = "id="+projectId+"&member="+tmpMember;
-     let xhr = new XMLHttpRequest();
-     xhr.withCredentials = true;
+    let data = "id=" + projectId + "&member=" + tmpMember;
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
 
-     xhr.addEventListener("readystatechange", function () {
-       let message=  document.getElementById('AddOrDelete');
-         if (this.readyState === 4&&this.status===200) {
-             message.style.display="block";
-             message.innerHTML="Member wurde hinzugefügt";
-             message.style.color="black";
-         }else if(this.readyState===4){
-             message.style.display="block";
-             message.innerHTML="Member konnte nicht hinzugefügt werden";
-             message.style.color="red";
-         }
-         setTimeout(function () {
-            message.style.display="none";
-            message.innerHTML="";
-         },4000);
-         console.log(this.responseText);
-     });
+    xhr.addEventListener("readystatechange", function () {
+        let message = document.getElementById('AddOrDelete');
+        if (this.readyState === 4 && this.status === 200) {
+            message.style.display = "block";
+            message.innerHTML = "Member wurde hinzugefügt";
+            message.style.color = "black";
+        } else if (this.readyState === 4) {
+            message.style.display = "block";
+            message.innerHTML = "Member konnte nicht hinzugefügt werden";
+            message.style.color = "red";
+        }
+        setTimeout(function () {
+            message.style.display = "none";
+            message.innerHTML = "";
+        }, 4000);
+        console.log(this.responseText);
+    });
 
-     xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
-     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-     xhr.send(data);
+    xhr.send(data);
 
 }
 
@@ -1223,37 +1329,37 @@ function removeProjectMember(projectId, memberMail, memberRole) {
     let memberID;
     //holt mithilfe der E_Mail die Id des Members
     let content = document.querySelectorAll('[data-email');
-    for (let i = 0; i < content.length ; i++) {
-        if(content[i].getAttribute('data-email')===memberMail){
-            memberID=content[i].getAttribute('data-memberId');
+    for (let i = 0; i < content.length; i++) {
+        if (content[i].getAttribute('data-email') === memberMail) {
+            memberID = content[i].getAttribute('data-memberId');
         }
     }
     console.log(memberID);
-     let data ="id="+projectId+"&member="+memberID;
-       let xhr = new XMLHttpRequest();
-       xhr.withCredentials = true;
+    let data = "id=" + projectId + "&member=" + memberID;
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
 
-       xhr.addEventListener("readystatechange", function () {
-           let message=  document.getElementById('AddOrDelete');
-           if (this.readyState === 4&&this.status===200) {
-               message.style.display="block";
-               message.innerHTML="Member wurde gelöscht"
-               message.style.color="black";
-           } else if(this.readyState===4){
-               message.style.display="block";
-               message.innerHTML="Membr konnte nicht gelöscht werden";
-               message.style.color="red";
-           }
-           setTimeout(function () {
-               message.style.display="none";
-               message.innerHTML="";
-           },4000);
-           console.log(this.responseText);
-       });
-       xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
-       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.addEventListener("readystatechange", function () {
+        let message = document.getElementById('AddOrDelete');
+        if (this.readyState === 4 && this.status === 200) {
+            message.style.display = "block";
+            message.innerHTML = "Member wurde gelöscht"
+            message.style.color = "black";
+        } else if (this.readyState === 4) {
+            message.style.display = "block";
+            message.innerHTML = "Membr konnte nicht gelöscht werden";
+            message.style.color = "red";
+        }
+        setTimeout(function () {
+            message.style.display = "none";
+            message.innerHTML = "";
+        }, 4000);
+        console.log(this.responseText);
+    });
+    xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-       xhr.send(data);
+    xhr.send(data);
 
 }
 

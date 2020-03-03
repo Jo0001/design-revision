@@ -63,11 +63,12 @@ body {
 
 }
 
-.form p {
+.form b {
     padding-left: 40%;
     color: red;
     text-decoration: underline;
     text-underline: red;
+    display: none;
 }
 
 .topDivs{
