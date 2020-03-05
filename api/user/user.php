@@ -8,7 +8,10 @@ if (!empty($_GET['id']) && !empty($_GET['pid'])) {
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
         if (isValidProject($pid, $pdo)) {
             if (isMember($pid, getUser('pk_id')) && isMember($pid, (int)$id)) {
-                handleOutput(array("user"=>array("name"=>getUser('name'),"company"=>getUser('company'),"email"=>getUser('email'))));
+                $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
+                $result = $statement->execute(array('pk_id' => $id));
+                $user = $statement->fetch();
+                handleOutput(array("user" => array("name" => $user['name'], "company" => $user['company'], "email" => $user['email'])));
             } else {
                 showError("Not a member", 403);
             }
