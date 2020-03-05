@@ -55,20 +55,21 @@ function setup() {
             let xhr = new XMLHttpRequest();
             xhr.withCredentials = true;
             xhr.addEventListener("readystatechange", function () {
-                if (this.readyState === 4) {
-                    console.log(this.responseText);
+                if (this.readyState === 4 && this.status === 204) {
+                    let commentDiv = document.createElement("div");
+                    commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
+                    setCommentAttributes(commentDiv, comment);
+                    commentContainer.appendChild(commentDiv);
+                    messageDialog.style.display = "none";
+                    messageArea.value = "";
+                    resetAreaData();
+                } else if (this.readyState === 4 && this.status !== 204) {
+                    window.alert(this.responseText)
                 }
             });
             xhr.open("PUT", window.location.origin + "/design-revision/api/project/addcomments");
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.send(data);
-
-            let commentDiv = document.createElement("div");
-            commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
-            setCommentAttributes(commentDiv, comment);
-            commentContainer.appendChild(commentDiv);
-            messageDialog.style.display = "none";
-            resetAreaData();
         } else {
             window.alert("Message of Comment empty.");
         }
