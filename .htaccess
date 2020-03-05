@@ -3,4 +3,4 @@ DirectoryIndex login
 Options -Indexes
 
 #TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.17"
+Header set X-Build-Version "1.19"
