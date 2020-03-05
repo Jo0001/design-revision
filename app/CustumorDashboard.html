@@ -5,7 +5,9 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Customer Dashboard</title>
     <link href="../files/css/CustomerDashboard..css" rel="stylesheet">
+    <link href="../files/css/message.css" rel="stylesheet">
     <script src="../files/js/CustumorDashboard.js"></script>
+    <script src="../files/js/message.js"></script>
     <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
@@ -75,9 +77,10 @@
     <button class="Dialog_button" onclick="closeNo()">Nein</button>
 </dialog>
 <h1 id="message" style="color: red;text-align: center;display: none">Keine Treffer</h1>
-<div class="sendFeedBack" id="sendFeedBack">
-    <h1>Hello World</h1>
-</div>
+
+<!-- response message if sending was successful -->
+<div class="warn" id="mes"></div>
+
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </html>

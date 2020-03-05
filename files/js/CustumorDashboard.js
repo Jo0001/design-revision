@@ -467,9 +467,6 @@ function customerDelate(members, content, arrayLength) {
 function closeYes(members, content, arrayLength) {
     document.getElementById("dialog").removeAttribute('open');
     a = true;
-    let divForm = document.getElementById("form1");
-    let loeschen = document.getElementById("p1");
-    divForm.removeChild(loeschen);
     let div = document.getElementById(customerid);
     let id = div.getAttribute("data-id");
     sendDelet(id);
@@ -481,7 +478,6 @@ function closeYes(members, content, arrayLength) {
             content[i].lastChild.remove();
         }
     }
-    loeschen.remove();
     div.remove();
     toggleDialog();
 }
@@ -1148,21 +1144,15 @@ function sendNewProject() {
         update_progress(event, data)
     });
     xhr.addEventListener("readystatechange", function () {
-        let message = document.getElementById("sendFeedBack");
         if (this.readyState === 4 && this.status === 201) {
-            message.style.display = "block";
-            let m = message.getElementsByTagName("h1");
-            m[0].innerHTML = "Erfolgreich gesendet";
+            showmes("info", "Projekt erfolgreich erstellt");
             console.log(this.responseText);
 
         } else if (this.readyState === 4) {
-            message.style.display = "block";
-            let m = message.getElementsByTagName("h1");
-            m[0].innerHTML = "Fehler versuchen sie es erneut";
+            showmes("error", "Projekt konnte nicht erstellt werden");
         }
         //wartet
         setTimeout(function () {
-            message.style.display = "none";
             progressBar.style.display = "none";
             percentage.style.display = "none";
             //location.reload(true);
@@ -1178,26 +1168,14 @@ function sendDelet(id) {
     console.log(id);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
-    let message = document.getElementById("sendFeedBack");
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4 && this.status === 204) {
-            message.style.display = "block";
-            let m = message.getElementsByTagName("h1");
-            m[0].innerHTML = "Erfolgreich gesendet";
+            showmes("info", "Projekt erfolgreich gelöscht");
             console.log(this.responseText);
-            setTimeout(function () {
-                message.style.display = "none";
-                //location.reload(true);
-            }, 2000);
+
 
         } else if (this.readyState === 4) {
-            message.style.display = "block";
-            let m = message.getElementsByTagName("h1");
-            m[0].innerHTML = "Fehler versuchen sie es erneut";
-            setTimeout(function () {
-                message.style.display = "none";
-                //location.reload(true);
-            }, 2000)
+            showmes("error", "Projekt konnte nicht gelöscht werden");
         }
     });
 
@@ -1261,22 +1239,15 @@ function sendUpdateProject() {
             update_progress(event, dataFile)
         });
         xhrFile.addEventListener("readystatechange", function () {
-            let message = document.getElementById("sendFeedBack");
-            message.style.display = "block";
+
             if (this.readyState === 4 && this.status === 200) {
-                message.style.display = "block";
-                let m = message.getElementsByTagName("h1");
-                m[0].innerHTML = "Erfolgreich gesendet";
+                showmes("info", "Datei wurde hochgeladen");
                 console.log(this.responseText);
-                //wartet
 
             } else if (this.readyState === 4) {
-                message.style.display = "block";
-                let m = message.getElementsByTagName("h1");
-                m[0].innerHTML = "Fehler versuchen sie es erneut";
+                showmes("error", "Datei konnte nicht hochgeladen werden");
             }
             setTimeout(function () {
-                message.style.display = "none";
                 progressBar.style.display = "none";
                 percentage.style.display = "none";
                 //location.reload(true);
