@@ -49,7 +49,6 @@ function generate() {
     let projectsArray = [];
     let requestredy = false;
     let customerSpan = document.createElement("span");
-    b.appendChild(customerSpan);
     let nameimg = document.createElement("img");
     let customerdiv = document.createElement("div");
     let statusImg = document.createElement("img");
@@ -119,9 +118,9 @@ function generate() {
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
                 userId = userObject.user.id;
-                clientname.innerHTML = userObject.user.name + counter;
+                clientname.innerHTML = userObject.user.name;
                 nameimg.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObject.user.name);
-                clientemail.innerHTML = userObject.user.email + " " + counter;
+                clientemail.innerHTML = userObject.user.email;
                 company.innerHTML = userObject.user.company;
                 if (!(userObject.user.status === "VERIFIED")) {
                     window.location = window.location.origin + "/design-revision/login/login.html?verify=notVerified";
@@ -263,7 +262,7 @@ function generate() {
                         arrayRole = role.innerHTML;
                         arrayRole = arrayRole.split(",");
                         gotProject = true;
-
+                        b.appendChild(customerSpan);
                     } else if (request1.readyState === 4 && request1.status === 401) {
                         customerdiv.remove();
                         //window.alert("Nicht eingelogt");
@@ -302,7 +301,7 @@ function generate() {
                             userName.innerHTML = userObj.user.name;
                             userDiv.appendChild(userName);
                             let userEmail = document.createElement("p");
-                            userEmail.innerHTML = userObj.user.email + arrayMember[i];
+                            userEmail.innerHTML = userObj.user.email;
                             userDiv.appendChild(userEmail);
                             userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
                             userAvatar.setAttribute("alt", "tick");
@@ -811,6 +810,7 @@ function addMember() {
 
     if (select) {
         if (a === false) {
+
             for (let i = 0; i < arrayLength; i++) {
                 let temp = content[i].lastChild;
                 if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
@@ -824,7 +824,9 @@ function addMember() {
             projecst[i].style.display = "none";
         }
         for (let i = 0; i < arrayLength; i++) {
-
+            if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
+                userIDs[i] = content[i].getAttribute('data-memberId');
+                content[i].style.display = "block";
             content[i].style.display = "block";
             content[i].style.background = "white";
             let buttonAdmin = document.createElement("button");
@@ -915,9 +917,7 @@ function addMember() {
             //sorgt für Dynamische Buttons
             buttonMember.style.display = "inline";
             buttonAdmin.style.display = "none";
-            if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
-                userIDs[i] = content[i].getAttribute('data-memberId');
-                content[i].style.display = "block";
+
             } else {
                 content[i].style.display = "none";
             }
