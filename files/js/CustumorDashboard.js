@@ -810,7 +810,7 @@ function addMember() {
 
     if (select) {
         if (a === false) {
-
+            document.getElementById("loeschen").style.display="none";
             for (let i = 0; i < arrayLength; i++) {
                 let temp = content[i].lastChild;
                 if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
@@ -926,6 +926,9 @@ function addMember() {
         console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
+        if(boolstatus&&!a){
+        document.getElementById("loeschen").style.display="inline";
+        }
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
@@ -939,6 +942,7 @@ function addMember() {
         }
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "block";
+            projecst[i].style.border="4px solid black"
         }
     }
 }

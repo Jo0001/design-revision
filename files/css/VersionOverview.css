@@ -6,7 +6,7 @@ body {
 }
 
 .topimg {
-    margin-top: -8.5%;
+    margin-top: -12%;
     position: fixed;
     z-index: 6;
     background-color: rgba(128, 128, 128, 0.2);
@@ -65,7 +65,7 @@ h1 {
 
 
 .space {
-    margin-top: 8.5%;
+    margin-top: 12%;
     position: relative;
 }
 .tnummer {
