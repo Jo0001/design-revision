@@ -1010,8 +1010,10 @@ function changeClientState(members, role, id) {
                 let role = 1;
                 let include = true;
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display = "inline";
-                buttonAdmin.style.display = "none";
+                if (!(members.includes(parent.getAttribute('data-memberid')))) {
+                    buttonMember.style.display = "inline";
+                    buttonAdmin.style.display = "none";
+                }
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
 
@@ -1040,8 +1042,10 @@ function changeClientState(members, role, id) {
                 let role = "0";
                 let include = true;
                 //sorgt für Dynamische Buttons
-                buttonMember.style.display = "none";
-                buttonAdmin.style.display = "inline";
+                if (!(members.includes(parent.getAttribute('data-memberid')))) {
+                    buttonMember.style.display = "none";
+                    buttonAdmin.style.display = "inline";
+                }
                 //Schauen ob es den Member schon gibt un Rolle anpassen
                 for (let j = 0; j < jasonmembers.length; j++) {
                     if (jasonmembers[j].email == email) {
@@ -1068,9 +1072,21 @@ function changeClientState(members, role, id) {
             buttonDeletMember.addEventListener('click', function () {
                 let parent = buttonDeletMember.parentNode;
                 let email = parent.getAttribute("data-email");
-                //sorgt für Dynamische Buttons
-                buttonMember.style.display = "inline";
-                buttonAdmin.style.display = "none";
+
+                //sorgt für Dynamische Buttons und schaut ob das Mitglied schon im Projekt ist
+                if (!(members.includes(parent.getAttribute('data-memberid')))) {
+                    buttonMember.style.display = "inline";
+                    buttonAdmin.style.display = "none";
+                } else {
+                    let help1 = members.indexOf(parent.getAttribute('data-memberid'));
+                    if (role[help1] == 0) {
+                        buttonMember.style.display = "inline";
+                    }
+                    if (role[help1] == 1) {
+                        buttonAdmin.style.display = "inline";
+                    }
+                }
+
                 for (let k in jasonmembers) {
                     if (jasonmembers.hasOwnProperty(k)) {
                         if (jasonmembers[k].email == email) {
@@ -1088,11 +1104,11 @@ function changeClientState(members, role, id) {
             console.log(content[i].style.backgroundColor);
             //schaut ob der Account schon im Projekt ist
             if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
-                buttonMember.style.display = "none";
-                buttonAdmin.style.display = "inline";
-            } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
                 buttonMember.style.display = "inline";
                 buttonAdmin.style.display = "none";
+            } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
+                buttonMember.style.display = "none";
+                buttonAdmin.style.display = "inline";
             } else {
                 buttonMember.style.display = "inline";
                 buttonAdmin.style.display = "none";
@@ -1102,6 +1118,7 @@ function changeClientState(members, role, id) {
                 buttonAdmin.style.display = "none";
                 buttonDeletMember.style.display = "none"
             }
+
             select = false;
         }
     } else {
