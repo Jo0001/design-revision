@@ -79,7 +79,6 @@ function updateProjectMember($pid, $id, $role, $pdo)
 //$id => Userid, $pid => project_id
 function updateUserProjects($pdo, $id, $pid)
 {
-    $pid = explode("project_", $pid)[1];
     //fetch all projectdata of the user
     $statement = $pdo->prepare("SELECT projects FROM `users` WHERE pk_id = ? ");
     $statement->execute(array($id));
