@@ -124,7 +124,7 @@ function addmember()
                             informNewbie($member['email'], $projectname, $name);
                         } else {
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
-                            sendMail($member['email'], IdToName($pdo,$id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO Needs testing
+                            sendMail($member['email'], IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO Needs testing
                         }
 
                     } else {
@@ -297,11 +297,46 @@ function solveComment()
             $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
             if (isValidProject($pid, $pdo)) {
                 if (isMember($pid, getUser('pk_id'))) {
+                    //TODO timestamp
+                    $versions = getLatestProjectData($pid, $pdo)['version'];
+                    //Loop through every row
+                    for ($i = 1; $i <= $versions; $i++) {
+                        //Get whole array from that row
+                        $statement = $pdo->prepare("SELECT data from " . $pid . " WHERE version = ? ");
+                        $statement->execute(array($i));
+                        $rawdata = json_decode($statement->fetch()['data'], true);
 
-                    //  handleOutput("Just a demo without real logic");
-                    //TODO Search comment, change commentstatus & timestamp
+                        $j = 0;
+                        //Loop through every array from that row
+                        foreach ($rawdata as $tmp) {
+                            //Check if id matches and change isImplemented to true
+                            if ($tmp['cid'] === $cid) {
+                                //Check if comment isnt already solved
+                                if (!$tmp['isImplemented']) {
 
+                                    $tmp['isImplemented'] = true;
 
+                                    //Save edited array back to whole row array and save it back to the database
+                                    $rawdata[$j] = $tmp;
+                                    $statement = $pdo->prepare("UPDATE $pid SET data = ? WHERE version = ?");
+                                    $statement->execute(array(json_encode($rawdata), $i));
+
+                                    //Update lastedit timestamp
+                                    $statement = $pdo->prepare("UPDATE $pid SET lastedit = CURRENT_TIMESTAMP ORDER BY version DESC LIMIT 1");
+                                    $statement->execute();
+
+                                    header("HTTP/1.1 204 No Content");
+                                    die();
+                                } else {
+                                    showError("Already solved", 400);
+                                }
+                            }
+                            $j++;
+                        }
+
+                    }
+                    //If we reach this line the comment was not found
+                    showError("Not found", 404);
 
                 } else {
                     showError("Not a member", 403);
