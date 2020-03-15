@@ -292,6 +292,11 @@ function generate() {
                         if (request2.readyState === 4 && request2.status === 200) {
                             let userObj = JSON.parse(request2.response);
                             let userDiv = document.createElement("div");
+                            //css for Users
+                            userDiv.style.marginLeft = "5%";
+                            userDiv.style.transform = "scale(0.9)";
+                            userDiv.style.width = "60%";
+                            //******
                             let userAvatar = document.createElement("IMG");
                             userDiv.appendChild(userAvatar);
                             userDiv.className = "clients";
@@ -467,6 +472,7 @@ function closeYes(members, content, arrayLength) {
     document.getElementById("dialog").removeAttribute('open');
     a = true;
     let div = document.getElementById(customerid);
+    let span =div.parentElement;
     let id = div.getAttribute("data-id");
     sendDelet(id);
     //Daten der Cusomer löschen
@@ -477,7 +483,7 @@ function closeYes(members, content, arrayLength) {
             content[i].lastChild.remove();
         }
     }
-    div.remove();
+    span.remove();
     toggleDialog();
 }
 
@@ -509,14 +515,14 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
                 let help1 = members.indexOf(help);
                 if (role[help1] == 0) {
                     let messageMember = document.createElement("p");
-                    messageMember.innerHTML = "Ist Mitglied in dem Gew&auml;hlten project";
+                    messageMember.innerHTML = "Ist Mitglied in dem gew&auml;hlten Projekt";
                     messageMember.style.paddingLeft = "10px";
                     content[i].style.background = "#00FF66";
                     content[i].appendChild(messageMember);
                 }
                 if (role[help1] == 1) {
                     let messageMember = document.createElement("p");
-                    messageMember.innerHTML = "Ist Admin in dem Gew&auml;hlten project";
+                    messageMember.innerHTML = "Ist Admin in dem gew&auml;hlten Projekt";
                     messageMember.style.paddingLeft = "10px";
                     content[i].style.background = "orange";
                     content[i].appendChild(messageMember);
@@ -807,18 +813,18 @@ function addMember() {
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
     let userIDs = [];
-
     if (select) {
         if (a === false) {
-            document.getElementById("loeschen").style.display="none";
+            document.getElementById("loeschen").style.display = "none";
             for (let i = 0; i < arrayLength; i++) {
                 let temp = content[i].lastChild;
-                if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                if (temp.innerHTML === "Ist Admin in dem gewählten Projekt" || temp.innerHTML === "Ist Mitglied in dem gewählten Projekt") {
                     temp.style.display = "none";
                 }
             }
             a = true;
         }
+        document.getElementById('searchform').style.display = "none";
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "none";
@@ -926,11 +932,13 @@ function addMember() {
         console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
-        if(boolstatus&&!a){
-        document.getElementById("loeschen").style.display="inline";
+        if (boolstatus && !a) {
+            document.getElementById("loeschen").style.display = "inline";
         }
+        document.getElementById('searchform').style.display = "block";
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
+            content[i].style.transform = "scale(0.9)";
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 userIDs[i] = content[i].getAttribute('data-memberId');
                 content[i].lastChild.remove();
@@ -942,7 +950,7 @@ function addMember() {
         }
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "block";
-            projecst[i].style.border="4px solid black"
+            projecst[i].style.border = "4px solid black"
         }
     }
 }
@@ -961,8 +969,9 @@ function changeClientState(members, role, id) {
         }
         for (let i = 0; i < arrayLength; i++) {
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
+                content[i].style.transform = "scale(1)";
                 let temp = content[i].lastChild;
-                if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
+                if (temp.innerHTML === "Ist Admin in dem gewählten Projekt" || temp.innerHTML === "Ist Mitglied in dem gewählten Projekt") {
                     temp.style.display = "none";
 
 
@@ -1131,6 +1140,7 @@ function changeClientState(members, role, id) {
         select = true;
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
+            content[i].style.transform = "scale(0.9)";
             content[i].lastChild.remove();
             content[i].lastChild.remove();
             content[i].lastChild.remove();
