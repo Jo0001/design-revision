@@ -193,6 +193,11 @@ function generate() {
                     if (request1.readyState === 4 && request1.status === 200) {
                         let projectObejct = JSON.parse(request1.response);
                         projektname.innerHTML = projectObejct.project.name;
+                        //wenn der Link gedrückt wird, dann werden die Meber nicht angeziegt
+                        projektname.onclick=function(){
+                            customerdiv.click();
+                        };
+                        
                         let includes = true;
                         if (autoComplete.length === 0) {
                             autoComplete[0] = projectObejct.project.name;
@@ -208,6 +213,11 @@ function generate() {
                             autoComplete.push(projectObejct.project.name);
                         }
                         versionen.innerHTML = "Versionen: " + projectObejct.project.version;
+                        //wenn der Link gedrückt wird, dann werden die Meber nicht angeziegt
+                        versionen.onclick=function(){
+                            customerdiv.click();
+                        };
+
                         textStatus.innerHTML = projectObejct.project.status;
                         // changing the Status to German words
 
