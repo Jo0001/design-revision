@@ -20,8 +20,11 @@ function createProject()
             $projectname = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
             $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
             $target_dir = "../../user-content/";
-            $hash = bin2hex(openssl_random_pseudo_bytes(4));
-            $filename = $hash . time() . $hash . ".pdf";
+            do {
+                $hash = bin2hex(openssl_random_pseudo_bytes(13));
+                $filename = $hash . ".pdf";
+            } while (file_exists($filename));
+
             $target_file = $target_dir . basename($filename);
 
             if (filter_var($_FILES["file"]["type"], FILTER_SANITIZE_STRING) === "application/pdf" && !file_exists($target_file) && (int)filter_var($_FILES["file"]["size"], FILTER_SANITIZE_NUMBER_INT) < 500000001 && strlen($projectname) < 81) {
@@ -91,7 +94,7 @@ function createProject()
                                 informNewbie($tmp, $projectname, $name);
                             } else {
                                 $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
-                                sendMail($tmp, IdToName($pdo,$id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO NEEDS TESTING
+                                sendMail($tmp, IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO NEEDS TESTING
                             }
                         }
                     }
@@ -144,8 +147,11 @@ function updateFile()
                     if ($currentStatus == IN_PROGRESS) {
 
                         $target_dir = "../../user-content/";
-                        $hash = bin2hex(openssl_random_pseudo_bytes(4));
-                        $filename = $hash . time() . $hash . ".pdf";
+                        do {
+                            $hash = bin2hex(openssl_random_pseudo_bytes(13));
+                            $filename = $hash . ".pdf";
+                        } while (file_exists($filename));
+
                         $target_file = $target_dir . basename($filename);
 
                         if (!empty($_FILES["file"])) {
