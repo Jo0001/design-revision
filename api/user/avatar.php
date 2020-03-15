@@ -3,7 +3,7 @@ require "../../libs/auth.php";
 require "../../libs/api-util.php";
 
 if (!empty($_GET['name'])) {
-    if(isLoggedIn()) {
+    if (isLoggedIn()) {
         $name = filter_var($_GET['name'], FILTER_SANITIZE_STRING);
 
         header('Content-Type: image/png');
@@ -14,8 +14,11 @@ if (!empty($_GET['name'])) {
 
         $white = imagecolorallocate($im, 255, 255, 255);
 
-       // $bgcolor = imagecolorallocatealpha($im, 255, 20, 0, 50);
-        $bgcolor = imagecolorallocatealpha($im, random_int ( 10 , 255 ), random_int ( 10 , 255 ), random_int ( 10 , 255 ), 50);
+        $bgcolor = imagecolorallocatealpha($im, 255, 20, 0, 50);
+        try {
+            $bgcolor = imagecolorallocatealpha($im, random_int(10, 245), random_int(10, 245), random_int(10, 245), 50);
+        } catch (Exception $e) {
+        }
         imagefill($im, 0, 0, $bgcolor);
 
         $text = strtoupper($name[0]);
@@ -33,9 +36,9 @@ if (!empty($_GET['name'])) {
         imagettftext($im, 99, 0, $x, $y, $white, $font, $text);
         imagepng($im);
         imagedestroy($im);
-    }else {
+    } else {
         showError("Login to get the requested data", 401);
     }
-}else {
-    showError("Bad Request",400);
+} else {
+    showError("Bad Request", 400);
 }
