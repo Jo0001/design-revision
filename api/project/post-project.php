@@ -182,7 +182,7 @@ function updateFile()
                             showError("Missing file", 400);
                         }
                     } else {
-                        showError("something went wrong", 400);
+                        showError("Project has the wrong status", 409);
                     }
                 } else {
                     showError("Forbidden", 403);
