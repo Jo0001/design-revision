@@ -194,7 +194,7 @@ function generate() {
                         let projectObejct = JSON.parse(request1.response);
                         projektname.innerHTML = projectObejct.project.name;
                         //wenn der Link gedrückt wird, dann werden die Meber nicht angeziegt
-                        projektname.onclick=function(){
+                        projektname.onclick = function () {
                             customerdiv.click();
                         };
 
@@ -214,7 +214,7 @@ function generate() {
                         }
                         versionen.innerHTML = "Versionen: " + projectObejct.project.version;
                         //wenn der Link gedrückt wird, dann werden die Meber nicht angeziegt
-                        versionen.onclick=function(){
+                        versionen.onclick = function () {
                             customerdiv.click();
                         };
 
@@ -482,7 +482,7 @@ function closeYes(members, content, arrayLength) {
     document.getElementById("dialog").removeAttribute('open');
     a = true;
     let div = document.getElementById(customerid);
-    let span =div.parentElement;
+    let span = div.parentElement;
     let id = div.getAttribute("data-id");
     sendDelet(id);
     //Daten der Cusomer löschen
@@ -1249,58 +1249,62 @@ function sendUpdateProject() {
             }
         });
     }
-    if (sendFile === undefined) {
-        if (b) {
-            const previewContainer = document.getElementById("imagePreview");
-            const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
-            const previewFile = previewContainer.querySelector(".image-preview__file");
-            previewDefaulText.style.display = "block";
-            previewDefaulText.style.color = "red";
-            previewFile.innerHTML = "Bitte PDF hinzufügen";
-            previewFile.style.display = "none";
-            console.log("Hello");
-            setTimeout(function () {
-                if (sendFile === undefined) {
+    let waitforMember = setInterval(function () {
+        if (waitMember) {
+            clearInterval(waitforMember);
+            if (localFile === undefined) {
+                if (b) {
+                    const previewContainer = document.getElementById("imagePreview");
+                    const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
+                    const previewFile = previewContainer.querySelector(".image-preview__file");
                     previewDefaulText.style.display = "block";
-                    previewDefaulText.style.color = "#cccccc";
-                    previewFile.innerHTML = "Keine Datei ausgewählt";
+                    previewDefaulText.style.color = "red";
+                    previewFile.innerHTML = "Bitte PDF hinzufügen";
                     previewFile.style.display = "none";
+                    console.log("Hello");
+                    setTimeout(function () {
+                        if (sendFile === undefined) {
+                            previewDefaulText.style.display = "block";
+                            previewDefaulText.style.color = "#cccccc";
+                            previewFile.innerHTML = "Keine Datei ausgewählt";
+                            previewFile.style.display = "none";
 
+                        }
+                    }, 4000);
                 }
-            }, 4000);
-        }
-    } else {
-        //Senden der File
-        let dataFile = new FormData();
-        dataFile.append("id", updateProjectId);
-        dataFile.append("file", sendFile, sendFile.name);
-        console.log(sendFile);
-        let xhrFile = new XMLHttpRequest();
-        xhrFile.withCredentials = true;
-        xhrFile.upload.addEventListener("progress", function (event) {
-            update_progress(event, dataFile)
-        });
-        xhrFile.addEventListener("readystatechange", function () {
+            } else {
+                //Senden der File
+                let dataFile = new FormData();
+                dataFile.append("id", updateProjectId);
+                dataFile.append("file", localFile, localFile.name);
+                let xhrFile = new XMLHttpRequest();
+                xhrFile.withCredentials = true;
+                xhrFile.upload.addEventListener("progress", function (event) {
+                    update_progress(event, dataFile)
+                });
+                xhrFile.addEventListener("readystatechange", function () {
 
-            if (this.readyState === 4 && this.status === 201) {
-                showmes("info", "Datei wurde hochgeladen");
-                console.log(this.responseText);
+                    if (this.readyState === 4 && this.status === 201) {
+                        showmes("info", "Datei wurde hochgeladen");
+                        console.log(this.responseText);
 
-            } else if(this.readyState === 4&& this.status===409){
-                showmes("error", "Der Projektstatus ist nicht zu bearbeiten, also können sie keine neue PDF hochladen");
-            } else if (this.readyState === 4) {
-                showmes("error", "Datei konnte nicht hochgeladen werden");
+                    } else if (this.readyState === 4 && this.status === 409) {
+                        showmes("error", "Der Projektstatus ist nicht zu bearbeiten, also können sie keine neue PDF hochladen");
+                    } else if (this.readyState === 4) {
+                        showmes("error", "Datei konnte nicht hochgeladen werden");
+                    }
+                    bool = true;
+                    setTimeout(function () {
+                        progressBar.style.display = "none";
+                        percentage.style.display = "none";
+                        //location.reload(true);
+                    }, 2000);
+                });
+                xhrFile.open("POST", window.location.origin + "/design-revision/api/project/updatefile");
+                xhrFile.send(dataFile);
             }
-            setTimeout(function () {
-                progressBar.style.display = "none";
-                percentage.style.display = "none";
-                //location.reload(true);
-            }, 2000);
-        });
-        xhrFile.open("POST", window.location.origin + "/design-revision/api/project/updatefile");
-        xhrFile.send(dataFile);
-    }
-
+        }
+    })
 }
 
 function addProjectMember(projectId, memberMail, memberRole) {
@@ -1356,21 +1360,27 @@ function removeProjectMember(projectId, memberMail, memberRole) {
 
     xhr.addEventListener("readystatechange", function () {
         let message = document.getElementById('AddOrDelete');
-        if (this.readyState === 4 && this.status === 200) {
-            message.style.display = "block";
-            message.innerHTML = "Member wurde gelöscht"
-            message.style.color = "black";
-        } else if (this.readyState === 4) {
-            message.style.display = "block";
-            message.innerHTML = "Membr konnte nicht gelöscht werden";
-            message.style.color = "red";
+        if (this.readyState === 4) {
+            if (this.response == "") {
+                message.style.display = "block";
+                message.innerHTML = "Member wurde gelöscht";
+                message.style.color = "black";
+                counterForSendedMemberXhr++;
+            } else {
+                message.style.display = "block";
+                message.innerHTML = "Member konnte nicht gelöscht werden";
+                message.style.color = "red";
+                counterForSendedMemberXhr++;
+            }
         }
-        setTimeout(function () {
-            message.style.display = "none";
-            message.innerHTML = "";
-        }, 4000);
-        console.log(this.responseText);
-    });
+
+            setTimeout(function () {
+                message.style.display = "none";
+                message.innerHTML = "";
+            }, 4000);
+            console.log(this.responseText);
+        }
+    );
     xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
