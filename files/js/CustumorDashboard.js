@@ -197,7 +197,7 @@ function generate() {
                         projektname.onclick=function(){
                             customerdiv.click();
                         };
-                        
+
                         let includes = true;
                         if (autoComplete.length === 0) {
                             autoComplete[0] = projectObejct.project.name;
@@ -229,7 +229,7 @@ function generate() {
                                 textStatus.innerHTML = "Wird bearbeitet";
                                 break;
                             case "TODO":
-                                textStatus.innerHTML = "Zu bearbeiten";
+                                textStatus.innerHTML = "Bearbeitung ausstehend";
                                 break;
                             case "DONE":
                                 textStatus.innerHTML = "Fertig/Druckfreigabe";
@@ -1274,6 +1274,7 @@ function sendUpdateProject() {
         let dataFile = new FormData();
         dataFile.append("id", updateProjectId);
         dataFile.append("file", sendFile, sendFile.name);
+        console.log(sendFile);
         let xhrFile = new XMLHttpRequest();
         xhrFile.withCredentials = true;
         xhrFile.upload.addEventListener("progress", function (event) {
@@ -1281,10 +1282,12 @@ function sendUpdateProject() {
         });
         xhrFile.addEventListener("readystatechange", function () {
 
-            if (this.readyState === 4 && this.status === 200) {
+            if (this.readyState === 4 && this.status === 201) {
                 showmes("info", "Datei wurde hochgeladen");
                 console.log(this.responseText);
 
+            } else if(this.readyState === 4&& this.status===409){
+                showmes("error", "Der Projektstatus ist nicht zu bearbeiten, also können sie keine neue PDF hochladen");
             } else if (this.readyState === 4) {
                 showmes("error", "Datei konnte nicht hochgeladen werden");
             }
@@ -1294,7 +1297,7 @@ function sendUpdateProject() {
                 //location.reload(true);
             }, 2000);
         });
-        xhrFile.open("PUT", window.location.origin + "/design-revision/api/project/updatefile");
+        xhrFile.open("POST", window.location.origin + "/design-revision/api/project/updatefile");
         xhrFile.send(dataFile);
     }
 
