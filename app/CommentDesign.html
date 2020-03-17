@@ -22,7 +22,7 @@
     <div id="commentArea" style="display: none; width: 10px; height: 10px; z-index: -3;"></div>
 </div>
 <div id="messageDialog"
-     style="position: relative; top: 50%; left: 33%; background-color: #333333; z-index: 10; width: 35%; min-width; height: 250px; display: none;">
+     style="position: relative; top: 50%; left: 33%; background-color: #333333; z-index: 10; width: 35%; height: 250px; display: none;">
     <table>
         <tr>
             <h1 style="color: white; font-size: 24px; left: 15px; top: 10px; position: relative;">Kommentar
@@ -47,7 +47,28 @@
     </table>
 
 </div>
-<div class="toolbox" style="top: 40%; outline-style:none;box-shadow:none;border-color:transparent;">
+<div class="toolbox" id="changeCommentContainer"
+     style="text-align: left; top: 15%; width: 28%; height: 60%; min-height: 60%; left: 1%;outline-style:none;box-shadow:none;border-color:transparent; padding-right: 15px;">
+    <div id="textCommentContainer" style="height: 98%; width: 99%; overflow-x: hidden; overflow-y: scroll;">
+        <div id="blueprintTextComment"
+             style="position: absolute; display: none; margin: 5px 15px 10px 10px; background-color: dimgrey; grid-template-columns: 90% 10%;">
+            <div id="cIContainer" style="margin-left: 10px;">
+                <p>
+                <p id="commentIText">Idk... Just change it. <br> dsadadas s <br> lorem...</p>
+                <br>
+                geschrieben von
+                <a href="mailto:email?subject=Kommentar%20im%20Designvorschlag"
+                   id="commentIAuthor" style="color: white;">email@thingymagics.com</a>
+                </p>
+                <div id="commentIFinder" style="height: 10px; z-index: 3; margin-bottom: 5px;"></div>
+            </div>
+            <label style="margin-left: 5px; margin-right: 5px; padding-top: 85%;">
+                <input id="commentIImplemented" type="checkbox"/>
+            </label>
+        </div>
+    </div>
+</div>
+<div class="toolbox" style="top: 40%; right: 1%;outline-style:none;box-shadow:none;border-color:transparent;">
     <button class="disSelected" id="movePdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
             alt="Move" class="icon" src="https://cdn-design-revision.netlify.com/files/img/move.png"/></button>
     <br/>

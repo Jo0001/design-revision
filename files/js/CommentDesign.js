@@ -47,8 +47,10 @@ function setup() {
             let yInCoords = (yInPx / commentAreaData.heightPdf).toPrecision(7);
             let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
             let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
-            let comment = new Comment(pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
-                user.id, messageArea.value, false);
+            let comment = new Comment(0, pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
+                user.id, messageArea.value, false, generateRandomColor(), 0);
+            console.log(String(JSON.stringify(comment)).hashCode());
+            comment.cId = String(JSON.stringify(comment)).hashCode();
             comments.push(comment);
             console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));
             let data = "id=" + projectId + "&comment=" + JSON.stringify(comment);
@@ -56,10 +58,7 @@ function setup() {
             xhr.withCredentials = true;
             xhr.addEventListener("readystatechange", function () {
                 if (this.readyState === 4 && this.status === 204) {
-                    let commentDiv = document.createElement("div");
-                    commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
-                    setCommentAttributes(commentDiv, comment);
-                    commentContainer.appendChild(commentDiv);
+                    createComment(comment);
                     messageDialog.style.display = "none";
                     messageArea.value = "";
                     resetAreaData();
@@ -182,6 +181,15 @@ function loaded() {
 function openCommentDialog() {
     messageDialog.style.top = ((window.screen.height - messageDialog.style.height.replace("px", "") - 120) / 2) + "px";
     messageDialog.style.display = null;
+}
+
+function generateRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+    return color;
 }
 
 let readyStateCheckInterval = setInterval(function () {

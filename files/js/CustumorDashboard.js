@@ -175,7 +175,7 @@ function generate() {
         if (requestredy) {
             clearInterval(checkForProjects);
             projectid = projectsArray[counterForId];
-            let link = window.location.origin + "/design-revision/app/CommentDesign.html?id=" + projectid;
+            let link = window.location.origin + "/design-revision/app/ViewDesign.html?id=" + projectid;
             projektname.href = link;
             versionen.href = window.location.origin + "/design-revision/app/VersionOverview.html?id=" + projectid;
             //customerdiv id geben

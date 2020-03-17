@@ -120,7 +120,8 @@ class ButtonGroup {
 }
 
 class Comment {
-    constructor(page, x, y, w, h, authorId, commentText, isImplemented) {
+    constructor(cId, page, x, y, w, h, authorId, commentText, isImplemented, color, type) {
+        this.cId = cId;
         this.page = page;
         this.x = x;
         this.y = y;
@@ -129,6 +130,8 @@ class Comment {
         this.authorId = authorId;
         this.commentText = commentText;
         this.isImplemented = isImplemented;
+        this.color = color;
+        this.type = type;
     }
 }
 
@@ -150,6 +153,7 @@ let viewport;
 //Comment-Variables
 let projectId;
 let commentContainer;
+let changeCommentContainer;
 let comments = [];
 let canvasObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutationRecord) {
@@ -192,6 +196,7 @@ function setupViewport() {
     decPage = document.getElementById("decPage");
     incPage = document.getElementById("incPage");
     canvas = document.getElementById('pdf');
+    changeCommentContainer = document.getElementById("textCommentContainer");
     let titleCard = document.getElementById("titleCard");
 
     //Turn-Page-Logic
@@ -302,6 +307,16 @@ function setupViewport() {
         });
     });
     request2.send();
+
+    String.prototype.hashCode = function () {
+        var hash = 0;
+        for (var i = 0; i < this.length; i++) {
+            var character = this.charCodeAt(i);
+            hash = ((hash << 5) - hash) + character;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash;
+    }
 
     //Viewport-Movement
     function dragElementWhenBtnIsDown(element, btn) {
@@ -435,7 +450,12 @@ function setupViewport() {
 //API-Request-Stuff
 function handleServerResponse(request, successCallback) {
     if (request.readyState === 4 && request.status === 200) {
-        successCallback(JSON.parse(request.response));
+        try {
+            successCallback(JSON.parse(request.response));
+        } catch (e) {
+            console.log(request.response);
+            throw new Error("Fuck... Somehow thats non JSON. Why would you give me non JSON??! " + e);
+        }
     } else if (request.readyState === 4 && request.status === 401) {
         window.alert("keine Berechtigung");
     } else if (request.readyState === 4 && request.status === 403) {
@@ -468,10 +488,12 @@ function ensureEventAttributes(event) {
 
 
 //Comment-Management
-function clearComments() {
+function clearCommentsAndGetNew() {
     for (let index = 0; index < comments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
+        let textComment = document.getElementById("textComment" + index);
         commentDiv.remove();
+        textComment.remove();
     }
     comments = [];
     //Json Comments aus Api hohlen
@@ -498,7 +520,33 @@ function createComment(comment) {
     let commentDiv = document.createElement("div");
     commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
     setCommentAttributes(commentDiv, comment);
+    let textComment = document.getElementById("blueprintTextComment").cloneNode(true);
+    textComment.style.position = null;
+    textComment.style.display = "grid";
+    textComment.setAttribute("id", "textComment" + comments.indexOf(comment));
+    let children = textComment.querySelectorAll("*");
+    children.forEach(c => {
+        if (c.id !== undefined) {
+            c.id = c.id.replace("I", comments.indexOf(comment) + "");
+        }
+    });
+    changeCommentContainer.appendChild(textComment);
     commentContainer.appendChild(commentDiv);
+
+    document.getElementById("comment" + comments.indexOf(comment) + "Text").innerText = comment.commentText;
+    document.getElementById("comment" + comments.indexOf(comment) + "Implemented").checked = comment.isImplemented;
+    document.getElementById("comment" + comments.indexOf(comment) + "Finder").style.backgroundColor = comment.color;
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function () {
+        handleServerResponse(xhr, function (response) {
+            document.getElementById("comment" + comments.indexOf(comment) + "Author").href =
+                document.getElementById("comment" + comments.indexOf(comment) + "Author").href.replace("email", response.user.email);
+            document.getElementById("comment" + comments.indexOf(comment) + "Author").innerText = response.user.name;
+        });
+    });
+    xhr.open("GET", window.location.origin + "/design-revision/api/user/?id=" + comment.authorId + "&pid=" + projectId);
+    xhr.send();
 }
 
 function setCommentAttributes(commentDiv, comment) {
@@ -509,7 +557,7 @@ function setCommentAttributes(commentDiv, comment) {
     commentDiv.style.height = (parseFloat(comment.h) * commentContainer.style.height.replace("px", "")) + "px";
     commentDiv.style.backgroundColor = "rgba(61, 61, 61, 0.75)";
     commentDiv.style.outlineStyle = "outset";
-    commentDiv.style.outlineColor = "rgba(250, 0, 0, 0.75)";
+    commentDiv.style.outlineColor = comment.color;
 }
 
 function resizeComments() {
@@ -558,7 +606,7 @@ function loadPdfPage(scale) {
         num = num >= 1 ? num : 1;
         num = num <= pdf.numPages ? num : pdf.numPages;
         pageNumberContainer.value = num;
-        clearComments();//to get comments
+        clearCommentsAndGetNew();//to get comments
         pdf.getPage(parseInt(pageNumberContainer.value)).then(function (localPage) {
             pdfPage = localPage;
             renderIfReady(scale);
@@ -641,6 +689,6 @@ async function renderIfReady(scale) {
     }
 
     function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms || DEF_DELAY));
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
