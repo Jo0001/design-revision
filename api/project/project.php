@@ -52,8 +52,12 @@ if (!is_null($id)) {
 
                     } else {
                         foreach ($rawdata as $tmp) {
-                            foreach (json_decode($tmp[0]) as $tmp2) {
-                                array_push($output, $tmp2);
+                            if(!is_null($tmp[0])) {
+                                foreach (json_decode($tmp[0]) as $tmp2) {
+                                    array_push($output, $tmp2);
+                                }
+                            }else {
+                                $output = array();
                             }
                         }
                     }
