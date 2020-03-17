@@ -14,19 +14,19 @@
 </head>
 <body>
 <div class="topDivs">
-        <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
-             style="float: left"
-             width="100">
+    <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
+         style="float: left"
+         width="100">
     <div id="pageLoader"></div>
-        <a href="../login/login.php?logout">Log Out</a>
-        <form enctype="multipart/form-data" autocomplete="off" id="search1">
-            <div class="autocomplete" style="float: right">
+    <a href="../login/login.php?logout">Log Out</a>
+    <form enctype="multipart/form-data" autocomplete="off" id="search1">
+        <div class="autocomplete" style="float: right">
             <label>
                 <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname"
                        type="text">
             </label>
-            </div>
-        </form>
+        </div>
+    </form>
 </div>
 <div class="space"></div>
 <div class="form" id="form1">
@@ -49,7 +49,7 @@
         <span id="messageRole"></span><br>
         <span id="messageEmail"></span><br>
         <span id="messageDoubleSelected"></span><br>
-        <input onclick="addEmailField()"
+        <input onclick="addEmailField()" id="newEmail"
                type="button" value="Weiterer Nutzer auswählen"/> <br>
         <input accept="application/pdf" id="inputFile" name="inputFile" style="display: none;" type="file"/>
         <input onclick="document.getElementById('inputFile').click();"

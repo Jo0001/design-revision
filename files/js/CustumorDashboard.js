@@ -31,6 +31,7 @@ let gotUserData = false;
 //update Project id
 let updateProjectId;
 let arrayBefore = [];
+let counterForSendedMemberXhr = 0;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -161,13 +162,13 @@ function generate() {
                 gotUserData = true;
 
             } else if (request.readyState === 4 && request.status === 403) {
-                console.log("Forbidden");
+                showmes("error", "Verboten");
             } else if (request.readyState === 4 && request.status === 401) {
                 document.location = window.location.origin + "/design-revision/login/login.html";
             } else if (request.readyState === 4 && request.status === 404) {
-                window.alert("Nichts gefunden");
+                showmes("error", "Nichts gefunden");
             } else if (request.readyState === 4 && request.status === 400) {
-                window.alert("Unbekannter AnfrageParameter");
+                showmes("error", "Unbekannter AnfrageParameter");
             }
         };
     }
@@ -175,7 +176,7 @@ function generate() {
         if (requestredy) {
             clearInterval(checkForProjects);
             projectid = projectsArray[counterForId];
-            let link = window.location.origin + "/design-revision/app/ViewDesign.html?id=" + projectid;
+            let link = window.location.origin + "/design-revision/simulate/view.php?id=" + projectid;
             projektname.href = link;
             versionen.href = window.location.origin + "/design-revision/app/VersionOverview.html?id=" + projectid;
             //customerdiv id geben
@@ -278,12 +279,11 @@ function generate() {
                         //window.alert("Nicht eingelogt");
                         document.location = "../login/login.html";
                     } else if (request1.readyState === 4 && request1.status === 403) {
-                        window.alert("Sie sind noch in keinem Projekt warten sie bis wir sie zu einem hinzufügen!");
-                        console.log("Forbidden");
+                        showmes("info", "Sie sind noch in keinem Projekt warten sie bis wir sie zu einem hinzufügen!");
                     } else if (request1.readyState === 4 && request1.status === 404) {
-                        window.alert("Nichts gefunden");
+                        showmes("error", "Nichts gefunden");
                     } else if (request1.readyState === 4 && request1.status === 400) {
-                        console.log("Unbekannter Anfrageparameter");
+                        showmes("error", "Unbekannter AnfrageParameter");
                     }
                 };
             }
@@ -313,12 +313,19 @@ function generate() {
                             customerSpan.appendChild(userDiv);
                             console.log(userObj.user.name);
                             let userName = document.createElement("p");
-                            userName.innerHTML = userObj.user.name;
+                            if (userObj.user.name != "") {
+                                userName.innerHTML = userObj.user.name;
+                                userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
+
+                            } else {
+                                userName.innerHTML = "Regestrierung austehend";
+                                userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=Regestrierung-austehend");
+                                console.log("NOT");
+                            }
                             userDiv.appendChild(userName);
                             let userEmail = document.createElement("p");
                             userEmail.innerHTML = userObj.user.email;
                             userDiv.appendChild(userEmail);
-                            userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
                             userAvatar.setAttribute("alt", "tick");
                             userAvatar.style.borderRadius = "200px";
                             userAvatar.style.padding = "3px";
@@ -326,18 +333,18 @@ function generate() {
                             let userCompany = document.createElement("p");
                             userCompany.innerHTML = userObj.user.company;
                             userDiv.appendChild(userCompany);
-                            userDiv.setAttribute('data-email', userObj.user.email + arrayMember[i]);
+                            userDiv.setAttribute('data-email', userObj.user.email);
                             userDiv.setAttribute('data-memberId', arrayMember[i]);
                             userDiv.style.display = "none";
 
                         } else if (request2.readyState === 4 && request2.status === 403) {
-                            console.log("Forbidden");
+                            showmes("error", "Verboten");
                         } else if (request2.readyState === 4 && request2.status === 401) {
                             document.location = window.location.origin + "/design-revision/login/login.html";
                         } else if (request2.readyState === 4 && request2.status === 404) {
-                            window.alert("Nichts gefunden");
+                            showmes("warn", "Nichts gefunden");
                         } else if (request2.readyState === 4 && request2.status === 400) {
-                            window.alert("Unbekannter AnfrageParameter");
+                            showmes("error", "Unbekannter AnfrageParameter");
                         }
                     };
                 }
@@ -392,74 +399,97 @@ function generate() {
             };
             updateOrCreate = true;
             doubleClickSelect = true;
+            arrayBefore = [];
         }
     };
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
         if (select) {
             //Disable search in clicked Mode
-            document.getElementById('searchform').style.display="none";
-
-            let content = document.querySelectorAll('[data-memberid');
-            let helpArray = [];
-            boolstatus = boolStatus1;
-            let j = 0;
-            for (let i = 0; i < content.length; i++) {
-                if (arrayMember.includes(content[i].getAttribute("data-memberId"))) {
-                    helpArray[j] = content[i].getAttribute("data-email");
-                    j++;
-                }
-            }
             for (let i = 0; i < arrayMember.length; i++) {
-                if (content.length > arrayMember[i]) {
-                    let mail = helpArray[i];
-                    let member = {"email": mail, "role": arrayRole[i]};
-                    arrayBefore.push(member);
-                    sendArray.push(member);
-                }
-            }
-            console.log(sendArray);
-            console.log(arrayBefore);
-            let btnAddMember = document.getElementById("btnAddMember");
-            updateProjectId = customerdiv.getAttribute('data-id');
-            console.log(updateProjectId);
-            let mail = document.getElementById('email');
-            mail.required = false;
-            let AdminOrMember = document.getElementById('AdminOrMember');
-            AdminOrMember.required = false;
-            let projektErsellen = document.getElementById("projektErstellen");
-            let projektName = document.getElementById("projectname");
+                //abfrage ob der User Admin ist oder nicht
+                if (arrayMember[i] == userId) {
+                    if (arrayRole[i] == 0) {
+                        customerdiv.click();
 
-            let arrayLength = content.length;
-            if (doubleClickSelect) {
-                for (let i = 0; i < arrayLength; i++) {
-                    content[i].style.background = "white";
-                    content[i].style.border = "4px solid black";
-                    content[i].style.display="none";
-                }
-                if (a === false) {
-                    for (let i = 0; i < arrayLength; i++) {
-                        let temp = content[i].lastChild;
-                        if (temp.innerHTML === "Ist Admin in dem Gewählten project" || temp.innerHTML === "Ist Mitglied in dem Gewählten project") {
-                            temp.style.display = "none";
+                    } else {
+                        //abfrage ob das Projekt fertig ist, dann kann nichts mher geändert werden
+                        if (boolStatus1) {
+                            customerdiv.click();
+                        } else {
+
+                            document.getElementById('searchform').style.display = "none";
+                            let userIds = [];
+                            let content = document.querySelectorAll('[data-memberid');
+                            let helpArray = [];
+                            boolstatus = boolStatus1;
+                            for (let i = 0; i < content.length; i++) {
+                                if (!(userIds.includes(content[i].getAttribute('data-memberId')))) {
+                                    userIds.push(content[i].getAttribute('data-memberId'));
+                                    if (arrayMember.includes(content[i].getAttribute("data-memberId"))) {
+                                        helpArray.push(content[i].getAttribute("data-email"));
+                                    }
+                                }
+                            }
+                            console.log("Before:" + JSON.stringify(helpArray));
+
+                            sendArray = [];
+                            let j = 0;
+                            for (let i = 0; i < arrayMember.length; i++) {
+                                if (arrayMember[i] != userId) {
+                                    let mail = helpArray[j];
+                                    let member = {"email": mail, "role": arrayRole[i]};
+                                    arrayBefore.push(member);
+                                    console.log("Before:" + JSON.stringify(arrayBefore));
+                                    sendArray.push(member);
+                                    j++;
+                                }
+                            }
+                            console.log(sendArray);
+                            console.log(arrayBefore);
+                            let btnAddMember = document.getElementById("btnAddMember");
+                            updateProjectId = customerdiv.getAttribute('data-id');
+                            console.log(updateProjectId);
+                            let mail = document.getElementById('email');
+                            mail.required = false;
+                            let AdminOrMember = document.getElementById('AdminOrMember');
+                            AdminOrMember.required = false;
+                            let projektErsellen = document.getElementById("projektErstellen");
+                            let projektName = document.getElementById("projectname");
+
+                            let arrayLength = content.length;
+                            if (doubleClickSelect) {
+                                for (let i = 0; i < arrayLength; i++) {
+                                    content[i].style.background = "white";
+                                    content[i].style.border = "4px solid black";
+                                    content[i].style.display = "none";
+                                }
+                                if (a === false) {
+                                    for (let i = 0; i < arrayLength; i++) {
+                                        let temp = content[i].lastChild;
+                                        if (temp.innerHTML === "Ist Admin in dem gewählten Projekt" || temp.innerHTML === "Ist Mitglied in dem geählten Projekt") {
+                                            temp.style.display = "none";
+                                        }
+                                        document.getElementById('loeschen').style.display = "none";
+                                    }
+                                }
+
+                                projektName.required = false;
+                                projektName.style.visibility = "hidden";
+                                projektErsellen.innerHTML = "Projekt ändern";
+                                customerdiv.style.background = "#FFFF99";
+                                btnAddMember.onclick = function () {
+                                    changeClientState(arrayMember, arrayRole, customerdiv.getAttribute("data-memberid"));
+                                    customerdiv.style.background = "#FFFF99";
+                                };
+                                updateOrCreate = false;
+                                doubleClickSelect = false;
+                                a = false;
+                                customerdiv.style.border = "4px solid black";
+                            }
                         }
-                        document.getElementById('loeschen').style.display="none";
                     }
                 }
-
-                projektName.required = false;
-                projektName.style.visibility = "hidden";
-                projektErsellen.innerHTML = "Projekt ändern";
-                customerdiv.style.background = "#FFFF99";
-                btnAddMember.onclick = function () {
-                    changeClientState(arrayMember, arrayRole, customerdiv.getAttribute("data-memberid"));
-                    customerdiv.style.background = "#FFFF99";
-                };
-                updateOrCreate = false;
-                doubleClickSelect = false;
-                a=false;
-                customerdiv.style.border="4px solid black";
-
             }
         }
     });
@@ -517,7 +547,7 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
             userDivs[i].style.display = "block";
         }
         //Disable search in clicked Mode
-        document.getElementById('searchform').style.display="none";
+        document.getElementById('searchform').style.display = "none";
         tmpClients = members;
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-memberId");
@@ -544,7 +574,7 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
         let customerdiv1 = document.getElementById(customerid);
         //Abfrage ob der Kunde gelöscht werden kann
         if (boolStatus) {
-            loeschen.style.display="block";
+            loeschen.style.display = "block";
             loeschen.onclick = function () {
                 customerDelate(members, content, arrayLength);
             };
@@ -557,13 +587,13 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
 
     } else {
         //Enable search in clicked Mode
-        document.getElementById('searchform').style.display="block";
+        document.getElementById('searchform').style.display = "block";
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.background = "white";
         customerdiv1.style.border = "4px solid black";
-        a=true;
-        if(boolstatus){
-            loeschen.style.display="none";
+        a = true;
+        if (boolstatus) {
+            loeschen.style.display = "none";
         }
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-memberId");
@@ -577,7 +607,7 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
         for (let i = 0; i < content.length; i++) {
             let help = content[i].lastElementChild;
             content[i].style.display = "none";
-            if(help.innerHTML==="Ist Mitglied in dem Gewählten project"||help.innerHTML==="Ist Admin in dem Gewählten project"){
+            if (help.innerHTML === "Ist Mitglied in dem gewählten Projekt" || help.innerHTML === "Ist Admin in dem geählten Projekt") {
                 help.remove();
             }
         }
@@ -652,8 +682,10 @@ let readyStateCheckInterval = setInterval(function () {
             } else {
                 clearInterval(userInterval);
                 let spacing = document.createElement('div');
-                spacing.style.height="400px";
-                document.body.appendChild(spacing);
+                spacing.style.height = "400px";
+                setTimeout(function () {
+                    document.body.appendChild(spacing);
+                }, 2000);
             }
 
         }, 200);
@@ -712,7 +744,29 @@ let readyStateCheckInterval = setInterval(function () {
                     }
                     cleraForm();
                 }
+
             }
+            //löscht die inhalte des das die Werte der Felder enthält
+            let tmpArray = JSON.stringify(sendArray);
+            let tmpArray1 = JSON.stringify(sendArrayFields);
+            $.each(JSON.parse(tmpArray1), function (key, value) {
+                if (tmpArray.indexOf(value.email) > -1) {
+                    for (let i = 0; i < sendArray.length; i++) {
+                        if (sendArray[i].email === value.email) {
+                            sendArray.splice(i, 1);
+                            console.log("sliced " + value.email + " index " + i);
+                        }
+                    }
+
+                }
+            });
+
+            if (replace) {
+                for (let i = 0; i < arrayBefore.length; i++) {
+                    sendArray.push(arrayBefore[i]);
+                }
+            }
+            console.log(sendArray);
             evt.preventDefault();
         });
         //beim submit Event wird der Submit gehindert
@@ -843,96 +897,97 @@ function addMember() {
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 userIDs[i] = content[i].getAttribute('data-memberId');
                 content[i].style.display = "block";
-            content[i].style.display = "block";
-            content[i].style.background = "white";
-            let buttonAdmin = document.createElement("button");
-            buttonAdmin.innerHTML = "Admin";
-            //Button Click event
-            buttonAdmin.addEventListener('click', function () {
-                let parent = buttonAdmin.parentNode;
-                let email = parent.getAttribute("data-email");
-                let role = 1;
-                let include = true;
-                //sorgt für Dynamische Buttons
-                buttonMember.style.display = "inline";
-                buttonAdmin.style.display = "none";
-                //Schauen ob es den Member schon gibt un Rolle anpassen
-                for (let j = 0; j < jasonmembers.length; j++) {
+                content[i].style.display = "block";
+                content[i].style.background = "white";
+                content[i].style.transform = "scale(1)";
+                let buttonAdmin = document.createElement("button");
+                buttonAdmin.innerHTML = "Admin";
+                //Button Click event
+                buttonAdmin.addEventListener('click', function () {
+                    let parent = buttonAdmin.parentNode;
+                    let email = parent.getAttribute("data-email");
+                    let role = 1;
+                    let include = true;
+                    //sorgt für Dynamische Buttons
+                    buttonMember.style.display = "inline";
+                    buttonAdmin.style.display = "none";
+                    //Schauen ob es den Member schon gibt un Rolle anpassen
+                    for (let j = 0; j < jasonmembers.length; j++) {
 
-                    if (jasonmembers[j].email == email) {
-                        jasonmembers[j].role = 1;
-                        include = false;
-                    }
-                }
-
-                if (include) {
-                    let member = {"email": email, "role": role};
-                    jasonmembers.push(member);
-                }
-                jasonmembers.sort();
-                console.log(jasonmembers);
-                sendArray = jasonmembers;
-                parent.style.background = "#FFA500";
-            });
-            content[i].appendChild(buttonAdmin);
-            let buttonMember = document.createElement("button");
-            //Butto Click event
-            buttonMember.addEventListener('click', function () {
-                let parent = buttonMember.parentNode;
-                let email = parent.getAttribute("data-email");
-                let role = 0;
-                let include = true;
-                //sorgt für Dynamische Buttons
-                buttonMember.style.display = "none";
-                buttonAdmin.style.display = "inline";
-                //Schauen ob es den Member schon gibt un Rolle anpassen
-                for (let j = 0; j < jasonmembers.length; j++) {
-
-                    if (jasonmembers[j].email == email) {
-                        jasonmembers[j].role = 0;
-                        include = false;
-                    }
-                }
-
-
-                if (include) {
-                    let member = {"email": email, "role": role};
-                    jasonmembers.push(member);
-                }
-                jasonmembers.sort();
-                console.log(jasonmembers);
-                sendArray = jasonmembers;
-                parent.style.background = "#00FF66"
-            });
-            buttonMember.innerHTML = "Member";
-            content[i].appendChild(buttonMember);
-            let buttonDeletMember = document.createElement("button");
-            buttonDeletMember.innerHTML = "Entfehrnen";
-            buttonDeletMember.addEventListener('click', function () {
-                //sorgt für Dynamische Buttons
-                buttonMember.style.display = "inline";
-                buttonAdmin.style.display = "none";
-                let parent = buttonDeletMember.parentNode;
-                let email = parent.getAttribute("data-email");
-                for (let k in jasonmembers) {
-                    if (jasonmembers.hasOwnProperty(k)) {
-                        if (jasonmembers[k].email == email) {
-                            jasonmembers.splice(k, 1);
+                        if (jasonmembers[j].email == email) {
+                            jasonmembers[j].role = 1;
+                            include = false;
                         }
                     }
 
-                }
-                console.log(jasonmembers);
-                jasonmembers.sort();
-                console.log(jasonmembers);
-                sendArray = jasonmembers;
-                parent.style.background = "white";
-            });
-            content[i].appendChild(buttonDeletMember);
-            select = false;
-            //sorgt für Dynamische Buttons
-            buttonMember.style.display = "inline";
-            buttonAdmin.style.display = "none";
+                    if (include) {
+                        let member = {"email": email, "role": role};
+                        jasonmembers.push(member);
+                    }
+                    jasonmembers.sort();
+                    console.log(jasonmembers);
+                    sendArray = jasonmembers;
+                    parent.style.background = "#FFA500";
+                });
+                content[i].appendChild(buttonAdmin);
+                let buttonMember = document.createElement("button");
+                //Butto Click event
+                buttonMember.addEventListener('click', function () {
+                    let parent = buttonMember.parentNode;
+                    let email = parent.getAttribute("data-email");
+                    let role = 0;
+                    let include = true;
+                    //sorgt für Dynamische Buttons
+                    buttonMember.style.display = "none";
+                    buttonAdmin.style.display = "inline";
+                    //Schauen ob es den Member schon gibt un Rolle anpassen
+                    for (let j = 0; j < jasonmembers.length; j++) {
+
+                        if (jasonmembers[j].email == email) {
+                            jasonmembers[j].role = 0;
+                            include = false;
+                        }
+                    }
+
+
+                    if (include) {
+                        let member = {"email": email, "role": role};
+                        jasonmembers.push(member);
+                    }
+                    jasonmembers.sort();
+                    console.log(jasonmembers);
+                    sendArray = jasonmembers;
+                    parent.style.background = "#00FF66"
+                });
+                buttonMember.innerHTML = "Member";
+                content[i].appendChild(buttonMember);
+                let buttonDeletMember = document.createElement("button");
+                buttonDeletMember.innerHTML = "Entfehrnen";
+                buttonDeletMember.addEventListener('click', function () {
+                    //sorgt für Dynamische Buttons
+                    buttonMember.style.display = "inline";
+                    buttonAdmin.style.display = "none";
+                    let parent = buttonDeletMember.parentNode;
+                    let email = parent.getAttribute("data-email");
+                    for (let k in jasonmembers) {
+                        if (jasonmembers.hasOwnProperty(k)) {
+                            if (jasonmembers[k].email == email) {
+                                jasonmembers.splice(k, 1);
+                            }
+                        }
+
+                    }
+                    console.log(jasonmembers);
+                    jasonmembers.sort();
+                    console.log(jasonmembers);
+                    sendArray = jasonmembers;
+                    parent.style.background = "white";
+                });
+                content[i].appendChild(buttonDeletMember);
+                select = false;
+                //sorgt für Dynamische Buttons
+                buttonMember.style.display = "inline";
+                buttonAdmin.style.display = "none";
 
             } else {
                 content[i].style.display = "none";
@@ -1018,8 +1073,10 @@ function changeClientState(members, role, id) {
         for (let i = 0; i < members.length; i++) {
             if (content.length > members[i]) {
                 let mail = helpArray[i];
-                let member = {"email": mail, "role": role[i]};
-                jasonmembers.push(member);
+                if (mail !== undefined) {
+                    let member = {"email": mail, "role": role[i]};
+                    jasonmembers.push(member);
+                }
             }
         }
         addButton.value = "Zu Projekt hinzufügen";
@@ -1231,23 +1288,50 @@ function sendUpdateProject() {
     let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
     let tmpArray1 = JSON.stringify(arrayBefore);
+    let bool = false;
+    let localFile = sendFile;
     console.log(sendArray);
     console.log(arrayBefore);
     let b = true;
+    let counter = 0;
+    let waitMember = false;
+    let hadToChange = false;
     if (sendUserEmail) {
         $.each(JSON.parse(tmpArray), function (key, value) {
             if (!(tmpArray1.indexOf(value.email) > -1)) {
                 addProjectMember(updateProjectId, value.email, value.role);
                 b = false;
+                counter++;
+                hadToChange = true;
             }
         });
 
         $.each(JSON.parse(tmpArray1), function (key, value) {
-            if (tmpArray.indexOf(value.email) === -1) {
+            if (tmpArray.indexOf(value.email) == -1) {
                 removeProjectMember(updateProjectId, value.email, value.role);
+                console.log("Remove");
                 b = false;
+                counter++;
+                hadToChange = true;
             }
         });
+        if (hadToChange) {
+            let awaitResonse = setInterval(function () {
+                if (counterForSendedMemberXhr === counter) {
+                    counterForSendedMemberXhr = 0;
+                    if (localFile === undefined) {
+                        location.reload(true);
+                    }
+                    waitMember = true;
+                    clearInterval(awaitResonse);
+                }
+                console.log("still waiting");
+                console.log(counter);
+                console.log(counterForSendedMemberXhr);
+            }, 4000);
+        } else {
+            waitMember = true;
+        }
     }
     let waitforMember = setInterval(function () {
         if (waitMember) {
@@ -1322,11 +1406,14 @@ function addProjectMember(projectId, memberMail, memberRole) {
             message.style.display = "block";
             message.innerHTML = "Member wurde hinzugefügt";
             message.style.color = "black";
+            counterForSendedMemberXhr++;
         } else if (this.readyState === 4) {
             message.style.display = "block";
             message.innerHTML = "Member konnte nicht hinzugefügt werden";
             message.style.color = "red";
+            counterForSendedMemberXhr++;
         }
+
         setTimeout(function () {
             message.style.display = "none";
             message.innerHTML = "";
@@ -1359,20 +1446,20 @@ function removeProjectMember(projectId, memberMail, memberRole) {
     xhr.withCredentials = true;
 
     xhr.addEventListener("readystatechange", function () {
-        let message = document.getElementById('AddOrDelete');
-        if (this.readyState === 4) {
-            if (this.response == "") {
-                message.style.display = "block";
-                message.innerHTML = "Member wurde gelöscht";
-                message.style.color = "black";
-                counterForSendedMemberXhr++;
-            } else {
-                message.style.display = "block";
-                message.innerHTML = "Member konnte nicht gelöscht werden";
-                message.style.color = "red";
-                counterForSendedMemberXhr++;
+            let message = document.getElementById('AddOrDelete');
+            if (this.readyState === 4) {
+                if (this.response == "") {
+                    message.style.display = "block";
+                    message.innerHTML = "Member wurde gelöscht";
+                    message.style.color = "black";
+                    counterForSendedMemberXhr++;
+                } else {
+                    message.style.display = "block";
+                    message.innerHTML = "Member konnte nicht gelöscht werden";
+                    message.style.color = "red";
+                    counterForSendedMemberXhr++;
+                }
             }
-        }
 
             setTimeout(function () {
                 message.style.display = "none";
@@ -1660,7 +1747,24 @@ function cleraForm() {
         content[i].remove();
     }
     if (!select) {
-        addMember();
+        if (!updateOrCreate) {
+            addMember();
+        } else {
+            content = document.querySelectorAll('[data-email');
+            for (let i = 0; i < content, length; i++) {
+                content[i].style.background = "white";
+                content[i].lastChild.remove();
+                content[i].lastChild.remove();
+                content[i].lastChild.remove();
+                content[i].style.display = "none";
+
+            }
+            let projects = document.querySelectorAll('[data-id');
+            for (let i = 0; i < projects.length; i++) {
+                projects[i].style.display = "block";
+            }
+        }
+
     }
 
 }
