@@ -21,6 +21,9 @@ function showError($error, $code)
     } elseif ($code == 404) {
         header("HTTP/1.1 404 Not Found");
         $http_message = "Not Found";
+    } elseif ($code == 409) {
+        header("HTTP/1.1 409 Conflict");
+        $http_message = "Conflict";
     } elseif ($code == 500) {
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
