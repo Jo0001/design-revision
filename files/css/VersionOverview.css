@@ -91,6 +91,6 @@ h1 {
     background-color: #0cfad6;
 }
 .row{
-     background-color: rgba(128, 128, 128, 0.2);
+    background-color: rgba(128, 128, 128, 0.2);
     display: table-row;
- }
+}
