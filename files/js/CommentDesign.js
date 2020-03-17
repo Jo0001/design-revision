@@ -7,6 +7,8 @@ let saveCommentBtn;
 let discardCommentBtn;
 
 function setup() {
+
+
     createCommentBtn = document.getElementById("createComment");
     commentArea = document.getElementById("commentArea");
     messageArea = document.getElementById("commentMsg");
@@ -49,7 +51,6 @@ function setup() {
             let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
             let comment = new Comment(0, pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
                 user.id, messageArea.value, false, generateRandomColor(), 0);
-            console.log(String(JSON.stringify(comment)).hashCode());
             comment.cId = String(JSON.stringify(comment)).hashCode();
             comments.push(comment);
             console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));

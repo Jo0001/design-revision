@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
 </head>
-<body>
+<body style="overflow: hidden;">
 <div class="topDivs">
     <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
          style="float: left"
@@ -31,7 +31,7 @@
 <div class="space"></div>
 <div class="form" id="form1">
     <form enctype="multipart/form-data" id="CustumorDashForm" method="post">
-        <h2 id="projektErstellen" >Projekt erstellen</h2>
+        <h2 id="projektErstellen">Projekt erstellen</h2>
         <label>
             <input id="projectname" name="projectname" placeholder="Projektname" required type="text">
         </label><br>
@@ -39,9 +39,9 @@
         <span id="AddOrDelete"></span><br>
         <span id="emailSpan">
         <label>
-            <input id="email" name="email" placeholder="E-mail" style="width: 60%" type="email" required >
+            <input id="email" name="email" placeholder="E-mail" required style="width: 60%" type="email">
         </label>
-            <select id="AdminOrMember" name="AdminOrMember"  required>
+            <select id="AdminOrMember" name="AdminOrMember" required>
                 <option disabled hidden selected value="">Auswählen</option>
                 <option value="Member">Member</option>
                 <option value="Admin">Admin</option>
@@ -65,7 +65,7 @@
                type="button"
                value="Member ausw&#228;hlen"/><br>
         <input id="submitButton" type="submit" value="Speichern">
-        <b id="loeschen" >Kunde löschen</b>
+        <b id="loeschen">Kunde löschen</b>
         <div id="loader"><span id="percentage" style="display: none"></span></div>
     </form>
 </div>
@@ -80,7 +80,10 @@
 
 <!-- response message if sending was successful -->
 <div class="warn" id="mes"></div>
-
+<div style="position: fixed; top: 11%; width: 76%; height: 90%; min-height: 90%; overflow: hidden;">
+    <div id="projectsScrollContainer" style="height: 98%; width: 99%; overflow-x: hidden; overflow-y: scroll;">
+    </div>
+</div>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </html>

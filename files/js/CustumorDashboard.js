@@ -273,7 +273,7 @@ function generate() {
                         arrayRole = role.innerHTML;
                         arrayRole = arrayRole.split(",");
                         gotProject = true;
-                        b.appendChild(customerSpan);
+                        document.getElementById("projectsScrollContainer").appendChild(customerSpan);
                     } else if (request1.readyState === 4 && request1.status === 401) {
                         customerdiv.remove();
                         //window.alert("Nicht eingelogt");

@@ -302,7 +302,12 @@ function setupViewport() {
     request2.open('GET', requestURL);
     request2.addEventListener('readystatechange', function (e) {
         handleServerResponse(request2, function (response) {
-            pdfFileOrUrl = "../api/project/pdf.php?file=" + response.link;
+            if (getURLParameter('pdf') === "") {
+                pdfFileOrUrl = "../api/project/pdf.php?file=" + response.link;
+            } else {
+                pdfFileOrUrl = "../api/project/pdf.php?file=" + getURLParameter('pdf');
+                console.log("PDF-Parameter set!");
+            }
             loadPDFAndRender(1, pdfFileOrUrl);
         });
     });
@@ -316,7 +321,7 @@ function setupViewport() {
             hash = hash & hash; // Convert to 32bit integer
         }
         return hash;
-    }
+    };
 
     //Viewport-Movement
     function dragElementWhenBtnIsDown(element, btn) {
