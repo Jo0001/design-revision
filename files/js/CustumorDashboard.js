@@ -682,10 +682,14 @@ let readyStateCheckInterval = setInterval(function () {
             } else {
                 clearInterval(userInterval);
                 let spacing = document.createElement('div');
-                spacing.style.height = "400px";
+                spacing.style.height = "200px";
                 setTimeout(function () {
-                    document.body.appendChild(spacing);
+                    document.getElementById('projectsScrollContainer').appendChild(spacing);
                 }, 2000);
+                //versteckt das Ladesymbol oben
+                setTimeout(function () {
+                    document.getElementById('pageLoader').style.display = "none";
+                }, 1000);
             }
 
         }, 200);
@@ -749,10 +753,12 @@ let readyStateCheckInterval = setInterval(function () {
             //löscht die inhalte des das die Werte der Felder enthält
             let tmpArray = JSON.stringify(sendArray);
             let tmpArray1 = JSON.stringify(sendArrayFields);
+            let savedEmail=[]
             $.each(JSON.parse(tmpArray1), function (key, value) {
                 if (tmpArray.indexOf(value.email) > -1) {
                     for (let i = 0; i < sendArray.length; i++) {
-                        if (sendArray[i].email === value.email) {
+                        if (sendArray[i].email === value.email &&! (savedEmail.includes(sendArray[i].email))){
+                            savedEmail.push(value.email);
                             sendArray.splice(i, 1);
                             console.log("sliced " + value.email + " index " + i);
                         }
@@ -827,9 +833,6 @@ let readyStateCheckInterval = setInterval(function () {
             sendFile = undefined;
         }
     }, false);
-    setTimeout(function () {
-        document.getElementById('pageLoader').style.display = "none";
-    }, 1000);
 
 }, 10);
 
@@ -997,6 +1000,7 @@ function addMember() {
         console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
+        console.log("Add Member");
         if (boolstatus && !a) {
             document.getElementById("loeschen").style.display = "inline";
         }
@@ -1519,13 +1523,13 @@ function addMemberWithEmail() {
     adminOrMember.onchange = function () {
         let test = adminOrMember.value;
         if (test === "Member") {
-            role = 0;
+            role = "0";
             objMember = {"email": member, "role": role};
             sendArrayFields[0] = objMember;
             console.log(sendArrayFields);
         }
         if (test === "Admin") {
-            role = 1;
+            role = "1";
             objMember = {"email": member, "role": role};
             sendArrayFields[0] = objMember;
             console.log(sendArrayFields);
@@ -1582,13 +1586,13 @@ function addEmailField() {
             let index = this.getAttribute('data-emailFormId');
             let test = selectClone.value;
             if (test === "Member") {
-                role = 0;
+                role = "0";
                 objMember = {"email": member, "role": role};
                 sendArrayFields[index] = objMember;
                 console.log(sendArrayFields);
             }
             if (test === "Admin") {
-                role = 1;
+                role = "1";
                 objMember = {"email": member, "role": role};
                 sendArrayFields[index] = objMember;
                 console.log(sendArrayFields);
@@ -1747,22 +1751,11 @@ function cleraForm() {
         content[i].remove();
     }
     if (!select) {
-        if (!updateOrCreate) {
-            addMember();
+        if (updateOrCreate) {
+                addMember();
         } else {
-            content = document.querySelectorAll('[data-email');
-            for (let i = 0; i < content, length; i++) {
-                content[i].style.background = "white";
-                content[i].lastChild.remove();
-                content[i].lastChild.remove();
-                content[i].lastChild.remove();
-                content[i].style.display = "none";
-
-            }
-            let projects = document.querySelectorAll('[data-id');
-            for (let i = 0; i < projects.length; i++) {
-                projects[i].style.display = "block";
-            }
+            console.log("Else");
+            document.getElementById('btnAddMember').click();
         }
 
     }
