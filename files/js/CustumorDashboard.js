@@ -43,7 +43,6 @@ function generate() {
     let request1 = new XMLHttpRequest();
     let boolStatus1;
     let requestURL;
-    let b = document.body;
     let arrayMember;
     let arrayRole;
     let gotProject = false;
@@ -288,7 +287,7 @@ function generate() {
                 };
             }
         }
-    }, 1000);
+    }, 10);
     let checkForProjectsToCreateMember = setInterval(function () {
         if (requestredy && gotProject) {
             clearInterval(checkForProjectsToCreateMember);
@@ -352,7 +351,7 @@ function generate() {
             counterForUser++;
 
         }
-    }, 50);
+    }, 10);
 
 
     customerdiv.appendChild(clientname);
@@ -384,7 +383,7 @@ function generate() {
                 content[i].style.background = "white";
                 content[i].style.border = "4px solid black";
             }
-            let id1 = clientname.innerHTML + projektname.innerHTML;
+            let id1 = clientname.innerHTML + projektname.innerHTML+customerdiv.getAttribute('data-id');
             customerdiv.setAttribute("id", id1);
             customerdiv.style.background = "white";
             clientDivClick(customerdiv, clientname.innerHTML, projektname.innerHTML, id1, boolStatus1, arrayMember, arrayRole);

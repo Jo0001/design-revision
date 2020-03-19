@@ -6,4 +6,4 @@ AddDefaultCharset UTF-8
 DefaultLanguage de
 
 #TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.30"
+Header set X-Build-Version "1.31"
