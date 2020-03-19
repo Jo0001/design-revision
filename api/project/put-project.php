@@ -297,7 +297,7 @@ function solveComment()
             $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
             if (isValidProject($pid, $pdo)) {
                 if (isMember($pid, getUser('pk_id'))) {
-                    //TODO timestamp
+
                     $versions = getLatestProjectData($pid, $pdo)['version'];
                     //Loop through every row
                     for ($i = 1; $i <= $versions; $i++) {
