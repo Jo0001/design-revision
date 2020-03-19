@@ -63,11 +63,11 @@ if (!is_null($id)) {
                     }
                     handleOutput(array("link" => $project['link'], "data" => $output));
                 } else if ($page == "history") {
-                    $statement = $pdo->prepare("SELECT link, lastedit FROM " . $id);
+                    $statement = $pdo->prepare("SELECT version, link, lastedit FROM " . $id);
                     $statement->execute();
                     $history = array();
                     foreach ($statement->fetchAll() as $tmp) {
-                        array_push($history, array("link" => $tmp['link'], "lastedit" => $tmp['lastedit']));
+                        array_push($history, array("link" => $tmp['link'], "lastedit" => $tmp['lastedit'],"version"=>(int)$tmp['version']));
                     }
                     handleOutput($history);
                 } else {
