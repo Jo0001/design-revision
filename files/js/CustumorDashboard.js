@@ -433,6 +433,7 @@ function generate() {
                             console.log("Before:" + JSON.stringify(helpArray));
 
                             sendArray = [];
+                            arrayBefore=[];
                             let j = 0;
                             for (let i = 0; i < arrayMember.length; i++) {
                                 if (arrayMember[i] != userId) {
@@ -1018,7 +1019,8 @@ function addMember() {
         }
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "block";
-            projecst[i].style.border = "4px solid black"
+            projecst[i].style.border = "4px solid black";
+            projecst[i].style.background="white";
         }
     }
 }
@@ -1029,7 +1031,6 @@ function changeClientState(members, role, id) {
     let arrayLength = content.length;
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
-    let helpArray = [];
     let userIDs = [];
     if (select) {
         for (let i = 0; i < projects.length; i++) {
@@ -1049,39 +1050,31 @@ function changeClientState(members, role, id) {
             }
 
         }
-        //löschen nachricht verstecken
-        let delet = document.getElementById("form1");
-        //messageMember verstecken
+        userIDs=[];
 
         for (let i = 0; i < arrayLength; i++) {
-            let help = content[i].getAttribute("data-memberId");
-            if (members.includes(help)) {
-                let help1 = members.indexOf(help);
-                if (role[help1] == 0) {
-                    content[i].style.background = "#00FF66";
-                }
-                if (role[help1] == 1) {
-                    content[i].style.background = "#FFA500";
-                }
-            }
-        }
-        let j = 0;
-        for (let i = 0; i < content.length; i++) {
-            if (members.includes(content[i].getAttribute("data-memberId"))) {
-                helpArray[j] = content[i].getAttribute("data-email");
-                j++;
-            }
-        }
+            //sorgt dafür das jeder Member nur einmal in den Array kommt
+            if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
+                userIDs[i] = content[i].getAttribute('data-memberId');
+                let help = content[i].getAttribute("data-memberId");
+                if (members.includes(help)) {
+                    let help1 = members.indexOf(help);
+                    let mail = content[i].getAttribute('data-email');
+                    if (role[help1] == 0) {
+                        content[i].style.background = "#00FF66";
 
-        for (let i = 0; i < members.length; i++) {
-            if (content.length > members[i]) {
-                let mail = helpArray[i];
-                if (mail !== undefined) {
-                    let member = {"email": mail, "role": role[i]};
-                    jasonmembers.push(member);
+                        let member = {"email": mail, "role": role[help1]};
+                        jasonmembers.push(member);
+                    }
+                    if (role[help1] == 1) {
+                        content[i].style.background = "#FFA500";
+                        let member = {"email": mail, "role": role[help1]};
+                        jasonmembers.push(member);
+                    }
                 }
             }
         }
+       console.log(jasonmembers);
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < arrayLength; i++) {
             let buttonAdmin = document.createElement("button");
