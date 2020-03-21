@@ -2,6 +2,7 @@
 require "../../libs/auth.php";
 require "../../libs/api-util.php";
 require "../../libs/sendEmail.php";
+require "../../libs/filter.php";
 
 $page = explode("?", basename(filter_var($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL))[0];
 
@@ -35,8 +36,8 @@ function addComments()
 
             $data = filter_var($GLOBALS['_PUT']['comment'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
             //Check if JSON is valid
-            if (!isJson($data)) {
-                showError("No JSON Data", 400);
+            if (!filterComment($data)) {
+                showError("No (valid) JSON Data", 400);
             }
 
             $statement = $pdo->prepare("SELECT data FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
