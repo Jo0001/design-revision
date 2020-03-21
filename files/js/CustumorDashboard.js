@@ -123,7 +123,7 @@ function generate() {
                 clientemail.innerHTML = userObject.user.email;
                 company.innerHTML = userObject.user.company;
                 if (!(userObject.user.status === "VERIFIED")) {
-                    window.location = window.location.origin + "/design-revision/login/?verify=notVerified";
+                    destroy_session("notVerified");
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
@@ -132,7 +132,8 @@ function generate() {
                     clearInterval(checkForProjects);
                     ableNewProject = false;
                     setTimeout(function () {
-                        window.location = window.location.origin + "/design-revision/login/?projects=noProjects";
+                        destroy_session("noProjects");
+
                     }, 100)
 
                 } else {
@@ -1841,4 +1842,23 @@ function autocomplete(inp, arr) {
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });
+}
+function destroy_session(state){
+    //a functionn to log the User out when sending him back to Login Page for example because he has no projects
+    let xmlhttp = new XMLHttpRequest();
+    xmlhttp.open('POST',window.location.origin+"/design-revision/login/?logout", true);
+    xmlhttp.onreadystatechange=function(){
+        if (xmlhttp.readyState === 4){
+            if(xmlhttp.status === 200){
+               console.log("LogOut Successful");
+               if(state==="noProjects"){
+                   window.location = window.location.origin + "/design-revision/login/?projects=noProjects";
+               }
+               if(state==="notVerified"){
+                   window.location = window.location.origin + "/design-revision/login/?verify=notVerified";
+               }
+            }
+        }
+    };
+    xmlhttp.send(null);
 }
