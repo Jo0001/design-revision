@@ -28,7 +28,7 @@ function addComments()
 
     if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['comment'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         $pid = "project_" . $pid;
 
         //Check if user is logged in and a projectmember
@@ -71,7 +71,7 @@ function addmember()
         $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
 
         $pid = "project_" . $pid;
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
 
         if (isLoggedIn()) {
 
@@ -163,7 +163,7 @@ function removemember()
         $member = (int)filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING);
         if (isLoggedIn()) {
             $pid = "project_" . $pid;
-            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+            $pdo = $GLOBALS['pdo'];
             if (isValidProject($pid, $pdo)) {
                 if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
 
@@ -217,7 +217,7 @@ function updateStatus()
         $status = filter_var($GLOBALS['_PUT'] ['status'], FILTER_SANITIZE_STRING);
 
         $pid = "project_" . $pid;
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         if (isLoggedIn()) {
             if (isValidProject($pid, $pdo)) {
                 $projectdata = getLatestProjectData($pid, $pdo);
@@ -295,7 +295,7 @@ function solveComment()
         $cid = filter_var($GLOBALS['_PUT'] ['cid'], FILTER_SANITIZE_STRING);
         if (isLoggedIn()) {
             $pid = "project_" . $pid;
-            $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+            $pdo = $GLOBALS['pdo'];
             if (isValidProject($pid, $pdo)) {
                 if (isMember($pid, getUser('pk_id'))) {
 

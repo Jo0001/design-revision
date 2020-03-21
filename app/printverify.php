@@ -11,7 +11,7 @@ if (!empty($_POST['code']) && !empty($_GET['id'])) {
         $loc = "?id=" . explode("project_", $pid)[1];
         if (isValidProject($pid, $pdo)) {
             if (isMember($pid, getUser('pk_id'))) {
-                $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+                $pdo = $GLOBALS['pdo'];
                 $project = getLatestProjectData($pid, $pdo);
                 $securitycode = $project['securitycode'];
 

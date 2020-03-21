@@ -30,7 +30,7 @@ function createProject()
             if (filter_var($_FILES["file"]["type"], FILTER_SANITIZE_STRING) === "application/pdf" && !file_exists($target_file) && (int)filter_var($_FILES["file"]["size"], FILTER_SANITIZE_NUMBER_INT) < 500000001 && strlen($projectname) < 81) {
                 if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                     //Generate Table
-                    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+                    $pdo = $GLOBALS['pdo'];
                     $result = 0;
                     do {
                         $t_name = "project_" . bin2hex(openssl_random_pseudo_bytes(4));
@@ -139,7 +139,7 @@ function updateFile()
     if (isset($_POST ['id'])) {
         $pid = filter_var($_POST ['id'], FILTER_SANITIZE_STRING);
         $pid = "project_" . $pid;
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         if (isLoggedIn()) {
             if (isValidProject($pid, $pdo)) {
                 if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {

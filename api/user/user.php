@@ -5,7 +5,7 @@ if (!empty($_GET['id']) && !empty($_GET['pid'])) {
     $id = filter_var($_GET['id'], FILTER_SANITIZE_STRING);
     $pid = "project_" . filter_var($_GET['pid'], FILTER_SANITIZE_STRING);
     if (isLoggedIn()) {
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         if (isValidProject($pid, $pdo)) {
             if (isMember($pid, getUser('pk_id')) && isMember($pid, (int)$id)) {
                 $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");

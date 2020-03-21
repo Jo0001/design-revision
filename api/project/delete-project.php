@@ -8,7 +8,7 @@ parse_str(file_get_contents('php://input'), $_DELETE);
 if (isset($_DELETE['id'])) {
     $id = "project_" . filter_var($_DELETE['id'], FILTER_SANITIZE_STRING);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $pdo = $GLOBALS['pdo'];
     if (isValidProject($id, $pdo) && getUser('status') == "VERIFIED") {
         $userid = getUser("pk_id");
         if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {

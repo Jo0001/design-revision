@@ -14,7 +14,7 @@ $verified = false;
 if (!empty($_GET['token'])) {
     $token = filter_var($_GET['token'], FILTER_SANITIZE_STRING);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $pdo = $GLOBALS['pdo'];
     $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
     $result = $statement->execute(array('token' => $token));
     $user = $statement->fetch();

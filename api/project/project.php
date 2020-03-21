@@ -13,7 +13,7 @@ $id = check_id();
 if (!is_null($id)) {
     if (isLoggedIn()) {
         $id = "project_" . $id;
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         if (isValidProject($id, $pdo)) {
             $project = getLatestProjectData($id, $pdo);
             if (isMember($id, getUser('pk_id'))) {
@@ -84,9 +84,4 @@ if (!is_null($id)) {
     }
 } else {
     showError("Missing id, please specify it with ?id=value", 400);
-}
-
-function showHistory()
-{
-
 }

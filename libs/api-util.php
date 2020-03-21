@@ -1,6 +1,5 @@
 <?php
-$pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-
+$pdo = $GLOBALS['pdo'];//TODO UNUSED??
 
 /*
  * Handle Output & Errors
@@ -103,7 +102,7 @@ function getUser($value)
 {
     if (isLoggedIn()) {
         $id = $_SESSION['user-id'];
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
         $result = $statement->execute(array('pk_id' => $id));
         $user = $statement->fetch();
@@ -118,7 +117,7 @@ function getUser($value)
 
 function isMember($pid, $userid)
 {
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $pdo = $GLOBALS['pdo'];
     $members = json_decode(getLatestProjectData($pid, $pdo)['members'], true);
 
     foreach ($members as $member) {
@@ -153,7 +152,7 @@ function nestedLowercase($value)
 
 function emailToId($email)
 {
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $pdo = $GLOBALS['pdo'];
     $statement = $pdo->prepare("SELECT pk_id FROM `users` WHERE email = ?");
     $statement->execute(array($email));
     $tmpid = $statement->fetch();
@@ -175,11 +174,11 @@ function IdToName($pdo, $id)
 }
 
 
-function isJson($string)
+/*function isJson($string)
 {
     json_decode($string);
     return (json_last_error() == JSON_ERROR_NONE);
-}
+}*/
 
 function informNewbie($email, $projectname, $name)
 {

@@ -2,10 +2,13 @@
 require "util.php";
 session_start();
 
+$pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+
 function logIn($email, $password, $location)
 {
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-    $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+
+    //  $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $statement = $GLOBALS['pdo']->prepare("SELECT * FROM users WHERE email = :email");
     $result = $statement->execute(array('email' => $email));
     $user = $statement->fetch();
 
