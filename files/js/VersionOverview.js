@@ -71,7 +71,7 @@ function request() {
             awaitData = false;
         } else if (request.readyState === 4 && request.status === 401) {
             console.log("Nicht eingelogt");
-            document.location = "../login/login.html";
+            document.location = "../login/";
         } else if (request.readyState === 4 && request.status === 403) {
             setTimeout(function () {
                 //using timeouts because otherwise the site could not show alert correctly

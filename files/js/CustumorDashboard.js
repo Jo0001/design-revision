@@ -123,16 +123,16 @@ function generate() {
                 clientemail.innerHTML = userObject.user.email;
                 company.innerHTML = userObject.user.company;
                 if (!(userObject.user.status === "VERIFIED")) {
-                    window.location = window.location.origin + "/design-revision/login/login.html?verify=notVerified";
+                    window.location = window.location.origin + "/design-revision/login/?verify=notVerified";
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
-                if (tmp === null) {
+                if (tmp === null || tmp[0]===undefined) {
                     customerdiv.remove();
                     clearInterval(checkForProjects);
                     ableNewProject = false;
                     setTimeout(function () {
-                        window.location = window.location.origin + "/design-revision/login/login.html?projects=noProjects";
+                        window.location = window.location.origin + "/design-revision/login/?projects=noProjects";
                     }, 100)
 
                 } else {
@@ -163,7 +163,7 @@ function generate() {
             } else if (request.readyState === 4 && request.status === 403) {
                 showmes("error", "Verboten");
             } else if (request.readyState === 4 && request.status === 401) {
-                document.location = window.location.origin + "/design-revision/login/login.html";
+                document.location = window.location.origin + "/design-revision/login/";
             } else if (request.readyState === 4 && request.status === 404) {
                 showmes("error", "Nichts gefunden");
             } else if (request.readyState === 4 && request.status === 400) {
@@ -276,7 +276,7 @@ function generate() {
                     } else if (request1.readyState === 4 && request1.status === 401) {
                         customerdiv.remove();
                         //window.alert("Nicht eingelogt");
-                        document.location = "../login/login.html";
+                        document.location = "../login/";
                     } else if (request1.readyState === 4 && request1.status === 403) {
                         showmes("info", "Sie sind noch in keinem Projekt warten sie bis wir sie zu einem hinzufügen!");
                     } else if (request1.readyState === 4 && request1.status === 404) {
@@ -339,7 +339,7 @@ function generate() {
                         } else if (request2.readyState === 4 && request2.status === 403) {
                             showmes("error", "Verboten");
                         } else if (request2.readyState === 4 && request2.status === 401) {
-                            document.location = window.location.origin + "/design-revision/login/login.html";
+                            document.location = window.location.origin + "/design-revision/login/";
                         } else if (request2.readyState === 4 && request2.status === 404) {
                             showmes("warn", "Nichts gefunden");
                         } else if (request2.readyState === 4 && request2.status === 400) {
