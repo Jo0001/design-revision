@@ -127,7 +127,7 @@ function generate() {
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
-                if (tmp === null || tmp[0]===undefined) {
+                if (tmp === null || tmp[0] === undefined) {
                     customerdiv.remove();
                     clearInterval(checkForProjects);
                     ableNewProject = false;
@@ -384,7 +384,7 @@ function generate() {
                 content[i].style.background = "white";
                 content[i].style.border = "4px solid black";
             }
-            let id1 = clientname.innerHTML + projektname.innerHTML+customerdiv.getAttribute('data-id');
+            let id1 = clientname.innerHTML + projektname.innerHTML + customerdiv.getAttribute('data-id');
             customerdiv.setAttribute("id", id1);
             customerdiv.style.background = "white";
             clientDivClick(customerdiv, clientname.innerHTML, projektname.innerHTML, id1, boolStatus1, arrayMember, arrayRole);
@@ -434,7 +434,7 @@ function generate() {
                             console.log("Before:" + JSON.stringify(helpArray));
 
                             sendArray = [];
-                            arrayBefore=[];
+                            arrayBefore = [];
                             let j = 0;
                             for (let i = 0; i < arrayMember.length; i++) {
                                 if (arrayMember[i] != userId) {
@@ -754,11 +754,11 @@ let readyStateCheckInterval = setInterval(function () {
             //löscht die inhalte des das die Werte der Felder enthält
             let tmpArray = JSON.stringify(sendArray);
             let tmpArray1 = JSON.stringify(sendArrayFields);
-            let savedEmail=[]
+            let savedEmail = []
             $.each(JSON.parse(tmpArray1), function (key, value) {
                 if (tmpArray.indexOf(value.email) > -1) {
                     for (let i = 0; i < sendArray.length; i++) {
-                        if (sendArray[i].email === value.email &&! (savedEmail.includes(sendArray[i].email))){
+                        if (sendArray[i].email === value.email && !(savedEmail.includes(sendArray[i].email))) {
                             savedEmail.push(value.email);
                             sendArray.splice(i, 1);
                             console.log("sliced " + value.email + " index " + i);
@@ -1021,7 +1021,7 @@ function addMember() {
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "block";
             projecst[i].style.border = "4px solid black";
-            projecst[i].style.background="white";
+            projecst[i].style.background = "white";
         }
     }
 }
@@ -1051,7 +1051,7 @@ function changeClientState(members, role, id) {
             }
 
         }
-        userIDs=[];
+        userIDs = [];
 
         for (let i = 0; i < arrayLength; i++) {
             //sorgt dafür das jeder Member nur einmal in den Array kommt
@@ -1075,7 +1075,7 @@ function changeClientState(members, role, id) {
                 }
             }
         }
-       console.log(jasonmembers);
+        console.log(jasonmembers);
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < arrayLength; i++) {
             let buttonAdmin = document.createElement("button");
@@ -1745,7 +1745,7 @@ function cleraForm() {
     }
     if (!select) {
         if (updateOrCreate) {
-                addMember();
+            addMember();
         } else {
             console.log("Else");
             document.getElementById('btnAddMember').click();
@@ -1843,22 +1843,12 @@ function autocomplete(inp, arr) {
         closeAllLists(e.target);
     });
 }
-function destroy_session(state){
-    //a functionn to log the User out when sending him back to Login Page for example because he has no projects
-    let xmlhttp = new XMLHttpRequest();
-    xmlhttp.open('POST',window.location.origin+"/design-revision/login/?logout", true);
-    xmlhttp.onreadystatechange=function(){
-        if (xmlhttp.readyState === 4){
-            if(xmlhttp.status === 200){
-               console.log("LogOut Successful");
-               if(state==="noProjects"){
-                   window.location = window.location.origin + "/design-revision/login/?projects=noProjects";
-               }
-               if(state==="notVerified"){
-                   window.location = window.location.origin + "/design-revision/login/?verify=notVerified";
-               }
-            }
-        }
-    };
-    xmlhttp.send(null);
-}
+
+function destroy_session(state) {
+    if (state === "noProjects") {
+        window.location = window.location.origin + "/design-revision/login/?logout&projects=noProjects";
+    }
+    if (state === "notVerified") {
+        window.location = window.location.origin + "/design-revision/login/?logout&verify=notVerified";
+    }
+    }
