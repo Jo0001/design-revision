@@ -13,8 +13,8 @@ if ($page === "addmember") {
     addmember();
 } elseif ($page === "removemember") {
     removemember();
-} elseif ($page === "addcomments") {
-    addComments();
+} elseif ($page === "addcomment" || $page === "addcomments") {
+    addComment();
 } elseif ($page === "solvecomment") {
     solveComment();
 } elseif ($page === "updatestatus") {
@@ -23,7 +23,7 @@ if ($page === "addmember") {
     showError("Bad Request", 400);
 }
 
-function addComments()
+function addComment()
 {
 
     if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['comment'])) {

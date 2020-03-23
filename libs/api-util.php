@@ -27,7 +27,7 @@ function showError($error, $code)
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.7, "documentation" => "https://documenter.getpostman.com/view/9645782/SWLZgW2n"));
+    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.8, "documentation" => "https://documenter.getpostman.com/view/9645782/SWLZgW2n"));
     handleOutput($err);
     die;
 }
@@ -172,13 +172,6 @@ function IdToName($pdo, $id)
     $statement->execute(array($id));
     return $statement->fetch()[0];
 }
-
-
-/*function isJson($string)
-{
-    json_decode($string);
-    return (json_last_error() == JSON_ERROR_NONE);
-}*/
 
 function informNewbie($email, $projectname, $name)
 {
