@@ -50,7 +50,10 @@ function createProject()
                     //Create a one dimensional array with all emails from the db
                     $useremails = array();
                     foreach ($tmpmails as $tmp) {
-                        array_push($useremails, $tmp['email']);
+                        //Only add valid e-mails to the list
+                        if (filter_var($tmp['email'], FILTER_VALIDATE_EMAIL)) {
+                            array_push($useremails, $tmp['email']);
+                        }
                     }
                     //convert json post to php array format
                     $members = json_decode($members, true);
@@ -61,8 +64,6 @@ function createProject()
                     $memberids = array();
 
                     $pid = explode("project_", $t_name)[1];
-
-                    // $projectname = $name;
 
                     //add current user (as admin)
                     $userid = getUser('pk_id');
