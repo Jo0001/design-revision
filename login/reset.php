@@ -1,9 +1,9 @@
 <?php
-$pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
 require "../libs/sendEmail.php";
-require "../libs/util.php";
+require "../libs/auth.php";
 if (!empty($_POST['email'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_STRING);
+    $pdo = $GLOBALS['pdo'];
     try {
         $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
         $result = $statement->execute(array('email' => $email));

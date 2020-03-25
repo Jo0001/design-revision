@@ -19,7 +19,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
     //Check if passwords match and email is valid
     //Password needs a length of 8+, normal letters,numbers, one Caps and one special char and password != email
     if ($password == $password2 && filter_var($email, FILTER_VALIDATE_EMAIL) && preg_match("#.*^(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#", $password) && (strcasecmp($password, $email) != 0)) {
-        $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+        $pdo = $GLOBALS['pdo'];
         try {
             $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
             $result = $statement->execute(array('email' => $email));

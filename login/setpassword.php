@@ -7,7 +7,7 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
     $password = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
     $password2 = filter_var($_POST['againPassword'], FILTER_SANITIZE_STRING);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+    $pdo = $GLOBALS['pdo'];
     try {
         $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
         $result = $statement->execute(array('token' => $token));
