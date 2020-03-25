@@ -12,34 +12,44 @@ if (isset($_DELETE['id'])) {
     if (isValidProject($id, $pdo) && getUser('status') == "VERIFIED") {
         $userid = getUser("pk_id");
         if (isAdmin(getLatestProjectData($id, $pdo), $userid)) {
-            $statement = $pdo->prepare("SELECT link FROM " . $id);
-            $statement->execute();
-            $link = $statement->fetchAll();
-            $target_dir = "../../user-content/";
-            for ($i = 0; $i < count($link); $i++) {
-                //deletes all project files
-                unlink($target_dir . $link[$i][0]);
-            }
+            try {
+                $statement = $pdo->prepare("SELECT link FROM " . $id);
+                $statement->execute();
+                $link = $statement->fetchAll();
 
-            $tmpproject = getLatestProjectData($id, $pdo);
-            $tmpmembers = json_decode($tmpproject['members'], true);
-            $ids = array_column($tmpmembers, 'id', "");
+                $target_dir = "../../user-content/";
+                for ($i = 0; $i < count($link); $i++) {
+                    //deletes all project files
+                    unlink($target_dir . $link[$i][0]);
+                }
 
-            foreach ($ids as $tmp) {
-                $statement = $pdo->prepare("SELECT projects FROM users WHERE pk_id =? ");
-                $statement->execute(array($tmp));
-                $projects = $statement->fetch()[0];
-                $projects = json_decode($projects);
-                //delete Project from user-projects array and reformat the array
-                unset($projects[array_search(filter_var($_DELETE['id'], FILTER_SANITIZE_STRING), $projects)]);
-                $projects = array_values($projects);
-                //save the new project array to the users-projects
-                $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
-                $statement->execute(array(json_encode($projects), $tmp));
+                $tmpproject = getLatestProjectData($id, $pdo);
+                $tmpmembers = json_decode($tmpproject['members'], true);
+                $ids = array_column($tmpmembers, 'id', "");
+
+                foreach ($ids as $tmp) {
+                    try {
+                        $statement = $pdo->prepare("SELECT projects FROM users WHERE pk_id =? ");
+                        $statement->execute(array($tmp));
+                        $projects = $statement->fetch()[0];
+                        $projects = json_decode($projects);
+                        //delete Project from user-projects array and reformat the array
+                        unset($projects[array_search(filter_var($_DELETE['id'], FILTER_SANITIZE_STRING), $projects)]);
+                        $projects = array_values($projects);
+                        //save the new project array to the users-projects
+                        $statement = $pdo->prepare("UPDATE `users` SET `projects` = ? WHERE `users`.`pk_id` = ?");
+                        $statement->execute(array(json_encode($projects), $tmp));
+                    } catch (PDOException $e) {
+                        showError("Something went really wrong", 500);
+                    }
+                }
+
+                //Drop the table of the project
+                $statement = $pdo->prepare("DROP TABLE " . $id);
+                $statement->execute();
+            } catch (PDOException $e) {
+                showError("Something went really wrong", 500);
             }
-            //Drop the table of the project
-            $statement = $pdo->prepare("DROP TABLE " . $id);
-            $statement->execute();
 
             header("HTTP/1.1 204 No Content ");
         } else {

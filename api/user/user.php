@@ -8,10 +8,15 @@ if (!empty($_GET['id']) && !empty($_GET['pid'])) {
         $pdo = $GLOBALS['pdo'];
         if (isValidProject($pid, $pdo)) {
             if (isMember($pid, getUser('pk_id')) && isMember($pid, (int)$id)) {
-                $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
-                $result = $statement->execute(array('pk_id' => $id));
-                $user = $statement->fetch();
-                handleOutput(array("user" => array("name" => $user['name'], "company" => $user['company'], "email" => $user['email'])));
+                try {
+                    $statement = $pdo->prepare("SELECT * FROM users WHERE pk_id = :pk_id");
+                    $result = $statement->execute(array('pk_id' => $id));
+                    $user = $statement->fetch();
+
+                    handleOutput(array("user" => array("name" => $user['name'], "company" => $user['company'], "email" => $user['email'])));
+                } catch (PDOException $e) {
+                    showError("Something went really wrong", 500);
+                }
             } else {
                 showError("Not a member", 403);
             }

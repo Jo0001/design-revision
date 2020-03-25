@@ -4,27 +4,27 @@ require "../libs/sendEmail.php";
 require "../libs/util.php";
 if (!empty($_POST['email'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_STRING);
+    try {
+        $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+        $result = $statement->execute(array('email' => $email));
+        $user = $statement->fetch();
 
-    $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-    $result = $statement->execute(array('email' => $email));
-    $user = $statement->fetch();
+        if ($user) {
+            date_default_timezone_set('Europe/Berlin');
+            $timestamp = date("Y-m-d H:i:s");
 
-    if ($user) {
-        date_default_timezone_set('Europe/Berlin');
-        $timestamp = date("Y-m-d H:i:s");
-
-        if (dateDifference($timestamp, $user['token_timestamp']) > 120) {
+            if (dateDifference($timestamp, $user['token_timestamp']) > 120) {
 
 
-            $statement = $pdo->prepare("UPDATE users SET token = ?, token_timestamp=? WHERE email = ?");
-            $hash = generateHash($pdo);
-            $statement->execute(array($hash, $timestamp, $email));
+                $statement = $pdo->prepare("UPDATE users SET token = ?, token_timestamp=? WHERE email = ?");
+                $hash = generateHash($pdo);
+                $statement->execute(array($hash, $timestamp, $email));
 
-            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://".filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING)."/design-revision/login/setpassword.php?token=" . $hash;
+                $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/setpassword.php?token=" . $hash;
 
-            sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
+                sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
 
-            die("<!DOCTYPE html>
+                die("<!DOCTYPE html>
 <html lang=\"de\">
 <head>
     <meta charset=\"UTF-8\">
@@ -40,8 +40,8 @@ if (!empty($_POST['email'])) {
 </div>
 </body>
 </html>");
-        } else {
-            die("<!DOCTYPE html>
+            } else {
+                die("<!DOCTYPE html>
 <html lang=\"de\">
 <head>
     <meta charset=\"UTF-8\">
@@ -57,7 +57,10 @@ if (!empty($_POST['email'])) {
 </div>
 </body>
 </html>");
+            }
         }
+    } catch (PDOException $e) {
+        showError("Something went really wrong", 500);
     }
 }
 ?>
@@ -102,11 +105,13 @@ if (!empty($_POST['email'])) {
         statusEmail.innerHTML = "";
 
     }
+
     function getURLParameter(name) {
         let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
         return (value !== 'null') ? value : false;
     }
-    window.onload=function mailOrPass() {
+
+    window.onload = function mailOrPass() {
         let err = getURLParameter('err');
         if (err === "login") {
             let feedback = document.getElementById("statusEmail");

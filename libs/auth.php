@@ -6,26 +6,28 @@ $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsr
 
 function logIn($email, $password, $location)
 {
+    try {
+        $statement = $GLOBALS['pdo']->prepare("SELECT * FROM users WHERE email = :email");
+        $result = $statement->execute(array('email' => $email));
+        $user = $statement->fetch();
 
-    //  $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-    $statement = $GLOBALS['pdo']->prepare("SELECT * FROM users WHERE email = :email");
-    $result = $statement->execute(array('email' => $email));
-    $user = $statement->fetch();
-
-    if ($user !== false && password_verify($password, $user['pswd'])) {
-        $_SESSION['user-status'] = $user['status'];
-        $_SESSION['user-log'] = "true";
-        $_SESSION['user-id'] = $user['pk_id'];
-        date_default_timezone_set('Europe/Berlin');
-        $_SESSION['user-time'] = date("Y-m-d H:i:s");
-        if (is_null($location)) {
-            $location = "../simulate/dashboard.php";
+        if ($user !== false && password_verify($password, $user['pswd'])) {
+            $_SESSION['user-status'] = $user['status'];
+            $_SESSION['user-log'] = "true";
+            $_SESSION['user-id'] = $user['pk_id'];
+            date_default_timezone_set('Europe/Berlin');
+            $_SESSION['user-time'] = date("Y-m-d H:i:s");
+            if (is_null($location)) {
+                $location = "../simulate/dashboard.php";
+            }
+            header("Location: $location");
+            die;
+        } else {
+            header("Location: ../login/?err=1");
+            die;
         }
-        header("Location: $location");
-        die;
-    } else {
-        header("Location: ../login/?err=1");
-        die;
+    } catch (PDOException $e) {
+        showError("Something went really wrong", 500);
     }
 
 }

@@ -8,30 +8,34 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
     $password2 = filter_var($_POST['againPassword'], FILTER_SANITIZE_STRING);
 
     $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-    $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
-    $result = $statement->execute(array('token' => $token));
-    $user = $statement->fetch();
+    try {
+        $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
+        $result = $statement->execute(array('token' => $token));
+        $user = $statement->fetch();
 
-    $email = $user['email'];
+        $email = $user['email'];
 
-    $timestamp = $user['token_timestamp'];
-    date_default_timezone_set('Europe/Berlin');
-    $currentdate = date("Y-m-d H:i:s");
-    $diff = dateDifference($timestamp, $currentdate);
+        $timestamp = $user['token_timestamp'];
+        date_default_timezone_set('Europe/Berlin');
+        $currentdate = date("Y-m-d H:i:s");
+        $diff = dateDifference($timestamp, $currentdate);
 
-    if (!empty($user) && $password == $password2 && preg_match("#.*^(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#", $password) && (strcasecmp($password, $email) != 0) && $diff <= 7200) {
-        $pw_options = [
-            'cost' => 12,
-        ];
-        $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
-        $statement = $pdo->prepare("UPDATE users SET pswd = ?, token = NULL WHERE token = ?");
-        $statement->execute(array($pswd, $token));
-        $content = parseHTML("../libs/templates/successPasswordReset.html", null, null, null, null);
-        sendMail($email, $user['name'], " =?utf-8?q?Sie_haben_Ihr_Design_Revision-Kennwort_erfolgreich_zur=C3=BCckgesetzt?=", $content);
+        if (!empty($user) && $password == $password2 && preg_match("#.*^(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#", $password) && (strcasecmp($password, $email) != 0) && $diff <= 7200) {
+            $pw_options = [
+                'cost' => 12,
+            ];
+            $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
+            $statement = $pdo->prepare("UPDATE users SET pswd = ?, token = NULL WHERE token = ?");
+            $statement->execute(array($pswd, $token));
+            $content = parseHTML("../libs/templates/successPasswordReset.html", null, null, null, null);
+            sendMail($email, $user['name'], " =?utf-8?q?Sie_haben_Ihr_Design_Revision-Kennwort_erfolgreich_zur=C3=BCckgesetzt?=", $content);
 
-        logIn($email, $password, "../simulate/dashboard.php?success=pswd");
-    } else {
-        header("Location: loginNewAccount.html?err=pswd");
+            logIn($email, $password, "../simulate/dashboard.php?success=pswd");
+        } else {
+            header("Location: loginNewAccount.html?err=pswd");
+        }
+    } catch (PDOException $e) {
+        showError("Something went really wrong", 500);
     }
 }
 ?>
@@ -59,8 +63,10 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
                 visibility
             </i>
         </div>
-        <div id="progressBarBorder"style="border: 3px solid white;border-radius: 2px;margin-top: 10px;background: white; width: 50%">
-            <div id="progressBar" style="height:24px;width:1%;background-color:#ff352c;border-radius: 4px;color: white;text-align: center"></div>
+        <div id="progressBarBorder"
+             style="border: 3px solid white;border-radius: 2px;margin-top: 10px;background: white; width: 50%">
+            <div id="progressBar"
+                 style="height:24px;width:1%;background-color:#ff352c;border-radius: 4px;color: white;text-align: center"></div>
         </div>
         <span id="feedback"></span>
         <br><br>
@@ -118,8 +124,8 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
                 call.style.color = "#428c0d";
                 call.innerHTML = "<strong>Das Passwort ist sehr sicher!</strong>";
                 feedback.style.background = "#428c0d";
-                feedback.style.width= "100%";
-                feedback.innerHTML="100%";
+                feedback.style.width = "100%";
+                feedback.innerHTML = "100%";
                 status = false;
 
             } else if (val.match(/\d+/) && val.match(/[a-zäöü]+/) || val.match(/\W/) && val.match(/[a-zäöü]+/)) {
@@ -127,35 +133,35 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
                 call.innerHTML = "<strong>Das Passwort fast sicher!</strong>";
                 feedback.style.background = "#ff9410";
                 feedback.style.width = "75%";
-                feedback.innerHTML="75%";
+                feedback.innerHTML = "75%";
                 status = true;
             } else {
                 call.style.color = "#ff9410";
                 call.innerHTML = "<strong>Das Passwort ist unsicher!</strong>";
                 feedback.style.background = "#ff9410";
                 feedback.style.width = "50%";
-                feedback.innerHTML="50%";
+                feedback.innerHTML = "50%";
             }
         } else {
             call.style.color = "#ff352c";
             call.innerHTML = "<strong>Das Passwort ist zu kurz!</strong>";
             feedback.style.background = "#ff352c";
             feedback.style.width = "25%";
-            feedback.innerHTML="25%";
+            feedback.innerHTML = "25%";
             status = true;
         }
         if (val.length === 0) {
             call.innerHTML = "";
             feedback.style.background = "#ff352c";
             feedback.style.width = "0%";
-            feedback.innerHTML="0%";
+            feedback.innerHTML = "0%";
             status = true;
 
         }
         let pass1 = document.querySelector("#password").value;
         let pass2 = document.querySelector("#againPassword").value;
         let samePass1 = document.getElementById("samePass");
-        if(pass2.length>0) {
+        if (pass2.length > 0) {
             if (!(pass1 === pass2)) {
                 samePass1.style.color = "red";
                 samePass1.innerHTML = "<strong>Passwörter verschieden</strong>";

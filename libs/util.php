@@ -1,13 +1,17 @@
 <?php
 function generateHash($pdo)
 {
-    do {
-        $hash = bin2hex(openssl_random_pseudo_bytes(64));
-        $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
-        $result = $statement->execute(array('token' => $hash));
-        $token = $statement->fetch();
-    } while ($token !== false);
-    return $hash;
+    try {
+        do {
+            $hash = bin2hex(openssl_random_pseudo_bytes(64));
+            $statement = $pdo->prepare("SELECT * FROM users WHERE token = :token");
+            $result = $statement->execute(array('token' => $hash));
+            $token = $statement->fetch();
+        } while ($token !== false);
+        return $hash;
+    } catch (PDOException $e) {
+        showError("Something went really wrong", 500);
+    }
 }
 
 function parseHTML($file_path, $name, $link, $project_name, $project_version)

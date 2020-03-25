@@ -17,9 +17,12 @@ if (!empty($_POST['code']) && !empty($_GET['id'])) {
 
                 if ($project['status'] !== DONE) {
                     if ($code === $securitycode) {
-
-                        $statement = $pdo->prepare("UPDATE " . $pid . " SET `securitycode` = ?  ORDER BY version DESC LIMIT 1");
-                        $statement->execute(array(null));
+                        try {
+                            $statement = $pdo->prepare("UPDATE " . $pid . " SET `securitycode` = ?  ORDER BY version DESC LIMIT 1");
+                            $statement->execute(array(null));
+                        } catch (PDOException $e) {
+                            showError("Something went really wrong", 500);
+                        }
 
                         //Sendmail to all members
                         $uname = getUser('name');

@@ -20,39 +20,43 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
     //Password needs a length of 8+, normal letters,numbers, one Caps and one special char and password != email
     if ($password == $password2 && filter_var($email, FILTER_VALIDATE_EMAIL) && preg_match("#.*^(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#", $password) && (strcasecmp($password, $email) != 0)) {
         $pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
-        $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
-        $result = $statement->execute(array('email' => $email));
-        $user = $statement->fetch();
+        try {
+            $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+            $result = $statement->execute(array('email' => $email));
+            $user = $statement->fetch();
 
-        if (empty($user) || $user['status'] == "INVITE") {
-            if (empty($user)) {
-                $pw_options = [
-                    'cost' => 12,
-                ];
-                $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
-                $hash = generateHash($pdo);
-                $statement = $pdo->prepare("INSERT INTO users (name, company, email, pswd,status,token) VALUES (?,?,?,?,?,?)");
-                $result = $statement->execute(array($name, $company, $email, $pswd, "REGISTERED", $hash));
-                $user = $statement->fetch();
+            if (empty($user) || $user['status'] == "INVITE") {
+                if (empty($user)) {
+                    $pw_options = [
+                        'cost' => 12,
+                    ];
+                    $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
+                    $hash = generateHash($pdo);
+                    $statement = $pdo->prepare("INSERT INTO users (name, company, email, pswd,status,token) VALUES (?,?,?,?,?,?)");
+                    $result = $statement->execute(array($name, $company, $email, $pswd, "REGISTERED", $hash));
+                    $user = $statement->fetch();
+                } else {
+                    $pw_options = [
+                        'cost' => 12,
+                    ];
+                    $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
+                    $hash = generateHash($pdo);
+                    $statement = $pdo->prepare("UPDATE users SET name = ?, company = ?, pswd= ?, status = ?, token = ? WHERE email = ?");
+                    $result = $statement->execute(array($name, $company, $pswd, "REGISTERED", $hash, $email));
+                    $user = $statement->fetch();
+
+                }
+                $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/verify.php?token=" . $hash;
+                $content = parseHTML("../libs/templates/emailverify.html", $name, $link, null, null);
+                sendMail($email, $name, "Willkommen bei Design Revison", $content);
+
+                logIn($email, $password, "../simulate/dashboard.php?success=signup");
+
             } else {
-                $pw_options = [
-                    'cost' => 12,
-                ];
-                $pswd = password_hash($password, PASSWORD_BCRYPT, $pw_options);
-                $hash = generateHash($pdo);
-                $statement = $pdo->prepare("UPDATE users SET name = ?, company = ?, pswd= ?, status = ?, token = ? WHERE email = ?");
-                $result = $statement->execute(array($name, $company, $pswd, "REGISTERED", $hash, $email));
-                $user = $statement->fetch();
-
+                header("Location: loginNewAccount.html?err=pswd");
             }
-            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/verify.php?token=" . $hash;
-            $content = parseHTML("../libs/templates/emailverify.html", $name, $link, null, null);
-            sendMail($email, $name, "Willkommen bei Design Revison", $content);
-
-            logIn($email, $password, "../simulate/dashboard.php?success=signup");
-
-        } else {
-            header("Location: loginNewAccount.html?err=pswd");
+        } catch (PDOException $e) {
+            showError("Something went really wrong", 500);
         }
     } else {
         header("Location: loginNewAccount.html?err=pswd");
@@ -96,14 +100,16 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
                 visibility
             </i>
         </div>
-        <div id="progressBarBorder"style="border: 3px solid white;border-radius: 2px;margin-top: 10px;background: white; width: 50%">
-            <div id="progressBar" style="height:24px;width:1%;background-color:#ff352c;border-radius: 4px;color: white;text-align: center"></div>
+        <div id="progressBarBorder"
+             style="border: 3px solid white;border-radius: 2px;margin-top: 10px;background: white; width: 50%">
+            <div id="progressBar"
+                 style="height:24px;width:1%;background-color:#ff352c;border-radius: 4px;color: white;text-align: center"></div>
         </div>
         <span id="feedback"></span>
         <br><br>
         <div class="input-container">
             <input id="againPassword" name="againPassword" onkeyup="check_up3()" placeholder="Passwort wiederholt"
-                   required  type="password">
+                   required type="password">
             <i onclick="passwordToggle2()" class="material-icons">
                 visibility
             </i>
@@ -157,8 +163,8 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
                 call.style.color = "#428c0d";
                 call.innerHTML = "<strong>Das Passwort ist sehr sicher!</strong>";
                 feedback.style.background = "#428c0d";
-                feedback.style.width= "100%";
-                feedback.innerHTML="100%";
+                feedback.style.width = "100%";
+                feedback.innerHTML = "100%";
                 status = false;
 
             } else if (val.match(/\d+/) && val.match(/[a-zäöü]+/) || val.match(/\W/) && val.match(/[a-zäöü]+/)) {
@@ -166,35 +172,35 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
                 call.innerHTML = "<strong>Das Passwort fast sicher!</strong>";
                 feedback.style.background = "#ff9410";
                 feedback.style.width = "75%";
-                feedback.innerHTML="75%";
+                feedback.innerHTML = "75%";
                 status = true;
             } else {
                 call.style.color = "#ff9410";
                 call.innerHTML = "<strong>Das Passwort ist unsicher!</strong>";
                 feedback.style.background = "#ff9410";
                 feedback.style.width = "50%";
-                feedback.innerHTML="50%";
+                feedback.innerHTML = "50%";
             }
         } else {
             call.style.color = "#ff352c";
             call.innerHTML = "<strong>Das Passwort ist zu kurz!</strong>";
             feedback.style.background = "#ff352c";
             feedback.style.width = "25%";
-            feedback.innerHTML="25%";
+            feedback.innerHTML = "25%";
             status = true;
         }
         if (val.length === 0) {
             call.innerHTML = "";
             feedback.style.background = "#ff352c";
             feedback.style.width = "0%";
-            feedback.innerHTML="0%";
+            feedback.innerHTML = "0%";
             status = true;
 
         }
         let pass1 = document.querySelector("#password").value;
         let pass2 = document.querySelector("#againPassword").value;
         let samePass1 = document.getElementById("samePass");
-        if(pass2.length>0) {
+        if (pass2.length > 0) {
             if (!(pass1 === pass2)) {
                 samePass1.style.color = "red";
                 samePass1.innerHTML = "<strong>Passwörter verschieden</strong>";
@@ -222,41 +228,44 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
         let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
         return (value !== 'null') ? value : false;
     }
-    window.onload=function mailOrPass() {
+
+    window.onload = function mailOrPass() {
         let mail = document.getElementById("email");
         let tmp = getURLParameter("email");
-        mail.value=tmp;
+        mail.value = tmp;
         let err = getURLParameter('err');
         if (err === "pswd") {
             let feedback = document.getElementById("feedback");
             feedback.style.color = "red";
             feedback.innerHTML = "<strong>Ung&uuml;ltiges Passwort</strong>"
         }
-        let success=getURLParameter('success');
-        if (success === "pswd"){
-            document.location="../login/verifizieren.html"
+        let success = getURLParameter('success');
+        if (success === "pswd") {
+            document.location = "../login/verifizieren.html"
         }
     };
+
     function passwordToggle() {
         const visibilityToggle = document.querySelector('.material-icons');
         let password = document.getElementById('password');
         if (password.type === "password") {
             password.type = "text";
-            visibilityToggle.innerHTML="visibility_off";
+            visibilityToggle.innerHTML = "visibility_off";
         } else {
             password.type = "password";
-            visibilityToggle.innerHTML="visibility";
+            visibilityToggle.innerHTML = "visibility";
         }
     }
+
     function passwordToggle2() {
         const visibilityToggle = document.querySelectorAll('.material-icons');
         let password = document.getElementById('againPassword');
         if (password.type === "password") {
             password.type = "text";
-            visibilityToggle[1].innerHTML="visibility_off";
+            visibilityToggle[1].innerHTML = "visibility_off";
         } else {
             password.type = "password";
-            visibilityToggle[1].innerHTML="visibility";
+            visibilityToggle[1].innerHTML = "visibility";
         }
     }
 

@@ -39,21 +39,24 @@ function addComment()
             if (!filterComment($data)) {
                 showError("No (valid) JSON Data", 400);
             }
+            try {
+                $statement = $pdo->prepare("SELECT data FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
+                $statement->execute();
+                $tmpdata = $statement->fetch()[0];
 
-            $statement = $pdo->prepare("SELECT data FROM " . $pid . " ORDER BY version DESC LIMIT 1 ");
-            $statement->execute();
-            $tmpdata = $statement->fetch()[0];
-
-            //Check if entry of db is empty/null
-            $newdata = array(json_decode($data, true));
-            if (!is_null($tmpdata)) {
-                $olddata = json_decode($tmpdata, true);
-                $result = array_merge($olddata, $newdata);
-            } else {
-                $result = $newdata;
+                //Check if entry of db is empty/null
+                $newdata = array(json_decode($data, true));
+                if (!is_null($tmpdata)) {
+                    $olddata = json_decode($tmpdata, true);
+                    $result = array_merge($olddata, $newdata);
+                } else {
+                    $result = $newdata;
+                }
+                $statement = $pdo->prepare("UPDATE " . $pid . " SET data = ?  ORDER BY version DESC LIMIT 1 ");
+                $statement->execute(array(json_encode($result)));
+            } catch (PDOException $e) {
+                showError("Something went really wrong", 500);
             }
-            $statement = $pdo->prepare("UPDATE " . $pid . " SET data = ?  ORDER BY version DESC LIMIT 1 ");
-            $statement->execute(array(json_encode($result)));
             header("HTTP/1.1 204 No Content");
 
         } else {
@@ -77,68 +80,71 @@ function addmember()
 
             if (isValidProject($pid, $pdo) && isJson($member)) {
                 if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
+                    try {
 
-                    $statement = $pdo->prepare("SELECT email FROM `users` ");
-                    $statement->execute();
-                    $tmpmails = $statement->fetchAll();
-                    //Create a one dimensional array with all emails from the db
-                    $useremails = array();
-                    foreach ($tmpmails as $tmp) {
-                        array_push($useremails, $tmp['email']);
-                    }
-
-                    //convert json post to php array format
-                    $member = json_decode($member, true);
-
-                    //Remove double entries from the array//TODO Really needed??
-                    $member = array_unique($member, SORT_REGULAR);
-
-                    $role = $member['role'];
-
-                    $projectname = getLatestProjectData($pid, $pdo)['p_name'];
-
-
-                    //Converts everything to lowercase
-                    $member = array_map('nestedLowercase', $member);
-
-                    $name = getUser('name');
-
-                    //check if user has already an account
-                    if (in_array($member['email'], $useremails)) {
-                        $id = emailToId($member['email']);
-
-                        if (isMember($pid, $id)) {
-                            showError("Is already a member", 400);
+                        $statement = $pdo->prepare("SELECT email FROM `users` ");
+                        $statement->execute();
+                        $tmpmails = $statement->fetchAll();
+                        //Create a one dimensional array with all emails from the db
+                        $useremails = array();
+                        foreach ($tmpmails as $tmp) {
+                            array_push($useremails, $tmp['email']);
                         }
 
-                        updateUserProjects($pdo, $id, $pid);
+                        //convert json post to php array format
+                        $member = json_decode($member, true);
 
-                        //Save the new user as member to the project
-                        updateProjectMember($pid, $id, $role, $pdo);
+                        //Remove double entries from the array//TODO Really needed??
+                        $member = array_unique($member, SORT_REGULAR);
 
-                        $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
-                        $statement->execute(array($id));
-                        $results = $statement->fetch();
-                        $status = $results['status'];
-                        //Inform user per email about the new project
-                        if ($status == INVITE) {
-                            informNewbie($member['email'], $projectname, $name);
+                        $role = $member['role'];
+
+                        $projectname = getLatestProjectData($pid, $pdo)['p_name'];
+
+
+                        //Converts everything to lowercase
+                        $member = array_map('nestedLowercase', $member);
+
+                        $name = getUser('name');
+
+                        //check if user has already an account
+                        if (in_array($member['email'], $useremails)) {
+                            $id = emailToId($member['email']);
+
+                            if (isMember($pid, $id)) {
+                                showError("Is already a member", 400);
+                            }
+
+                            updateUserProjects($pdo, $id, $pid);
+
+                            //Save the new user as member to the project
+                            updateProjectMember($pid, $id, $role, $pdo);
+
+                            $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
+                            $statement->execute(array($id));
+                            $results = $statement->fetch();
+                            $status = $results['status'];
+                            //Inform user per email about the new project
+                            if ($status == INVITE) {
+                                informNewbie($member['email'], $projectname, $name);
+                            } else {
+                                $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
+                                sendMail($member['email'], IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO Needs testing
+                            }
+
                         } else {
-                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
-                            sendMail($member['email'], IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO Needs testing
+                            $pid = explode("project_", $pid)[1];
+                            $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
+                            $statement->execute(array($member['email'], json_encode(array($pid))));
+
+                            //Save the new user as member to the project
+                            updateProjectMember($pid, (int)$pdo->lastInsertId(), $role, $pdo);
+
+                            informNewbie($member['email'], $projectname, $name);
                         }
-
-                    } else {
-                        $pid = explode("project_", $pid)[1];
-                        $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
-                        $statement->execute(array($member['email'], json_encode(array($pid))));
-
-                        //Save the new user as member to the project
-                        updateProjectMember($pid, (int)$pdo->lastInsertId(), $role, $pdo);
-
-                        informNewbie($member['email'], $projectname, $name);
+                    } catch (PDOException $e) {
+                        showError("Something went really wrong", 500);
                     }
-
                     handleOutput("Successful added member ");
 
                 } else {
@@ -166,7 +172,6 @@ function removemember()
             $pdo = $GLOBALS['pdo'];
             if (isValidProject($pid, $pdo)) {
                 if (isAdmin(getLatestProjectData($pid, $pdo), getUser('pk_id'))) {
-
                     if (isMember($pid, $member)) {
                         //Delete userid from project memberslist and save to db
                         $members = json_decode(getLatestProjectData($pid, $pdo)['members'], true);
@@ -179,18 +184,22 @@ function removemember()
                         //Convert Object back to array und reindex
                         $members = (array)$members;
                         $members = array_values($members);
-                        $statement = $pdo->prepare("UPDATE " . $pid . " SET members = ?  ORDER BY version DESC LIMIT 1 ");
-                        $statement->execute(array(json_encode($members)));
+                        try {
+                            $statement = $pdo->prepare("UPDATE " . $pid . " SET members = ?  ORDER BY version DESC LIMIT 1 ");
+                            $statement->execute(array(json_encode($members)));
 
-                        //Delete project-id from user
-                        $statement = $pdo->prepare("SELECT projects from users WHERE pk_id = ?");
-                        $statement->execute(array($member));
-                        $userprojects = json_decode($statement->fetch()['projects']);
-                        $pid = explode("project_", $pid)[1];
-                        unset($userprojects[array_search($pid, $userprojects, true)]);
-                        $userprojects = array_values($userprojects);
-                        $statement = $pdo->prepare("UPDATE users SET projects = ? WHERE pk_id = ?");
-                        $statement->execute(array(json_encode($userprojects), $member));
+                            //Delete project-id from user
+                            $statement = $pdo->prepare("SELECT projects from users WHERE pk_id = ?");
+                            $statement->execute(array($member));
+                            $userprojects = json_decode($statement->fetch()['projects']);
+                            $pid = explode("project_", $pid)[1];
+                            unset($userprojects[array_search($pid, $userprojects, true)]);
+                            $userprojects = array_values($userprojects);
+                            $statement = $pdo->prepare("UPDATE users SET projects = ? WHERE pk_id = ?");
+                            $statement->execute(array(json_encode($userprojects), $member));
+                        } catch (PDOException $e) {
+                            showError("Something went really wrong", 500);
+                        }
 
                         header("HTTP/1.1 204 No Content");
                     } else {
@@ -261,15 +270,18 @@ function updateStatus()
                             for ($i = 0; $i < 6; $i++) {
                                 $securitycode .= mt_rand(0, 9);
                             }
-                            $statement = $pdo->prepare("UPDATE " . $pid . " SET `securitycode` = ?  ORDER BY version DESC LIMIT 1");
-                            $statement->execute(array($securitycode));
+                            try {
+                                $statement = $pdo->prepare("UPDATE " . $pid . " SET `securitycode` = ?  ORDER BY version DESC LIMIT 1");
+                                $statement->execute(array($securitycode));
+                            } catch (PDOException $e) {
+                                showError("Something went really wrong", 500);
+                            }
                             $projectname = getLatestProjectData($pid, $pdo)[0];
                             sendMail(getUser('email'), getUser('name'), "Druckfreigabebestätigung von \"" . $projectname . "\"", parseHTML("../../libs/templates/printverify.html", null, $link, $projectname, $securitycode));
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("something went wrong", 400);
+                            showError("Something went wrong", 400);
                         }
-
 
                     } else {
                         showError("Unknown status. See the docs for help", 400);
@@ -300,41 +312,46 @@ function solveComment()
                 if (isMember($pid, getUser('pk_id'))) {
 
                     $versions = getLatestProjectData($pid, $pdo)['version'];
-                    //Loop through every row
-                    for ($i = 1; $i <= $versions; $i++) {
-                        //Get whole array from that row
-                        $statement = $pdo->prepare("SELECT data from " . $pid . " WHERE version = ? ");
-                        $statement->execute(array($i));
-                        $rawdata = json_decode($statement->fetch()['data'], true);
+                    try {
+                        //Loop through every row
+                        for ($i = 1; $i <= $versions; $i++) {
 
-                        $j = 0;
-                        //Loop through every array from that row
-                        foreach ($rawdata as $tmp) {
-                            //Check if id matches and change isImplemented to true
-                            if ($tmp['cid'] === $cid) {
-                                //Check if comment isnt already solved
-                                if (!$tmp['isImplemented']) {
+                            //Get whole array from that row
+                            $statement = $pdo->prepare("SELECT data from " . $pid . " WHERE version = ? ");
+                            $statement->execute(array($i));
+                            $rawdata = json_decode($statement->fetch()['data'], true);
 
-                                    $tmp['isImplemented'] = true;
+                            $j = 0;
+                            //Loop through every array from that row
+                            foreach ($rawdata as $tmp) {
+                                //Check if id matches and change isImplemented to true
+                                if ($tmp['cid'] === $cid) {
+                                    //Check if comment isnt already solved
+                                    if (!$tmp['isImplemented']) {
 
-                                    //Save edited array back to whole row array and save it back to the database
-                                    $rawdata[$j] = $tmp;
-                                    $statement = $pdo->prepare("UPDATE $pid SET data = ? WHERE version = ?");
-                                    $statement->execute(array(json_encode($rawdata), $i));
+                                        $tmp['isImplemented'] = true;
 
-                                    //Update lastedit timestamp
-                                    $statement = $pdo->prepare("UPDATE $pid SET lastedit = CURRENT_TIMESTAMP ORDER BY version DESC LIMIT 1");
-                                    $statement->execute();
+                                        //Save edited array back to whole row array and save it back to the database
+                                        $rawdata[$j] = $tmp;
+                                        $statement = $pdo->prepare("UPDATE $pid SET data = ? WHERE version = ?");
+                                        $statement->execute(array(json_encode($rawdata), $i));
 
-                                    header("HTTP/1.1 204 No Content");
-                                    die();
-                                } else {
-                                    showError("Already solved", 400);
+                                        //Update lastedit timestamp
+                                        $statement = $pdo->prepare("UPDATE $pid SET lastedit = CURRENT_TIMESTAMP ORDER BY version DESC LIMIT 1");
+                                        $statement->execute();
+
+                                        header("HTTP/1.1 204 No Content");
+                                        die();
+                                    } else {
+                                        showError("Already solved", 400);
+                                    }
                                 }
+                                $j++;
                             }
-                            $j++;
-                        }
 
+                        }
+                    } catch (PDOException $e) {
+                        showError("Something went really wrong", 500);
                     }
                     //If we reach this line the comment was not found
                     showError("Not found", 404);

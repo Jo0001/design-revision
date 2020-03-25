@@ -43,86 +43,86 @@ function createProject()
                     //Save the default data
                     date_default_timezone_set('Europe/Berlin');
                     $date = date("Y-m-d H:i:s");
-
-                    $statement = $pdo->prepare("SELECT email FROM `users` ");
-                    $statement->execute();
-                    $tmpmails = $statement->fetchAll();
-                    //Create a one dimensional array with all emails from the db
-                    $useremails = array();
-                    foreach ($tmpmails as $tmp) {
-                        //Only add valid e-mails to the list
-                        if (filter_var($tmp['email'], FILTER_VALIDATE_EMAIL)) {
-                            array_push($useremails, $tmp['email']);
-                        }
-                    }
-                    //convert json post to php array format
-                    $members = json_decode($members, true);
-
-                    //Remove double entries from the array
-                    $members = array_unique($members, SORT_REGULAR);
-
-                    $memberids = array();
-
-                    $pid = explode("project_", $t_name)[1];
-
-                    //add current user (as admin)
-                    $userid = getUser('pk_id');
-                    array_push($memberids, array("id" => (int)$userid, "role" => 1));
-                    updateUserProjects($pdo, $userid, $pid);
-
-                    //Converts everything to lowercase
-                    $members = array_map('nestedLowercase', $members);
-
-                    $name = getUser('name');
-
-                    foreach ($useremails as $tmp) {
-                        //check if user has an account
-                        if (in_array($tmp, array_column($members, 'email'))) {
-                            $id = emailToId($tmp);
-                            //get array with all roles and emails as index and select the one equal to the current email and save it
-                            $role = array_column($members, 'role', 'email')[$tmp];
-                            array_push($memberids, array("id" => (int)$id, "role" => $role));
-
-                            updateUserProjects($pdo, $id, $pid);
-
-                            $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
-                            $statement->execute(array($id));
-                            $results = $statement->fetch();
-
-                            $status = $results['status'];
-                            //Inform user per email about the new project
-                            if ($status == INVITE) {
-                                informNewbie($tmp, $projectname, $name);
-                            } else {
-                                $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
-                                sendMail($tmp, IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO NEEDS TESTING
+                    try {
+                        $statement = $pdo->prepare("SELECT email FROM `users` ");
+                        $statement->execute();
+                        $tmpmails = $statement->fetchAll();
+                        //Create a one dimensional array with all emails from the db
+                        $useremails = array();
+                        foreach ($tmpmails as $tmp) {
+                            //Only add valid e-mails to the list
+                            if (filter_var($tmp['email'], FILTER_VALIDATE_EMAIL)) {
+                                array_push($useremails, $tmp['email']);
                             }
                         }
-                    }
-                    //save all email addresses of the members as one dimensional array
-                    $emails = array();
-                    foreach ($members as $tmp) {
-                        array_push($emails, $tmp['email']);
-                    }
+                        //convert json post to php array format
+                        $members = json_decode($members, true);
 
-                    $result = array_diff($emails, $useremails);
-                    if (!empty($result)) {
-                        foreach ($result as $tmp) {
-                            $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
-                            $statement->execute(array($tmp, json_encode(array($pid))));
-                            $role = array_column($members, 'role', 'email')[$tmp];
-                            array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
+                        //Remove double entries from the array
+                        $members = array_unique($members, SORT_REGULAR);
 
-                            informNewbie($tmp, $projectname, $name);
+                        $memberids = array();
+
+                        $pid = explode("project_", $t_name)[1];
+
+                        //add current user (as admin)
+                        $userid = getUser('pk_id');
+                        array_push($memberids, array("id" => (int)$userid, "role" => 1));
+                        updateUserProjects($pdo, $userid, $pid);
+
+                        //Converts everything to lowercase
+                        $members = array_map('nestedLowercase', $members);
+
+                        $name = getUser('name');
+
+                        foreach ($useremails as $tmp) {
+                            //check if user has an account
+                            if (in_array($tmp, array_column($members, 'email'))) {
+                                $id = emailToId($tmp);
+                                //get array with all roles and emails as index and select the one equal to the current email and save it
+                                $role = array_column($members, 'role', 'email')[$tmp];
+                                array_push($memberids, array("id" => (int)$id, "role" => $role));
+
+                                updateUserProjects($pdo, $id, $pid);
+
+                                $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
+                                $statement->execute(array($id));
+                                $results = $statement->fetch();
+
+                                $status = $results['status'];
+                                //Inform user per email about the new project
+                                if ($status == INVITE) {
+                                    informNewbie($tmp, $projectname, $name);
+                                } else {
+                                    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
+                                    sendMail($tmp, IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));//TODO NEEDS TESTING
+                                }
+                            }
                         }
+                        //save all email addresses of the members as one dimensional array
+                        $emails = array();
+                        foreach ($members as $tmp) {
+                            array_push($emails, $tmp['email']);
+                        }
+
+                        $result = array_diff($emails, $useremails);
+                        if (!empty($result)) {
+                            foreach ($result as $tmp) {
+                                $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
+                                $statement->execute(array($tmp, json_encode(array($pid))));
+                                $role = array_column($members, 'role', 'email')[$tmp];
+                                array_push($memberids, array("id" => (int)$pdo->lastInsertId(), "role" => $role));
+
+                                informNewbie($tmp, $projectname, $name);
+                            }
+                        }
+
+                        $statement = $pdo->prepare("INSERT INTO " . $t_name . " (p_name, link, members,status,lastedit) VALUES (?, ?, ?,?,?)");
+                        $statement->execute(array($projectname, $filename, json_encode($memberids), 'WAITING_FOR_RESPONSE', $date));
+                    } catch (PDOException $e) {
+                        showError("Something went really wrong", 500);
                     }
-
-                    $statement = $pdo->prepare("INSERT INTO " . $t_name . " (p_name, link, members,status,lastedit) VALUES (?, ?, ?,?,?)");
-                    $statement->execute(array($projectname, $filename, json_encode($memberids), 'WAITING_FOR_RESPONSE', $date));
-
                     header("HTTP/1.1 201 Created ");
-                    //Just for development
-                    handleOutput("Successful saved the new project");
                 } else {
                     showError("Something went seriously wrong", 500);
                 }
@@ -158,8 +158,12 @@ function updateFile()
                         if (!empty($_FILES["file"])) {
                             if (filter_var($_FILES["file"]["type"], FILTER_SANITIZE_STRING) === "application/pdf" && !file_exists($target_file) && (int)filter_var($_FILES["file"]["size"], FILTER_SANITIZE_NUMBER_INT) < 500000001) {
                                 if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
-                                    $statement = $pdo->prepare("INSERT INTO $pid (p_name, link, members, status) SELECT p_name,?, members, ? FROM $pid ORDER BY version DESC LIMIT 1");
-                                    $statement->execute(array($filename, WAITING_FOR_RESPONSE));
+                                    try {
+                                        $statement = $pdo->prepare("INSERT INTO $pid (p_name, link, members, status) SELECT p_name,?, members, ? FROM $pid ORDER BY version DESC LIMIT 1");
+                                        $statement->execute(array($filename, WAITING_FOR_RESPONSE));
+                                    } catch (PDOException $e) {
+                                        showError("Something went really wrong", 500);
+                                    }
                                     //Inform clients
                                     $projectname = getLatestProjectData($pid, $pdo)[0];
                                     $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . explode("project_", $pid)[1];
