@@ -8,6 +8,25 @@ function isJson($string)
 function filterMembers($members)
 {
     if (isJson($members)) {
+        $members = json_decode($members, true);
+        foreach ($members as $member) {
+            if (!count($member) == 2 || !array_key_exists("email", $member) || !array_key_exists("role", $member) || !filter_var($member['email'], FILTER_VALIDATE_EMAIL) || strlen($member['role']) !== 1) {
+                return false;
+            }
+        }
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function filterMember($member)
+{
+    if (isJson($member)) {
+        $member = json_decode($member, true);
+        if (!count($member) == 2 || !array_key_exists("email", $member) || !array_key_exists("role", $member) || !filter_var($member['email'], FILTER_VALIDATE_EMAIL) || strlen($member['role']) !== 1) {
+            return false;
+        }
         return true;
     } else {
         return false;

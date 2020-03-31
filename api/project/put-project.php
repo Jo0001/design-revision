@@ -70,6 +70,10 @@ function addmember()
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
         $member = filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
 
+        if (!filterMember($member)) {
+            showError("No (valid) JSON Data", 400);
+        }
+
         $pid = "project_" . $pid;
         $pdo = $GLOBALS['pdo'];
 
