@@ -2,6 +2,7 @@
 require "../../libs/auth.php";
 require "../../libs/api-util.php";
 require "../../libs/sendEmail.php";
+require "../../libs/filter.php";
 
 $page = explode("?", basename(filter_var($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL))[0];
 
@@ -19,6 +20,11 @@ function createProject()
         if (isLoggedIn() && getUser('status') == "VERIFIED") {
             $projectname = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
             $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+
+            if (!filterMembers($members)) {
+                showError("No (valid) JSON Data", 400);
+            }
+
             $target_dir = "../../user-content/";
             do {
                 $hash = bin2hex(openssl_random_pseudo_bytes(13));
