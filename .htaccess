@@ -5,5 +5,30 @@ Options -Indexes
 AddDefaultCharset UTF-8
 DefaultLanguage de
 
+#Enable in production mode
+#RewriteEngine On
+#RewriteCond %{HTTPS} off
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+<FilesMatch "\.(ico|css|js)$">
+    Header set Cache-Control "public, max-age=160704000"
+</FilesMatch>
+
+<IfModule mod_headers.c>
+	Header set X-Frame-Options "SAMEORIGIN"
+	#Enable in production mode
+	#Header set Strict-Transport-Security: max-age=31536000
+	Header set Referrer-Policy: strict-origin-when-cross-origin
+	Header set X-XSS-Protection "1; mode=block"
+	Header set X-Content-Type-Options "nosniff"
+
+	Header unset X-Powered-By
+</IfModule>
+
+AddDefaultCharset UTF-8
+DefaultLanguage de
+
+ServerSignature Off
+
 #TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.41"
+Header set X-Build-Version "1.42"
