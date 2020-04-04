@@ -1,8 +1,9 @@
 <?php
 require "util.php";
+require_once "config.php";
 session_start();
 
-$pdo = new PDO('mysql:host=localhost;dbname=design_revision', 'dsnRev', '4_DiDsrev2019');
+$pdo = new PDO(dbDsn, dbUsername, dbPassword);
 
 function logIn($email, $password, $location)
 {
