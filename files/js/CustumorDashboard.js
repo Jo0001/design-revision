@@ -32,6 +32,8 @@ let gotUserData = false;
 let updateProjectId;
 let arrayBefore = [];
 let counterForSendedMemberXhr = 0;
+//scroll
+let yScrollPosition;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -243,7 +245,6 @@ function generate() {
                         if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
                             statusImg.setAttribute("src", "https://cdn-design-revision.netlify.com/files/img/XBereit.png");
                             boolStatus1 = true;
-
                         } else {
                             statusImg.setAttribute("src", "https://cdn-design-revision.netlify.com/files/img/XWarten.png");
                             boolStatus1 = false;
@@ -387,7 +388,7 @@ function generate() {
             let id1 = clientname.innerHTML + projektname.innerHTML + customerdiv.getAttribute('data-id');
             customerdiv.setAttribute("id", id1);
             customerdiv.style.background = "white";
-            clientDivClick(customerdiv, clientname.innerHTML, projektname.innerHTML, id1, boolStatus1, arrayMember, arrayRole);
+            clientDivClick(customerdiv, clientname.innerHTML, projektname.innerHTML, id1, boolStatus1, arrayMember, arrayRole, userId);
             let btnAddMember = document.getElementById("btnAddMember");
             let projektErsellen = document.getElementById("projektErstellen");
             let projektName = document.getElementById("projectname");
@@ -411,7 +412,6 @@ function generate() {
                 if (arrayMember[i] == userId) {
                     if (arrayRole[i] == 0) {
                         customerdiv.click();
-
                     } else {
                         //abfrage ob das Projekt fertig ist, dann kann nichts mher geändert werden
                         if (boolStatus1) {
@@ -535,7 +535,7 @@ function closeNo() {
 }
 
 //Dialogfenster öffnen
-function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, role) {
+function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, role, useId) {
     let loeschen = document.getElementById("loeschen");
     let content = document.querySelectorAll('[data-memberId');
     let arrayLength = content.length;
@@ -575,10 +575,13 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
         let customerdiv1 = document.getElementById(customerid);
         //Abfrage ob der Kunde gelöscht werden kann
         if (boolStatus) {
-            loeschen.style.display = "block";
-            loeschen.onclick = function () {
-                customerDelate(members, content, arrayLength);
-            };
+            //hier wird abgefragt ob der User kein Admin (Arbeiter der Argentur) ist, dann kann das Projekt auch nicht gelöscht werden
+            if (!(role[members.indexOf(JSON.stringify(userId))] === "0")) {
+                loeschen.style.display = "block";
+                loeschen.onclick = function () {
+                    customerDelate(members, content, arrayLength);
+                };
+            }
             customerdiv1.style.border = "4px solid red";
         } else {
             customerdiv1.style.background = "#0cfad6";
@@ -894,6 +897,10 @@ function addMember() {
         }
         document.getElementById('searchform').style.display = "none";
         addButton.value = "Zu Projekt hinzufügen";
+
+        //springe zum Anfang der Seite
+        document.getElementById('projectsScrollContainer').scrollTo(0, 0);
+
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "none";
         }
@@ -1018,6 +1025,9 @@ function addMember() {
             content[i].style.display = "none";
 
         }
+        //springe zum Anfang der Seite
+        document.getElementById('projectsScrollContainer').scrollTo(0, 0);
+
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "block";
             projecst[i].style.border = "4px solid black";
@@ -1034,6 +1044,14 @@ function changeClientState(members, role, id) {
     let jasonmembers = [];
     let userIDs = [];
     if (select) {
+        //speichre aktuelle Position
+        yScrollPosition = document.getElementById('projectsScrollContainer').scrollTop;
+
+
+        //springe zum Anfang der Seite
+        document.getElementById('projectsScrollContainer').scrollTo(0, 0);
+        console.log("Posttion: "+yScrollPosition);
+
         for (let i = 0; i < projects.length; i++) {
             projects[i].style.display = "none";
         }
@@ -1052,6 +1070,7 @@ function changeClientState(members, role, id) {
 
         }
         userIDs = [];
+
 
         for (let i = 0; i < arrayLength; i++) {
             //sorgt dafür das jeder Member nur einmal in den Array kommt
@@ -1199,6 +1218,7 @@ function changeClientState(members, role, id) {
             select = false;
         }
     } else {
+
         console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
@@ -1214,6 +1234,8 @@ function changeClientState(members, role, id) {
         for (let i = 0; i < projects.length; i++) {
             projects[i].style.display = "block";
         }
+        //springe zur gespeicherten Position
+        document.getElementById('projectsScrollContainer').scrollTop = yScrollPosition;
     }
 
 
@@ -1851,4 +1873,4 @@ function destroy_session(state) {
     if (state === "notVerified") {
         window.location = window.location.origin + "/design-revision/login/?logout&verify=notVerified";
     }
-    }
+}
