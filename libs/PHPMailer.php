@@ -19,7 +19,7 @@
  */
 
 namespace PHPMailer\PHPMailer;
-
+require_once "Exception.php";
 /**
  * PHPMailer - PHP email creation and transport class.
  *
