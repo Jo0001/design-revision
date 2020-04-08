@@ -12,6 +12,7 @@ function sendMail($toAdr, $toName, $subject, $content)
     try {
         //debug-level
         $mail->SMTPDebug = 0;
+        $mail->XMailer = ' ';
         $mail->isSMTP();
         $mail->Host = emailHost;
         $mail->SMTPAuth = true;
