@@ -13,7 +13,7 @@ if ($page === "addmember") {
     addmember();
 } elseif ($page === "removemember") {
     removemember();
-} elseif ($page === "addcomment" || $page === "addcomments") {
+} elseif ($page === "addcomment") {
     addComment();
 } elseif ($page === "solvecomment") {
     solveComment();

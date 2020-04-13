@@ -2,16 +2,22 @@
 
 use PHPMailer\PHPMailer\PHPMailer;
 
-require_once ("config.php");
+require_once("config.php");
 require_once("PHPMailer.php");
 require_once("SMTP.php");
 
+/**
+ * @param $toAdr String
+ * @param $toName String
+ * @param $subject String
+ * @param $content String
+ * @return bool Success
+ */
 function sendMail($toAdr, $toName, $subject, $content)
 {
     $mail = new PHPMailer(true);
     try {
-        //debug-level
-        $mail->SMTPDebug = 0;
+        $mail->SMTPDebug = 0; //debug-level
         $mail->XMailer = ' ';
         $mail->isSMTP();
         $mail->Host = emailHost;
@@ -31,13 +37,10 @@ function sendMail($toAdr, $toName, $subject, $content)
         $mail->isHTML(true);
         $mail->Subject = $subject;
         $mail->Body = $content;
-        //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
         $mail->send();
-       // echo 'Message has been sent to '.$toAdr;
         return true;
     } catch (Exception $e) {
-        //echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         return false;
     }
 }

@@ -1,8 +1,8 @@
 <?php
-$pdo = $GLOBALS['pdo'];//TODO UNUSED??
-
-/*
- * Handle Output & Errors
+/**
+ * Shows the errors as an informative message
+ * @param $error String as custom Error Message to display
+ * @param $code int  HTTP Error Code
  */
 function showError($error, $code)
 {
@@ -32,12 +32,22 @@ function showError($error, $code)
     die;
 }
 
+/**
+ * Formats the output to JSON and set also the Header to JSON
+ * @param $o String | array to output as JSON encoded
+ */
 function handleOutput($o)
 {
     header("Content-type:application/json");
     echo json_encode($o);
 }
 
+/**
+ * Checks if the project exists
+ * @param $id String ID of the Project (without project_)
+ * @param $pdo PDO Object
+ * @return bool true if project exists
+ */
 function isValidProject($id, $pdo)
 {
     try {
@@ -59,7 +69,12 @@ function isValidProject($id, $pdo)
     }
 }
 
-//Make sure you validate the id before calling this method
+/**
+ * Note: Make sure you validate the id before calling this
+ * @param $id String ID of the Project (without project_)
+ * @param $pdo PDO Object
+ * @return mixed Last row of the project
+ */
 function getLatestProjectData($id, $pdo)
 {
     try {
@@ -71,8 +86,13 @@ function getLatestProjectData($id, $pdo)
     }
 }
 
-
-//$pid => project_id
+/**
+ * Updates the projects of a user
+ * @param $pid String Project-ID (with project_)
+ * @param $id int User-ID
+ * @param $role int Role (0 or 1)
+ * @param $pdo PDO Object
+ */
 function updateProjectMember($pid, $id, $role, $pdo)
 {
     try {
@@ -90,7 +110,11 @@ function updateProjectMember($pid, $id, $role, $pdo)
     }
 }
 
-//$id => Userid, $pid => project_id
+/**
+ * @param $pdo  PDO Object
+ * @param $id int User-ID
+ * @param $pid String Project-ID (with project_)
+ */
 function updateUserProjects($pdo, $id, $pid)
 {
     try {
@@ -112,7 +136,10 @@ function updateUserProjects($pdo, $id, $pid)
     }
 }
 
-//Returns the user data.
+/**
+ * @param $value String
+ * @return array
+ */
 function getUser($value)
 {
     if (isLoggedIn()) {
@@ -135,6 +162,12 @@ function getUser($value)
     showError("Login to get the requested data", 401);
 }
 
+/**
+ * Check if a user is a member of a project
+ * @param $pid String Project-ID
+ * @param $userid int User-ID
+ * @return bool true if user is a member of the project
+ */
 function isMember($pid, $userid)
 {
     $pdo = $GLOBALS['pdo'];
@@ -148,6 +181,12 @@ function isMember($pid, $userid)
     return false;//TODO NEEDS TESTING
 }
 
+/**
+ * Check if a user has the admin role in a project
+ * @param $lastrow
+ * @param $userid int User-ID
+ * @return bool true if the user is admin in the project
+ */
 function isAdmin($lastrow, $userid)
 {
     $members = json_decode($lastrow['members'], true);
@@ -161,7 +200,11 @@ function isAdmin($lastrow, $userid)
     }
 }
 
-//Converts a 2 dimensional array to lowercase
+/**
+ * Converts a 2 dimensional array to lowercase
+ * @param $value
+ * @return array|string
+ */
 function nestedLowercase($value)
 {
     if (is_array($value)) {
@@ -170,6 +213,11 @@ function nestedLowercase($value)
     return strtolower($value);
 }
 
+/**
+ * Converts an email to a user id
+ * @param $email String
+ * @return int User-ID
+ */
 function emailToId($email)
 {
     $pdo = $GLOBALS['pdo'];
@@ -183,6 +231,12 @@ function emailToId($email)
     }
 }
 
+/**
+ * Converts the id to an email
+ * @param $pdo
+ * @param $id int
+ * @return String User-Email
+ */
 function IdToEmail($pdo, $id)
 {
     try {
@@ -194,6 +248,12 @@ function IdToEmail($pdo, $id)
     }
 }
 
+/**
+ * Converts the id of a user to a name
+ * @param $pdo
+ * @param $id int
+ * @return String name
+ */
 function IdToName($pdo, $id)
 {
     try {
@@ -205,12 +265,24 @@ function IdToName($pdo, $id)
     }
 }
 
+/**
+ * Informs users without an account about a new project
+ * @param $email String
+ * @param $projectname String
+ * @param $name String
+ */
 function informNewbie($email, $projectname, $name)
 {
     $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/login/loginNewAccount.html?email=" . $email;
     sendMail($email, $email, "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenNew.html", $name, $link, $projectname, 1));
 }
 
+/**
+ * Change the Status of a project
+ * @param $pdo
+ * @param $pid String
+ * @param $status String
+ */
 function changeStatus($pdo, $pid, $status)
 {
     try {

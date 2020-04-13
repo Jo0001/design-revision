@@ -13,8 +13,7 @@
 
 <script>
     function send() {
-       // let data = "id=73401dae&member={\"role\":123,\"email\":\"jonkjolk@gmx.de\"}";
-       // let data = "id=73401dae&status=HELLO";
+        // let data = "id=73401dae&member={\"role\":123,\"email\":\"jonkjolk@gmx.de\"}";
         let data = document.getElementById("raw").value;
         document.getElementById("output").innerHTML = "";
         let code = document.getElementById("code");
@@ -34,12 +33,9 @@
                 }
             }
         });
-        //xhr.open("PUT", window.origin+"/design-revision/api/project/solvecomment");
-        xhr.open("PUT", window.origin+"/design-revision/api/project/addcomments");
+        xhr.open("PUT", window.origin + "/design-revision/api/project/updatestatus");
         xhr.send(data);
     }
-
-
 </script>
 </body>
 </html>

@@ -5,7 +5,6 @@ if (isset($_GET['logout'])) {
     die;
 }
 if (isLoggedIn()) {
-    //header("Location: ../app/CustumorDashboard.html");
     header("Location: ../simulate/dashboard.php");
     die;
 }
@@ -24,7 +23,7 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <meta charset="UTF-8">

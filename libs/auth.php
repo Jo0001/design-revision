@@ -3,7 +3,14 @@ require "util.php";
 require_once "config.php";
 session_start();
 
-$pdo = new PDO(dbDsn, dbUsername, dbPassword);
+$pdo = null;
+try {
+    $pdo = new PDO(dbDsn, dbUsername, dbPassword);
+
+} catch (PDOException $e) {
+    header("HTTP/1.1 500 Internal Server Error");
+    die;
+}
 
 function logIn($email, $password, $location)
 {
@@ -13,11 +20,14 @@ function logIn($email, $password, $location)
         $user = $statement->fetch();
 
         if ($user !== false && password_verify($password, $user['pswd'])) {
-            $_SESSION['user-status'] = $user['status'];
+          //  $_SESSION['user-status'] = $user['status']; //TODO Not used??
             $_SESSION['user-log'] = "true";
             $_SESSION['user-id'] = $user['pk_id'];
             date_default_timezone_set('Europe/Berlin');
             $_SESSION['user-time'] = date("Y-m-d H:i:s");
+
+            $_SESSION['sec-hash'] = hash("ripemd160",$_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time']);
+
             if (is_null($location)) {
                 $location = "../simulate/dashboard.php";
             }
@@ -35,16 +45,17 @@ function logIn($email, $password, $location)
 
 function isLoggedIn()
 {
-    if (isset($_SESSION['user-status']) && isset($_SESSION['user-id']) && isset($_SESSION['user-log']) && isset($_SESSION['user-time']) && $_SESSION['user-log'] == "true") {
+    if ( isset($_SESSION['user-id']) && isset($_SESSION['user-log']) && isset($_SESSION['user-time']) && $_SESSION['user-log'] === "true") {
         date_default_timezone_set('Europe/Berlin');
         $currentdate = date("Y-m-d H:i:s");
         $usertime = $_SESSION['user-time'];
         $diff = dateDifference($usertime, $currentdate);
-        if ($diff > 86400) {
+
+        if ($diff < 86400 && $_SESSION['sec-hash'] === hash("ripemd160",$_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time'])) {
+            return true;
+        } else {
             logout();
             return false;
-        } else {
-            return true;
         }
     }
 }
