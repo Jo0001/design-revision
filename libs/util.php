@@ -1,4 +1,9 @@
 <?php
+/**
+ * Generates an unique hash
+ * @param $pdo
+ * @return string Hash
+ */
 function generateHash($pdo)
 {
     try {
@@ -14,6 +19,14 @@ function generateHash($pdo)
     }
 }
 
+/**
+ * @param $file_path String path to the template file
+ * @param $name String Name of the user
+ * @param $link String Link
+ * @param $project_name String Name of the project
+ * @param $project_version int Version of the project
+ * @return string|string[]
+ */
 function parseHTML($file_path, $name, $link, $project_name, $project_version)
 {
     $template = file_get_contents($file_path, false);
@@ -25,7 +38,9 @@ function parseHTML($file_path, $name, $link, $project_name, $project_version)
 }
 
 /**
- * @return int ->time-difference in seconds
+ * @param $d1
+ * @param $d2
+ * @return int time-difference in seconds
  */
 function dateDifference($d1, $d2)
 {
