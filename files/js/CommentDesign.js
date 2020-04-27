@@ -50,8 +50,9 @@ function setup() {
             let wInCoords = (wInPx / commentAreaData.widthPdf).toPrecision(7);
             let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
             let comment = new Comment(0, pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
-                user.id, messageArea.value, false, generateRandomColor(), 0);
+                user.id, messageArea.value, false, generateRandomColor(), 0, version);
             comment.cId = String(JSON.stringify(comment)).hashCode();
+            console.log(comment);
             comments.push(comment);
             console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));
             let data = "id=" + projectId + "&comment=" + JSON.stringify(comment);
@@ -185,9 +186,9 @@ function openCommentDialog() {
 }
 
 function generateRandomColor() {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
+    let letters = '0123456789ABCDEF'.split('');
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
         color += letters[Math.round(Math.random() * 15)];
     }
     return color;

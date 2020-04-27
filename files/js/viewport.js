@@ -120,7 +120,7 @@ class ButtonGroup {
 }
 
 class Comment {
-    constructor(cId, page, x, y, w, h, authorId, commentText, isImplemented, color, type) {
+    constructor(cId, page, x, y, w, h, authorId, commentText, isImplemented, color, type, version) {
         this.cId = cId;
         this.page = page;
         this.x = x;
@@ -132,6 +132,7 @@ class Comment {
         this.isImplemented = isImplemented;
         this.color = color;
         this.type = type;
+        this.version = version;
     }
 }
 
@@ -169,6 +170,7 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
         resizeComments();
     });
 });
+let version;
 //Progressbar-Variables
 let percentLoaded = 1;
 //Page-Turn-Logic
@@ -291,6 +293,7 @@ function setupViewport() {
     request.open('GET', requestURL);
     request.addEventListener('readystatechange', function (e) {
         handleServerResponse(request, function (response) {
+            version = response.project.version;
             titleCard.innerText = titleCard.innerHTML.replace("/", response.project.name);
         });
     });
