@@ -517,6 +517,7 @@ function clearCommentsAndGetNew() {
             let allPdfComments = response.data;
             for (let index = 0; index < allPdfComments.length; index++) {
                 let comment = allPdfComments[index];
+                //TODO FILTER HERE
                 displayedTextComments.push(comment);
                 createTextComment(comment);
                 if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
