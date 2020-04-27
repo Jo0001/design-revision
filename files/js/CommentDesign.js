@@ -51,9 +51,10 @@ function setup() {
             let hInCoords = (hInPx / commentAreaData.heightPdf).toPrecision(7);
             let comment = new Comment(0, pageNumberContainer.value, xInCoords, yInCoords, wInCoords, hInCoords,
                 user.id, messageArea.value, false, generateRandomColor(), 0, version);
-            comment.cId = String(JSON.stringify(comment)).hashCode();
+            comment.cid = String(JSON.stringify(comment)).hashCode();
             console.log(comment);
-            comments.push(comment);
+            displayedTextComments.push(comment);
+            displayedComments.push(comment);
             console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));
             let data = "id=" + projectId + "&comment=" + JSON.stringify(comment);
             let xhr = new XMLHttpRequest();
@@ -61,6 +62,7 @@ function setup() {
             xhr.addEventListener("readystatechange", function () {
                 if (this.readyState === 4 && this.status === 204) {
                     createComment(comment);
+                    createTextComment(comment);
                     messageDialog.style.display = "none";
                     messageArea.value = "";
                     resetAreaData();
@@ -68,7 +70,7 @@ function setup() {
                     window.alert(this.responseText)
                 }
             });
-            xhr.open("PUT", window.location.origin + "/design-revision/api/project/addcomments");
+            xhr.open("PUT", window.location.origin + "/design-revision/api/project/addcomment");
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.send(data);
         } else {

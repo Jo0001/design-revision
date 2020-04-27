@@ -120,8 +120,8 @@ class ButtonGroup {
 }
 
 class Comment {
-    constructor(cId, page, x, y, w, h, authorId, commentText, isImplemented, color, type, version) {
-        this.cId = cId;
+    constructor(cid, page, x, y, w, h, authorId, commentText, isImplemented, color, type, version) {
+        this.cid = cid;
         this.page = page;
         this.x = x;
         this.y = y;
@@ -155,7 +155,8 @@ let viewport;
 let projectId;
 let commentContainer;
 let changeCommentContainer;
-let comments = [];
+let displayedComments = [];
+let displayedTextComments = [];
 let canvasObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutationRecord) {
         let attribute = canvas.getAttribute(mutationRecord.attributeName);
@@ -240,7 +241,6 @@ function setupViewport() {
             try {
                 loaded();
             } catch (e) {
-
             }
         });
     });
@@ -497,13 +497,16 @@ function ensureEventAttributes(event) {
 
 //Comment-Management
 function clearCommentsAndGetNew() {
-    for (let index = 0; index < comments.length; index++) {
+    for (let index = 0; index < displayedComments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
-        let textComment = document.getElementById("textComment" + index);
         commentDiv.remove();
+    }
+    for (let index = 0; index < displayedTextComments.length; index++) {
+        let textComment = document.getElementById("textComment" + index);
         textComment.remove();
     }
-    comments = [];
+    displayedTextComments = [];
+    displayedComments = [];
     //Json Comments aus Api hohlen
     let request3 = new XMLHttpRequest();
     let requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
@@ -514,9 +517,11 @@ function clearCommentsAndGetNew() {
             let allPdfComments = response.data;
             for (let index = 0; index < allPdfComments.length; index++) {
                 let comment = allPdfComments[index];
+                displayedTextComments.push(comment);
+                createTextComment(comment);
                 if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
                     // console.log(comment);
-                    comments.push(comment);
+                    displayedComments.push(comment);
                     createComment(comment);
                 }
             }
@@ -525,32 +530,37 @@ function clearCommentsAndGetNew() {
 }
 
 function createComment(comment) {
-    let commentDiv = document.createElement("div");
-    commentDiv.setAttribute("id", "comment" + comments.indexOf(comment));
-    setCommentAttributes(commentDiv, comment);
+    if (displayedComments.indexOf(comment) >= 0) {
+        let commentDiv = document.createElement("div");
+        commentDiv.setAttribute("id", "comment" + displayedComments.indexOf(comment));
+        setCommentAttributes(commentDiv, comment);
+        commentContainer.appendChild(commentDiv);
+    }
+}
+
+function createTextComment(comment) {
     let textComment = document.getElementById("blueprintTextComment").cloneNode(true);
     textComment.style.position = null;
     textComment.style.display = "grid";
-    textComment.setAttribute("id", "textComment" + comments.indexOf(comment));
+    textComment.setAttribute("id", "textComment" + displayedTextComments.indexOf(comment));
     let children = textComment.querySelectorAll("*");
     children.forEach(c => {
         if (c.id !== undefined) {
-            c.id = c.id.replace("I", comments.indexOf(comment) + "");
+            c.id = c.id.replace("I", displayedTextComments.indexOf(comment) + "");
         }
     });
     changeCommentContainer.appendChild(textComment);
-    commentContainer.appendChild(commentDiv);
 
-    document.getElementById("comment" + comments.indexOf(comment) + "Text").innerText = comment.commentText;
-    document.getElementById("comment" + comments.indexOf(comment) + "Implemented").checked = comment.isImplemented;
-    document.getElementById("comment" + comments.indexOf(comment) + "Finder").style.backgroundColor = comment.color;
+    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Text").innerText = comment.commentText;
+    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked = comment.isImplemented;
+    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Finder").style.backgroundColor = comment.color;
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.addEventListener("readystatechange", function () {
         handleServerResponse(xhr, function (response) {
-            document.getElementById("comment" + comments.indexOf(comment) + "Author").href =
-                document.getElementById("comment" + comments.indexOf(comment) + "Author").href.replace("email", response.user.email);
-            document.getElementById("comment" + comments.indexOf(comment) + "Author").innerText = response.user.name;
+            document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Author").href =
+                document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Author").href.replace("email", response.user.email);
+            document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Author").innerText = response.user.name;
         });
     });
     xhr.open("GET", window.location.origin + "/design-revision/api/user/?id=" + comment.authorId + "&pid=" + projectId);
@@ -569,9 +579,9 @@ function setCommentAttributes(commentDiv, comment) {
 }
 
 function resizeComments() {
-    for (let index = 0; index < comments.length; index++) {
+    for (let index = 0; index < displayedComments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
-        let comment = comments[index];
+        let comment = displayedComments[index];
         setCommentAttributes(commentDiv, comment);
     }
 }

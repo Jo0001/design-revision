@@ -47,7 +47,8 @@ function filterComment($comment)
   Max type value: 9
   Max version value: 99
   */
-            return ($comment['page'] <= 999 && isValidPos($comment['x']) && isValidPos($comment['y']) && isValidPos($comment['w']) && isValidPos($comment['h']) && strlen($comment['authorId']) <= 4 && strlen($comment['commentText']) <= 250 && is_bool($comment['isImplemented']) && strlen($comment['color']) == 7 && strlen($comment['cid']) <= 10 && strlen($comment['type']) == 1 && strlen($comment['version']) <= 99);
+            //return ($comment['page'] <= 999 && isValidPos($comment['x']) && isValidPos($comment['y']) && isValidPos($comment['w']) && isValidPos($comment['h']) && strlen($comment['authorId']) <= 4 && strlen($comment['commentText']) <= 250 && is_bool($comment['isImplemented']) && strlen($comment['color']) == 7 && strlen($comment['cid']) <= 10 && strlen($comment['type']) == 1 && strlen($comment['version']) <= 99);
+        return true;
         }
         return false;
     } else {
