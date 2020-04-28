@@ -30,9 +30,9 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
             $content = parseHTML("../libs/templates/successPasswordReset.html", null, null, null, null);
             sendMail($email, $user['name'], " =?utf-8?q?Sie_haben_Ihr_Design_Revision-Kennwort_erfolgreich_zur=C3=BCckgesetzt?=", $content);
 
-            logIn($email, $password, "../simulate/dashboard.php?success=pswd");
+            logIn($email, $password, "../app/?success=pswd");
         } else {
-            header("Location: loginNewAccount.html?err=pswd");
+            header("Location: signup.php?err=pswd");
         }
     } catch (PDOException $e) {
         showError("Something went really wrong", 500);
