@@ -53,13 +53,13 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
                 logIn($email, $password, "../simulate/dashboard.php?success=signup");
 
             } else {
-                header("Location: loginNewAccount.html?err=pswd");
+                header("Location: signup.php?err=pswd");
             }
         } catch (PDOException $e) {
             showError("Something went really wrong", 500);
         }
     } else {
-        header("Location: loginNewAccount.html?err=pswd");
+        header("Location: signup.php?err=pswd");
     }
 }
 ?>
