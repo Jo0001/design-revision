@@ -29,7 +29,7 @@ function logIn($email, $password, $location)
             $_SESSION['sec-hash'] = hash("ripemd160",$_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time']);
 
             if (is_null($location)) {
-                $location = "../simulate/dashboard.php";
+                $location = "../app/";
             }
             header("Location: $location");
             die;

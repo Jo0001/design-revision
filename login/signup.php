@@ -2,7 +2,7 @@
 require "../libs/auth.php";
 require "../libs/sendEmail.php";
 if (isLoggedIn()) {
-    header("Location: ../simulate/dashboard.php");
+    header("Location: ../app/");
 }
 
 if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['againPassword'])) {
@@ -50,7 +50,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
                 $content = parseHTML("../libs/templates/emailverify.html", $name, $link, null, null);
                 sendMail($email, $name, "Willkommen bei Design Revison", $content);
 
-                logIn($email, $password, "../simulate/dashboard.php?success=signup");
+                logIn($email, $password, "../app/?success=signup");
 
             } else {
                 header("Location: signup.php?err=pswd");

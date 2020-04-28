@@ -5,7 +5,7 @@ if (isset($_GET['logout'])) {
     die;
 }
 if (isLoggedIn()) {
-    header("Location: ../simulate/dashboard.php");
+    header("Location: ../app/");
     die;
 }
 
