@@ -171,7 +171,10 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
         resizeComments();
     });
 });
+//Filter-Variables
 let version;
+let filterSettingsBtn;
+let filter = {};
 //Progressbar-Variables
 let percentLoaded = 1;
 //Page-Turn-Logic
@@ -280,6 +283,27 @@ function setupViewport() {
         }
     });
 
+    //Filter-Button-Setup
+    filterSettingsBtn = document.getElementById("filterSettingsBtn");
+    filterSettingsBtn.addEventListener("click", function (e) {
+        if (document.getElementById("filterDialog").style.display === "block") {
+            applyFilter();
+            closeForm();
+        } else {
+            applyFilter();
+            openForm();
+        }
+
+        //Filter-Functions
+        function openForm() {
+            document.getElementById("filterDialog").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("filterDialog").style.display = "none";
+        }
+    });
+
     //Demo-Data
     projectId = getURLParameter('id');
     if (projectId === "") {
@@ -299,7 +323,7 @@ function setupViewport() {
     });
     request.send();
 
-    //Json PDF aus Api hohlen
+    //Json PDF aus Api hohlen, (Comments hohlen)
     let request2 = new XMLHttpRequest();
     requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
     request2.open('GET', requestURL);
@@ -315,6 +339,8 @@ function setupViewport() {
         });
     });
     request2.send();
+    //Apply Filter
+    applyFilter();
 
     String.prototype.hashCode = function () {
         var hash = 0;
@@ -508,8 +534,8 @@ function clearCommentsAndGetNew() {
     displayedTextComments = [];
     displayedComments = [];
     //Json Comments aus Api hohlen
-    let request3 = new XMLHttpRequest();
     let requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
+    let request3 = new XMLHttpRequest();
     request3.open('GET', requestURL);
     request3.send();
     request3.addEventListener('readystatechange', function (e) {
@@ -517,14 +543,40 @@ function clearCommentsAndGetNew() {
             let allPdfComments = response.data;
             for (let index = 0; index < allPdfComments.length; index++) {
                 let comment = allPdfComments[index];
-                //TODO FILTER HERE
-                displayedTextComments.push(comment);
-                createTextComment(comment);
+                if (filter.pageFilter.length === 0) {
+                    checkStatusAndCreate(comment);
+                } else {
+                    if (numberInArray(filter.pageFilter, parseInt(comment.page))) {
+                        checkStatusAndCreate(comment);
+                    }
+                }
                 if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
                     // console.log(comment);
                     displayedComments.push(comment);
                     createComment(comment);
                 }
+            }
+
+            function checkStatusAndCreate(comment) {
+                if (filter.commentStatus === 1 && comment.isImplemented) {
+                    displayedTextComments.push(comment);
+                    createTextComment(comment);
+                } else if (filter.commentStatus === 2 && !comment.isImplemented) {
+                    displayedTextComments.push(comment);
+                    createTextComment(comment);
+                } else if (filter.commentStatus === 0) {
+                    displayedTextComments.push(comment);
+                    createTextComment(comment);
+                }
+            }
+
+            function numberInArray(a, num) {
+                for (let i = 0; i < a.length; i++) {
+                    if (a[i] === num) {
+                        return true;
+                    }
+                }
+                return false;
             }
         });
     });
@@ -552,9 +604,15 @@ function createTextComment(comment) {
     });
     changeCommentContainer.appendChild(textComment);
 
-    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Text").innerText = comment.commentText;
-    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked = comment.isImplemented;
-    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Finder").style.backgroundColor = comment.color;
+    try {
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Text").innerText = comment.commentText;
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked = comment.isImplemented;
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Finder").style.backgroundColor = comment.color;
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Version").innerText = "Version: " + comment.version;
+    } catch (e) {
+        console.log(e);
+    }
+
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.addEventListener("readystatechange", function () {
@@ -587,6 +645,36 @@ function resizeComments() {
     }
 }
 
+//Filter
+function applyFilter() {
+    if (document.getElementById("allComments").checked) {
+        filter.commentStatus = 0;
+    } else if (document.getElementById("solvedComments").checked) {
+        filter.commentStatus = 1;
+    } else if (document.getElementById("unsolvedComments").checked) {
+        filter.commentStatus = 2;
+    }
+
+    if (document.getElementById("allPages").checked) {
+        filter.pageFilter = [];
+    } else if (document.getElementById("certainPages").checked) {
+        let pageFilter = [];
+        let criteria = document.getElementById("certainPagesCriteria").value;
+        let cArray = criteria.split(",");
+        for (let index = 0; index < cArray.length; index++) {
+            if (!String(cArray[index]).includes("-")) {
+                pageFilter[pageFilter.length] = parseInt(cArray[index]);
+            } else {
+                cArray[index].split("-")
+                for (let s = parseInt(cArray[index].split("-")[0]); s <= parseInt(cArray[index].split("-")[1]); s++) {
+                    pageFilter[pageFilter.length] = s;
+                }
+            }
+        }
+        filter.pageFilter = pageFilter;
+    }
+    clearCommentsAndGetNew();
+}
 
 //Pre-Render
 function displayProgressOnBar() {
