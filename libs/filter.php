@@ -43,19 +43,15 @@ function filterComment($comment)
   Max page value: 999
   Max authorId value: 9999
   Max commentText length: 250letters
-  Max cid length: 10letters
+  Max cid length: 11letters
   Max type value: 9
   Max version value: 99
   */
-            return ($comment['page'] <= 999 && strlen($comment['x']) == 10 && strlen($comment['y']) == 10 && isValidPos($comment['w']) && isValidPos($comment['h']) && strlen($comment['authorId']) <= 4 && strlen($comment['commentText']) <= 250 && is_bool($comment['isImplemented']) && strlen($comment['color']) == 7  && strlen($comment['cid']) <= 10 && strlen($comment['type']) == 1 && strlen($comment['version']) <= 99);
+
+            return ($comment['page'] <= 999 && strlen($comment['x']) <= 10 && strlen($comment['y']) <= 10 && strlen($comment['w']) <= 10 && strlen($comment['h']) <= 10 && strlen($comment['authorId']) <= 4 && strlen($comment['commentText']) <= 250 && is_bool($comment['isImplemented']) && strlen($comment['color']) == 7 && strlen($comment['cid']) <= 11 && strlen($comment['type']) == 1 && strlen($comment['version']) <= 99);
         }
         return false;
     } else {
         return false;
     }
-}
-
-function isValidPos($num)
-{
-    return strlen($num) == 9;
 }
