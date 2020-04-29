@@ -1038,7 +1038,7 @@ function changeClientState(members, role, id) {
 
         //springe zum Anfang der Seite
         document.getElementById('projectsScrollContainer').scrollTo(0, 0);
-        console.log("Posttion: "+yScrollPosition);
+        console.log("Posttion: " + yScrollPosition);
 
         for (let i = 0; i < projects.length; i++) {
             projects[i].style.display = "none";
@@ -1519,9 +1519,23 @@ function addMemberWithEmail() {
     let objMember;
     emailFiled.onblur = function () {
         member = emailFiled.value;
-        objMember = {"email": member, "role": role};
-        sendArrayFields[0] = objMember;
-        console.log(sendArrayFields);
+        //when you leave the email Field with empty value then if the select input was set it will be set to default
+        //this allows to delete a member when a role was selected other wise the role cannot be deleted
+        if (emailFiled.value != "") {
+            objMember = {"email": member, "role": role};
+            sendArrayFields[0] = objMember;
+            console.log(sendArrayFields);
+        } else {
+            adminOrMember.value = "";
+            role = -1;
+            if (sendArrayFields.length > 1) {
+                sendArrayFields[0] = undefined;
+
+            } else {
+                sendArrayFields = [];
+            }
+            console.log(sendArrayFields);
+        }
     };
     adminOrMember.onchange = function () {
         let test = adminOrMember.value;
@@ -1571,6 +1585,9 @@ function addEmailField() {
         remove.onclick = function () {
             let index = this.getAttribute("data-emailFormId");
             sendArrayFields.splice(index, 1);
+            if(sendArrayFields[0]==undefined&&sendArrayFields.length==1){
+                sendArrayFields=[];
+            }
             emailSpan.removeChild(emailClone);
             emailSpan.removeChild(selectClone);
             emailSpan.removeChild(remove);
@@ -1583,6 +1600,12 @@ function addEmailField() {
             member = emailClone.value;
             objMember = {"email": member, "role": role};
             sendArrayFields[index] = objMember;
+            //prevent empty values
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                if (!(sendArrayFields.hasOwnProperty(i))) {
+                    sendArrayFields[i] = undefined;
+                }
+            }
             console.log(sendArrayFields);
         };
         selectClone.onchange = function () {
@@ -1598,9 +1621,15 @@ function addEmailField() {
                 role = "1";
                 objMember = {"email": member, "role": role};
                 sendArrayFields[index] = objMember;
-                console.log(sendArrayFields);
-            }
 
+            }
+            //prevent empty values
+            for (let i = 0; i < sendArrayFields.length; i++) {
+                if (!(sendArrayFields.hasOwnProperty(i))) {
+                    sendArrayFields[i] = undefined;
+                }
+            }
+            console.log(sendArrayFields);
         };
     }
 }
