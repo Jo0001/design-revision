@@ -525,13 +525,11 @@ function closeYes(members, content, arrayLength) {
         }
     }
     span.remove();
-    toggleDialog();
 }
 
 //Button Nein gedrückt
 function closeNo() {
     document.getElementById("dialog").removeAttribute('open');
-    toggleDialog();
 }
 
 //Dialogfenster öffnen
@@ -621,17 +619,6 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
     document.getElementById("pProjekt").innerHTML = projekt1;
 
 
-}
-
-
-//Handler für den Dialog da manche Browser nicht kompatibel sind
-function toggleDialog() {
-    let dialog = document.getElementById("dialog");
-    if (!dialog.hasAttribute('open')) {
-        let div = document.createElement('div');
-        div.id = 'backdrop';
-        document.body.appendChild(div);
-    }
 }
 
 
@@ -795,7 +782,7 @@ let readyStateCheckInterval = setInterval(function () {
     const previewDefaulText = previewContainer.querySelector(".image-preview__default-text");
     previewContainer.addEventListener('dragover', handleDragOver, false);
     previewContainer.addEventListener('drop', dateiauswahl, false);
-    // i needed to use the on click method to get get ride of the current File because Firexfox does not fire change event when  cancle in data-explore
+    // i needed to use the on click method to get get rid of the current File because Firexfox does not fire change event when  cancel in data-explore
     inputFile.addEventListener('click', function () {
         pdfIcon.style.display = "none";
         previewDefaulText.style.display = "block";
@@ -803,6 +790,7 @@ let readyStateCheckInterval = setInterval(function () {
         previewFile.innerHTML = "Keine Datei ausgewählt";
         previewFile.style.display = "none";
         sendFile = undefined;
+        $(inputFile).val(null).change();
     });
     inputFile.addEventListener("change", function () {
         const file = this.files[0];
