@@ -101,7 +101,7 @@ function addmember()
                         //Remove double entries from the array//TODO Really needed??
                         $member = array_unique($member, SORT_REGULAR);
 
-                        $role = $member['role'];
+                        $role = (int)$member['role'];
 
                         $projectname = getLatestProjectData($pid, $pdo)['p_name'];
 
@@ -137,14 +137,17 @@ function addmember()
                             }
 
                         } else {
+
                             $pid = explode("project_", $pid)[1];
                             $statement = $pdo->prepare("INSERT INTO `users` (`pk_id`, `name`, `company`, `email`, `pswd`, `projects`, `status`, `token`, `token_timestamp`) VALUES (NULL, '', NULL, ?, '', ?, 'INVITE', NULL, CURRENT_TIMESTAMP)");
                             $statement->execute(array($member['email'], json_encode(array($pid))));
 
                             //Save the new user as member to the project
-                            updateProjectMember($pid, (int)$pdo->lastInsertId(), $role, $pdo);
+                            $newID = (int)$pdo->lastInsertId();
+                            updateProjectMember( "project_" .$pid, $newID, $role, $pdo);
 
                             informNewbie($member['email'], $projectname, $name);
+
                         }
                     } catch (PDOException $e) {
                         showError("Something went really wrong", 500);

@@ -87,7 +87,7 @@ function createProject()
                                 $id = emailToId($tmp);
                                 //get array with all roles and emails as index and select the one equal to the current email and save it
                                 $role = array_column($members, 'role', 'email')[$tmp];
-                                array_push($memberids, array("id" => (int)$id, "role" => $role));
+                                array_push($memberids, array("id" => (int)$id, "role" => (int) $role));
 
                                 updateUserProjects($pdo, $id, $pid);
 
