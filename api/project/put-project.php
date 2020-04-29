@@ -152,7 +152,7 @@ function addmember()
                     } catch (PDOException $e) {
                         showError("Something went really wrong", 500);
                     }
-                    handleOutput("Successful added member ");
+                    header("HTTP/1.1 204 No Content");
 
                 } else {
                     showError("Not member/ not an admin", 403);

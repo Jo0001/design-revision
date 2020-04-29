@@ -1409,7 +1409,7 @@ function addProjectMember(projectId, memberMail, memberRole) {
 
     xhr.addEventListener("readystatechange", function () {
         let message = document.getElementById('AddOrDelete');
-        if (this.readyState === 4 && this.status === 200) {
+        if (this.readyState === 4 && this.status === 204) {
             message.style.display = "block";
             message.innerHTML = "Member wurde hinzugefügt";
             message.style.color = "black";
