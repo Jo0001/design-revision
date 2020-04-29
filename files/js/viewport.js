@@ -174,7 +174,7 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
 //Filter-Variables
 let version;
 let filterSettingsBtn;
-let filter = {};
+let filter = {pageFilter: [], versionFilter: [], commentStatus: 0};
 //Progressbar-Variables
 let percentLoaded = 1;
 //Page-Turn-Logic
@@ -540,20 +540,35 @@ function clearCommentsAndGetNew() {
     request3.send();
     request3.addEventListener('readystatechange', function (e) {
         handleServerResponse(request3, function (response) {
-            let allPdfComments = response.data;
-            for (let index = 0; index < allPdfComments.length; index++) {
-                let comment = allPdfComments[index];
+            try {
+                let allPdfComments = response.data;
+                for (let index = 0; index < allPdfComments.length; index++) {
+                    let comment = allPdfComments[index];
+                    if (filter.versionFilter.length === 0) {
+                        filterByPage(comment);
+                    } else {
+                        if (numberInArray(filter.versionFilter, parseInt(comment.version))) {
+                            filterByPage(comment);
+                        }
+                    }
+
+                    if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
+                        // console.log(comment);
+                        displayedComments.push(comment);
+                        createComment(comment);
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+            }
+
+            function filterByPage(comment) {
                 if (filter.pageFilter.length === 0) {
                     checkStatusAndCreate(comment);
                 } else {
                     if (numberInArray(filter.pageFilter, parseInt(comment.page))) {
                         checkStatusAndCreate(comment);
                     }
-                }
-                if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
-                    // console.log(comment);
-                    displayedComments.push(comment);
-                    createComment(comment);
                 }
             }
 
@@ -672,7 +687,31 @@ function applyFilter() {
             }
         }
         filter.pageFilter = pageFilter;
+    } else if (document.getElementById("currentPageFilter").checked) {
+        filter.pageFilter = [];
+        filter.pageFilter[0] = parseInt(pageNumberContainer.value);
     }
+
+    if (document.getElementById("allVersionsFilter").checked) {
+        filter.versionFilter = [];
+    } else if (document.getElementById("certainVersion").checked) {
+        let versionFilter = [];
+        let criteria = document.getElementById("certainVersionsCriteria").value;
+        let vArray = criteria.split(",");
+        for (let index = 0; index < vArray.length; index++) {
+            if (!String(vArray[index]).includes("-")) {
+                versionFilter[versionFilter.length] = parseInt(vArray[index]);
+            } else {
+                vArray[index].split("-")
+                for (let s = parseInt(vArray[index].split("-")[0]); s <= parseInt(vArray[index].split("-")[1]); s++) {
+                    versionFilter[versionFilter.length] = s;
+                }
+            }
+        }
+        filter.versionFilter = versionFilter;
+        console.log(versionFilter);
+    }
+
     clearCommentsAndGetNew();
 }
 
@@ -713,7 +752,7 @@ function loadPdfPage(scale) {
         num = num >= 1 ? num : 1;
         num = num <= pdf.numPages ? num : pdf.numPages;
         pageNumberContainer.value = num;
-        clearCommentsAndGetNew();//to get comments
+        applyFilter();
         pdf.getPage(parseInt(pageNumberContainer.value)).then(function (localPage) {
             pdfPage = localPage;
             renderIfReady(scale);

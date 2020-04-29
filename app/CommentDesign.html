@@ -64,20 +64,50 @@
         <table>
             <tr>
                 <td>
-                    <div>
-                        <input checked id="allPages" name="pageFilter" style="margin-top: 1px;" type="radio"
-                               value="allPages">
-                        <label for="allPages">Alle Seiten</label>
-                    </div>
+                    <input checked id="currentPageFilter" name="pageFilter" style="margin-top: 1px;" type="radio">
+                    <label for="currentPageFilter">Aktuelle Seite</label>
                 </td>
                 <td>
-                    <input id="certainPages" name="pageFilter" style="margin-top: 1px;" type="radio" value="allPages">
+                    <input id="certainPages" name="pageFilter" style="margin-top: 1px;" type="radio">
                     <label for="certainPages">Bestimmte Seiten</label>
                 </td>
                 <td>
-                    <input class="textField" id="certainPagesCriteria" pattern="^[0-9][-|,]{0,}" placeholder="1,3,6-8"
+                    <input class="textField" id="certainPagesCriteria" name="pageFilter" pattern="^[0-9][-|,]{0,}"
+                           placeholder="1,3,6-8"
                            style=" margin-top: 0; position: unset; min-width: 100px; width: 10%;" type="text"
-                           value="1"/>
+                           value=""/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>
+                        <input id="allPages" name="pageFilter" style="margin-top: 1px;" type="radio">
+                        <label for="allPages">Alle Seiten</label>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <h2>Versionsfilter:</h2>
+        <table style="width: 100%;">
+            <colgroup>
+                <col style="width: 25%;">
+                <col style="width: 34%;">
+                <col style="width: 23%;">
+            </colgroup>
+            <tr>
+                <td>
+                    <input checked id="allVersionsFilter" name="versionFilter" style="margin-top: 1px;" type="radio">
+                    <label for="allVersionsFilter">Alle Versionen</label>
+                </td>
+                <td>
+                    <input id="certainVersion" name="versionFilter" style="margin-top: 1px;" type="radio">
+                    <label for="certainVersion">ausgewählte Versionen</label>
+                </td>
+                <td>
+                    <input class="textField" id="certainVersionsCriteria" name="versionFilter" pattern="^[0-9][-|,]{0,}"
+                           placeholder="1,4,6-8"
+                           style=" margin-top: 0; position: unset; min-width: 100px; width: 10%;" type="text"
+                           value=""/>
                 </td>
             </tr>
         </table>
