@@ -45,7 +45,7 @@ let readyStateCheckInterval = setInterval(function () {
         clearInterval(readyStateCheckInterval);
         urlParameter = getURLParameter('id');
         if(urlParameter===""){
-            window.location=window.location.origin+"/design-revision/app/CustumorDashboard.html";
+            window.location=window.location.origin+"/design-revision/app/";
         }
         request();
         let getVersion = setInterval(function () {
