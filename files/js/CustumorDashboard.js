@@ -1568,9 +1568,9 @@ function addEmailField() {
         let emailClone = document.createElement("input");
         //prevents sending of empty fields in Update Project
         //otherwise there occurred an error
-        if(moreMember==1){
+        if (moreMember == 1) {
             let mail = document.getElementById('email');
-            mail.required =true;
+            mail.required = true;
             let adminOrMember = document.getElementById('AdminOrMember');
             adminOrMember.required = true;
         }
@@ -1593,19 +1593,22 @@ function addEmailField() {
         remove.onclick = function () {
             let index = this.getAttribute("data-emailFormId");
             sendArrayFields.splice(index, 1);
-            if(sendArrayFields[0]==undefined&&sendArrayFields.length==1){
-                sendArrayFields=[];
+            if (sendArrayFields[0] == undefined && sendArrayFields.length == 1) {
+                sendArrayFields = [];
             }
             emailSpan.removeChild(emailClone);
             emailSpan.removeChild(selectClone);
             emailSpan.removeChild(remove);
             moreMember--;
             //Allows to send empty Fields again in Update Project
-            if(moreMember==1){
-                let mail = document.getElementById('email');
-                mail.required =false;
-                let adminOrMember = document.getElementById('AdminOrMember');
-                adminOrMember.required = false;
+            if (moreMember == 1) {
+                //this is looking what state the User is update or Create Project
+                if (!updateOrCreate) {
+                    let mail = document.getElementById('email');
+                    mail.required = false;
+                    let adminOrMember = document.getElementById('AdminOrMember');
+                    adminOrMember.required = false;
+                }
             }
             console.log(sendArrayFields);
 

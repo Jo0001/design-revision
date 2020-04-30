@@ -26,7 +26,7 @@ function generate() {
         };
         nummer.innerHTML = "" + (i + 1);
         link.innerHTML = "link.to/file" + (i + 1);
-        link.href = window.location.origin + "/design-revision/app/ViewDesign.html?pdf=" + obj[i].link + "&&id=" + urlParameter;
+        link.href = window.location.origin + "/design-revision/simulate/view.php?pdf=" + obj[i].link + "&&id=" + urlParameter;
         lastModified.innerHTML = obj[i].lastedit;
         lastModified.style.paddingTop = "10px";
         tableNummer.appendChild(nummer);
