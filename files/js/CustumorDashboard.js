@@ -1566,6 +1566,14 @@ function addEmailField() {
         let member = "";
         let objMember;
         let emailClone = document.createElement("input");
+        //prevents sending of empty fields in Update Project
+        //otherwise there occurred an error
+        if(moreMember==1){
+            let mail = document.getElementById('email');
+            mail.required =true;
+            let adminOrMember = document.getElementById('AdminOrMember');
+            adminOrMember.required = true;
+        }
         emailClone.setAttribute('data-emailFormId', "" + moreMember);
         emailClone.type = "email";
         emailClone.required = true;
@@ -1592,6 +1600,13 @@ function addEmailField() {
             emailSpan.removeChild(selectClone);
             emailSpan.removeChild(remove);
             moreMember--;
+            //Allows to send empty Fields again in Update Project
+            if(moreMember==1){
+                let mail = document.getElementById('email');
+                mail.required =false;
+                let adminOrMember = document.getElementById('AdminOrMember');
+                adminOrMember.required = false;
+            }
             console.log(sendArrayFields);
 
         };
