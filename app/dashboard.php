@@ -19,7 +19,7 @@ if (!isLoggedIn()) {
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
 </head>
-<body style="overflow: hidden;">
+<body style="overflow: hidden;display:none">
 <div class="topDivs">
     <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
          style="float: left"

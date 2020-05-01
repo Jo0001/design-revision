@@ -30,4 +30,4 @@ DefaultLanguage de
 ServerSignature Off
 
 #TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.53"
+Header set X-Build-Version "1.54"

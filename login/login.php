@@ -91,26 +91,27 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
             feedback.innerHTML = "<strong>E-Mail oder Passwort falsch</strong>"
         }
         let success = getURLParameter('success');
-        if (success === "logout") {
+        if (success === "logout"&&getCookie('verify')!=="notVerified"&&getCookie('projects')!=="noProjects") {
             let alert= document.querySelector('.alert');
             alert.style.display="block";
             let message=alert.getElementsByTagName("span");
             message[1].innerHTML="Sie haben sich erfolglreich Ausgelogt";
         }
         let verify=getURLParameter('verify');
-        if(verify==='notVerified'){
+        if(verify==='notVerified'||getCookie('verify')==="notVerified"){
             let alert= document.querySelector('.alert');
             alert.style.display="block";
             let message=alert.getElementsByTagName("span");
             message[1].innerHTML="Sie m&uuml;ssen ihre E-Mail verifiziern";
-
+            delete_cookie('verify');
         }
         let projects=getURLParameter('projects');
-        if(projects==='noProjects'){
+        if(projects==='noProjects'||getCookie('projects')==="noProjects"){
             let alert= document.querySelector('.alert');
             alert.style.display="block";
             let message=alert.getElementsByTagName("span");
             message[1].innerHTML="Sie m&uuml;ssen warten bis sie einem Projekt zugewießen wurden";
+            delete_cookie('projects')
         }
     };
 
@@ -138,6 +139,27 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
             password.type = "password";
             visibilityToggle.innerHTML = "visibility";
         }
+
+    }
+
+   function getCookie(cname) {
+       let name = cname + "=";
+       let decodedCookie = decodeURIComponent(document.cookie);
+       let ca = decodedCookie.split(';');
+       for(let i = 0; i <ca.length; i++) {
+           let c = ca[i];
+           while (c.charAt(0) == ' ') {
+               c = c.substring(1);
+           }
+           if (c.indexOf(name) == 0) {
+               return c.substring(name.length, c.length);
+           }
+       }
+       return "";
+   }
+    //cookie functions
+    function delete_cookie( name ) {
+    document.cookie = name+"=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     }
 
     function saveLocation() {

@@ -117,6 +117,8 @@ function generate() {
         request.send();
         request.onreadystatechange = function () {
             if (request.readyState === 4 && request.status === 200) {
+                // display the body
+                document.body.style.display="block";
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
                 userId = userObject.user.id;
@@ -125,6 +127,7 @@ function generate() {
                 clientemail.innerHTML = userObject.user.email;
                 company.innerHTML = userObject.user.company;
                 if (!(userObject.user.status === "VERIFIED")) {
+                    request.abort();
                     destroy_session("notVerified");
                 }
                 //Projects-array von Api holen
@@ -134,6 +137,7 @@ function generate() {
                     clearInterval(checkForProjects);
                     ableNewProject = false;
                     setTimeout(function () {
+                        request.abort();
                         destroy_session("noProjects");
 
                     }, 100)
@@ -164,11 +168,17 @@ function generate() {
                 gotUserData = true;
 
             } else if (request.readyState === 4 && request.status === 403) {
+                // display the body
+                document.body.style.display="block";
                 showmes("error", "Verboten");
             } else if (request.readyState === 4 && request.status === 401) {
                 document.location = window.location.origin + "/design-revision/login/";
             } else if (request.readyState === 4 && request.status === 404) {
+                // display the body
+                document.body.style.display="block";
                 showmes("error", "Nichts gefunden");
+                // display the body
+                document.body.style.display="block";
             } else if (request.readyState === 4 && request.status === 400) {
                 showmes("error", "Unbekannter AnfrageParameter");
             }
@@ -666,26 +676,44 @@ function showRes() {
 let readyStateCheckInterval = setInterval(function () {
     if (document.readyState === "complete") {
         clearInterval(readyStateCheckInterval);
-        //generirt  User solange sie Projekte haben
-        let userInterval = setInterval(function () {
-            if (ableNewProject) {
-                generate();
-            } else {
-                clearInterval(userInterval);
-                let spacing = document.createElement('div');
-                spacing.style.height = "200px";
-                setTimeout(function () {
-                    document.getElementById('projectsScrollContainer').appendChild(spacing);
-                }, 2000);
-                //versteckt das Ladesymbol oben
-                setTimeout(function () {
-                    document.getElementById('pageLoader').style.display = "none";
-                }, 1000);
+        //verhindert das Generieren von Projekten wenn der User weitergeleited wird
+        if (getCookie('verify') !== "notVerified" && getCookie('projects') !== "noProjects") {
+            //generirt  User solange sie Projekte haben
+            let userInterval = setInterval(function () {
+                if (ableNewProject) {
+                    generate();
+                } else {
+                    clearInterval(userInterval);
+                    let spacing = document.createElement('div');
+                    spacing.style.height = "200px";
+                    setTimeout(function () {
+                        document.getElementById('projectsScrollContainer').appendChild(spacing);
+                    }, 2000);
+                    //versteckt das Ladesymbol oben
+                    setTimeout(function () {
+                        document.getElementById('pageLoader').style.display = "none";
+                    }, 1000);
+                }
+
+            }, 200);
+        } else {
+            //he will be redirected to lo again if the logout took to long
+            //the user get redirected to login with message
+            if (getCookie('projects') == "noProjects") {
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
+            } else if (getCookie('verify') == "notVerified") {
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified");
             }
-
-        }, 200);
-
-
+        }
+        /*this should prevent the Browser form  asking if the User really wants to leave because he has unsaved things in the forms
+        firefox does not allows this feature so i only prevent in chrome
+        */
+        if (!(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)) {
+            window.onbeforeunload = function (e) {
+                delete e['returnValue'];
+                e.preventDefault();
+            }
+        }
         addMemberWithEmail();
         let projectName = document.getElementById("projectname");
         projectName.addEventListener("keyup", function () {
@@ -1902,10 +1930,44 @@ function autocomplete(inp, arr) {
 }
 
 function destroy_session(state) {
+    /*because just referring to logout sometimes has not shown the right message i am using now a cookie to show the massage too
+     no the redirect hopefully suits, because sometimes the logout  takes time and then we get stuck in dashboard by reloading the page
+     i can speed it up because all current request get canceled and only the logout request is send
+     */
+    //hide body
+    document.body.style.display="none";
     if (state === "noProjects") {
-        window.location = window.location.origin + "/design-revision/login/?logout&projects=noProjects";
+        setCookie('projects', 'noProjects', 1)
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
+
     }
     if (state === "notVerified") {
-        window.location = window.location.origin + "/design-revision/login/?logout&verify=notVerified";
+        setCookie("verify", "notVerified", 1)
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified");
     }
+
+
+}
+
+function setCookie(cname, cvalue, exdays) {
+    let d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    let expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
 }

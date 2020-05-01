@@ -128,7 +128,10 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
         let call = document.getElementById("feedback");
         let feedback = document.getElementById('progressBar');
         let statusEmail = document.getElementById('statusEmail');
-        if (!(emailIsValid(document.querySelector("#email").value)) || status) {
+        //implemented same Password detection
+        let pass1 =document.querySelector("#password").value;
+        let pass2 = document.querySelector("#againPassword").value;
+        if (!(emailIsValid(document.querySelector("#email").value)) || status||pass1 != pass2) {
             if (!(emailIsValid(document.querySelector("#email").value))) {
                 statusEmail.style.color = "red";
                 statusEmail.innerHTML = "<strong>Gültige E-mail eingeben</strong>";
