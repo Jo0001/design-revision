@@ -119,10 +119,11 @@ function addmember()
                                 showError("Is already a member", 400);
                             }
 
+                            $pid = explode("project_", $pid)[1];
                             updateUserProjects($pdo, $id, $pid);
 
                             //Save the new user as member to the project
-                            updateProjectMember($pid, $id, $role, $pdo);
+                            updateProjectMember("project_" . $pid, $id, $role, $pdo);
 
                             $statement = $pdo->prepare("SELECT * FROM `users` WHERE pk_id = ?");
                             $statement->execute(array($id));
@@ -144,7 +145,7 @@ function addmember()
 
                             //Save the new user as member to the project
                             $newID = (int)$pdo->lastInsertId();
-                            updateProjectMember( "project_" .$pid, $newID, $role, $pdo);
+                            updateProjectMember("project_" . $pid, $newID, $role, $pdo);
 
                             informNewbie($member['email'], $projectname, $name);
 
