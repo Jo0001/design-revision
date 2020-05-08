@@ -89,12 +89,16 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
     let status = true;
     let resetpass = document.getElementById("resetPass");
     resetpass.addEventListener('submit', function (evt) {
+        let pass1 =document.querySelector("#password").value;
+        let pass2 = document.querySelector("#againPassword").value;
         let call = document.getElementById("feedback");
         let feedback = document.getElementById('progressBar');
+        if (status||pass1 != pass2) {
         if (status) {
             call.style.color = "black";
             feedback.style.width = "0%";
             call.innerHTML = "<strong>Das Passwort muss sicher sein</strong>";
+            }
             evt.preventDefault();
 
         }

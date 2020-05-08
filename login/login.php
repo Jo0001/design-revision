@@ -32,6 +32,7 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
     <link href="../files/css/Login.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
 <div class="alert">
@@ -43,7 +44,7 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
     <h1>Login</h1>
     <form action="login.php" id="login" method="post">
         <label>E-Mail:<br>
-            <input id="email" name="email" onkeyup="check_up3()" placeholder="E-mail" required type="email"
+            <input id="email" name="email" placeholder="E-mail" required type="email"
                    value="lukas-biermann@fahr-zur-hoelle.org">
         </label><span id="statusEmail"></span><br><br>
         <label>Passwort: </label><br>
@@ -119,10 +120,13 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
         return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     }
 
-    function check_up3() {
+    $('#email').on('keyup', function(e) {
+    //when enter is pressed the wrong email message don´t disappears
+     if (!(e.key === 'Enter')) {
         statusEmail.innerHTML = "";
+         }
+     })
 
-    }
 
     function getURLParameter(name) {
         let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);

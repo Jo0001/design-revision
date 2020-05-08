@@ -71,13 +71,14 @@ if (!empty($_POST['email'])) {
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title> Reset Password </title>
     <link href="../files/css/Login.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
 <div class="form">
     <h1> Setzen sie ihr Design Revision Passwort zur&uumlck </h1>
     <form action="reset.php" id="forgottenpass" method="post">
         <label>E-Mail:
-            <input id="email" name="email" onkeyup="check_up3()" placeholder="E-mail" required
+            <input id="email" name="email" placeholder="E-mail" required
                    type="email" value="lukas-biermann@fahr-zur-hoelle.org">
         </label><span id="statusEmail"></span><br><br>
         <input id="resetpass" name="resetpass" type="submit" value="Passwort zur&#x00FC;cksetzen">
@@ -101,10 +102,14 @@ if (!empty($_POST['email'])) {
         return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     }
 
-    function check_up3() {
-        statusEmail.innerHTML = "";
 
-    }
+   $('#email').on('keyup', function(e) {
+       //when enter is pressed the wrong email message don´t disappears
+        if (!(e.key === 'Enter')) {
+           let statusEmail = document.getElementById('statusEmail');
+                   statusEmail.innerHTML = "";
+            }
+        })
 
     function getURLParameter(name) {
         let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);

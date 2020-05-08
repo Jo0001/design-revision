@@ -73,6 +73,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
     <link href="../files/css/Login.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body>
 <div class="form">
@@ -87,7 +88,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
             </label></div>
         <br>
         <label>
-            <input id="email" name="email" onkeyup="check_up()" placeholder="E-mail" required type="email">
+            <input id="email" name="email"  placeholder="E-mail" required type="email">
         </label>
         <span id="statusEmail"></span><br><br>
         <label>
@@ -150,10 +151,14 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
         return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     }
 
-    function check_up() {
-        let statusEmail = document.getElementById('statusEmail');
-        statusEmail.innerHTML = "";
-    }
+    $('#email').on('keyup', function(e) {
+        //when enter is pressed the wrong email message don´t disappears
+         if (!(e.key === 'Enter')) {
+            let statusEmail = document.getElementById('statusEmail');
+                    statusEmail.innerHTML = "";
+             }
+         })
+
 
 
     function char_count() {
