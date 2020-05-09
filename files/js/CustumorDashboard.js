@@ -9,6 +9,7 @@ let bool1 = false;
 let boolstatus;
 let select = true;
 let doubleClickSelect = true;
+let roleList = []
 let autoComplete = [];
 let currentFocus;
 let newKeyUp = true;
@@ -283,6 +284,17 @@ function generate() {
                         customerdiv.appendChild(role);
                         arrayRole = role.innerHTML;
                         arrayRole = arrayRole.split(",");
+                        /*schauen ob der eingeloggte User Admin ist,
+                        ist er das nicht, so sieht der die project Erstellansicht nicht */
+                        for (let i = 0; i < arrayMember.length; i++) {
+                            if (arrayMember[i] == userId) {
+                                if (arrayRole[i] == 0) {
+                                    roleList[i] = 0;
+                                } else {
+                                    roleList[i] = 1
+                                }
+                            }
+                        }
                         gotProject = true;
                         document.getElementById("projectsScrollContainer").appendChild(customerSpan);
                     } else if (request1.readyState === 4 && request1.status === 401) {
@@ -420,7 +432,7 @@ function generate() {
             for (let i = 0; i < arrayMember.length; i++) {
                 //abfrage ob der User Admin ist oder nicht
                 if (arrayMember[i] == userId) {
-                    if (arrayRole[i] == 0) {
+                    if (arrayRole[i] == 0 || document.getElementById('CustumorDashForm').style.display == "none") {
                         customerdiv.click();
                     } else {
                         //abfrage ob das Projekt fertig ist, dann kann nichts mher geändert werden
@@ -684,6 +696,29 @@ let readyStateCheckInterval = setInterval(function () {
                     generate();
                 } else {
                     clearInterval(userInterval);
+                    /*es wird geschaut ob der User in keinem Projekt Admin ist ist das der Fall so kann er kein Projekt erstellen,
+                    da der User wenn der dies tuen würde zum Admin werden würde
+                     */
+                    if (!(roleList.includes(1))) {
+                        document.getElementById('CustumorDashForm').style.display = "none";
+                        document.getElementById('scrollArea').style.width = "100%"
+                        if(roleList.length=1){
+                            //give Members who have only one poroject a nice message that they will soon have more projects
+                           let topper= document.querySelector('.topDivs')
+                            topper.classList.add('tooltip');
+                           let msg = document.createElement("span");
+                           msg.classList.add("tooltiptext");
+                           msg.innerHTML ="Sie werden hier mehr sehen, sobald sie die Agentur zu mehr Projekte beauftragen";
+                           msg.style.visibility="visible"
+                           topper.appendChild(msg);
+                           setTimeout(function () {
+                               //hide message after 0.25 minute
+                            topper.removeChild(msg);
+                            topper.classList.remove('tooltip')
+                           },15000)
+                        }
+                    }
+
                     let spacing = document.createElement('div');
                     spacing.style.height = "200px";
                     //autocomplete function

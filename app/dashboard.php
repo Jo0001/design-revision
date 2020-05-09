@@ -87,7 +87,7 @@ if (!isLoggedIn()) {
 
 <!-- response message if sending was successful -->
 <div class="warn" id="mes"></div>
-<div style="position: fixed; top: 11%; width: 76%; height: 90%; min-height: 90%; overflow: hidden;">
+<div id="scrollArea" style="position: fixed; top: 11%; width: 76%; height: 90%; min-height: 90%; overflow: hidden;">
     <div id="projectsScrollContainer" style="height: 98%; width: 99%; overflow-x: hidden; overflow-y: scroll;">
     </div>
 </div>
