@@ -138,7 +138,7 @@ function updateUserProjects($pdo, $id, $pid)
 
 /**
  * @param $value String
- * @return array
+ * @return array | int |String
  */
 function getUser($value)
 {

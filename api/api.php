@@ -1,3 +1,3 @@
 <?php
 require "../libs/api-util.php";
-showError("Missing endpoint please user '/user' or '/project'",400);
+showError("Missing endpoint please use '/user' or '/project'",400);

@@ -41,7 +41,7 @@ function createProject()
                     do {
                         $t_name = "project_" . bin2hex(openssl_random_pseudo_bytes(4));
                         try {
-                            $statement = $pdo->prepare("CREATE TABLE `design_revision`.`" . $t_name . "` ( `p_name` VARCHAR(80) NOT NULL , `version` INT(10) UNSIGNED NOT NULL DEFAULT '1', `link` VARCHAR(30) NOT NULL , `members` VARCHAR(221) NOT NULL , `status` VARCHAR(20) NOT NULL , `lastedit` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `data` VARCHAR(20000) NULL , `securitycode` VARCHAR(6) NULL, PRIMARY KEY (`version`)) ENGINE = InnoDB");
+                            $statement = $pdo->prepare("CREATE TABLE `design_revision`.`" . $t_name . "` ( `p_name` VARCHAR(80) NOT NULL , `version` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT, `link` VARCHAR(30) NOT NULL , `members` VARCHAR(221) NOT NULL , `status` VARCHAR(20) NOT NULL , `lastedit` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `data` VARCHAR(20000) NULL , `securitycode` VARCHAR(6) NULL, PRIMARY KEY (`version`)) ENGINE = InnoDB");
                             $result = $statement->execute();
                         } catch (PDOException $e) {
                         }

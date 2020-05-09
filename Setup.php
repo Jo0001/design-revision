@@ -38,3 +38,10 @@ if ($done) {
 } else {
     echo "Es gab mindestens 1 Fehler bei der Einrichtung. Bitte alles Fehler beheben. Genaueres siehe oben";
 }
+
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
+    // SSL connection
+    echo "<br>Hinweis: Es wurde eine https Verbindung erkannt. Es wird empfohlen die automatische Weiterleitung direkt über den Server Einzustellen (normalerweise Standart).
+<br> Falls dies nicht möglich ist müssen die Zeilen 9-11 in der .htaccess Datei aktiviert werden (#vor den Zeilen entferen)";
+}
+
