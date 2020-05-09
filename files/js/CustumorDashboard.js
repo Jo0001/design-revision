@@ -118,7 +118,7 @@ function generate() {
         request.onreadystatechange = function () {
             if (request.readyState === 4 && request.status === 200) {
                 // display the body
-                document.body.style.display="block";
+                document.body.style.display = "block";
                 let userObject = JSON.parse(request.response);
                 console.log("xhrRequest");
                 userId = userObject.user.id;
@@ -169,16 +169,16 @@ function generate() {
 
             } else if (request.readyState === 4 && request.status === 403) {
                 // display the body
-                document.body.style.display="block";
+                document.body.style.display = "block";
                 showmes("error", "Verboten");
             } else if (request.readyState === 4 && request.status === 401) {
                 document.location = window.location.origin + "/design-revision/login/";
             } else if (request.readyState === 4 && request.status === 404) {
                 // display the body
-                document.body.style.display="block";
+                document.body.style.display = "block";
                 showmes("error", "Nichts gefunden");
                 // display the body
-                document.body.style.display="block";
+                document.body.style.display = "block";
             } else if (request.readyState === 4 && request.status === 400) {
                 showmes("error", "Unbekannter AnfrageParameter");
             }
@@ -668,7 +668,7 @@ function showRes() {
         bool1 = true;
 
     }
-    autocomplete(document.getElementById("searchform"), autoComplete)
+
 }
 
 
@@ -686,15 +686,13 @@ let readyStateCheckInterval = setInterval(function () {
                     clearInterval(userInterval);
                     let spacing = document.createElement('div');
                     spacing.style.height = "200px";
-                    setTimeout(function () {
-                        document.getElementById('projectsScrollContainer').appendChild(spacing);
-                    }, 2000);
+                    //autocomplete function
+                    autocomplete(document.getElementById("searchform"), autoComplete)
+                    //add a space so when member of  the last project is shown the project don´t swaps up and down and the project is hard to click
+                    document.getElementById('projectsScrollContainer').appendChild(spacing);
                     //versteckt das Ladesymbol oben
-                    setTimeout(function () {
-                        document.getElementById('pageLoader').style.display = "none";
-                    }, 1000);
+                    document.getElementById('pageLoader').style.display = "none";
                 }
-
             }, 200);
         } else {
             //he will be redirected to lo again if the logout took to long
@@ -1029,6 +1027,7 @@ function addMember() {
             document.getElementById("loeschen").style.display = "inline";
         }
         document.getElementById('searchform').style.display = "block";
+        document.getElementById('searchform').value = "";
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
             content[i].style.transform = "scale(0.9)";
@@ -1935,7 +1934,7 @@ function destroy_session(state) {
      i can speed it up because all current request get canceled and only the logout request is send
      */
     //hide body
-    document.body.style.display="none";
+    document.body.style.display = "none";
     if (state === "noProjects") {
         setCookie('projects', 'noProjects', 1)
         document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
