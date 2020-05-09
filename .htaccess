@@ -5,7 +5,7 @@ Options -Indexes
 AddDefaultCharset UTF-8
 DefaultLanguage de
 
-#Enable in production mode
+#Enable automatic https redirect
 #RewriteEngine On
 #RewriteCond %{HTTPS} off
 #RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -30,4 +30,4 @@ DefaultLanguage de
 ServerSignature Off
 
 #TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.54"
+Header set X-Build-Version "1.56"

@@ -25,7 +25,6 @@ function sendMail($toAdr, $toName, $subject, $content)
         $mail->Username = emailUsername;
         $mail->Password = emailPassword;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        // $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = emailPort;
 
         //Recipients
