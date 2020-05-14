@@ -289,10 +289,11 @@ function generate() {
                         for (let i = 0; i < arrayMember.length; i++) {
                             if (arrayMember[i] == userId) {
                                 if (arrayRole[i] == 0) {
-                                    roleList[i] = 0;
+                                    roleList.push(0);
                                 } else {
-                                    roleList[i] = 1
+                                    roleList.push(1);
                                 }
+                                console.log(roleList)
                             }
                         }
                         gotProject = true;
