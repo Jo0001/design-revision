@@ -10,7 +10,7 @@
 <body>
 <?php
 require "../libs/auth.php";
-require_once "../libs/util.php";
+
 $verified = false;
 if (!empty($_GET['token'])) {
     $token = filter_var($_GET['token'], FILTER_SANITIZE_STRING);
