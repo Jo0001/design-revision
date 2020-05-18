@@ -110,7 +110,6 @@ function generate() {
         for (let i = 0; i < userProjects.length; i++) {
             projectsArray.push(userProjects[i]);
         }
-        console.log("Took Saved Data");
     } else {
         //Jason user Object aus Api holen
         requestURL = window.location.origin + "/design-revision/api/user/";
@@ -121,7 +120,6 @@ function generate() {
                 // display the body
                 document.body.style.display = "block";
                 let userObject = JSON.parse(request.response);
-                console.log("xhrRequest");
                 userId = userObject.user.id;
                 clientname.innerHTML = userObject.user.name;
                 nameimg.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObject.user.name);
@@ -133,16 +131,12 @@ function generate() {
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
-                if (tmp === null || tmp[0] === undefined) {
+                if ((tmp === null || tmp[0] === undefined)&&userObject.user.status === "VERIFIED") {
                     customerdiv.remove();
                     clearInterval(checkForProjects);
                     ableNewProject = false;
-                    setTimeout(function () {
                         request.abort();
                         destroy_session("noProjects");
-
-                    }, 100)
-
                 } else {
                     let tmp1 = tmp[0];
                     for (let i = 1; i < tmp.length; i++) {
@@ -289,11 +283,11 @@ function generate() {
                         for (let i = 0; i < arrayMember.length; i++) {
                             if (arrayMember[i] == userId) {
                                 if (arrayRole[i] == 0) {
-                                    roleList.push(0);
+                                    roleList.unshift(0);
                                 } else {
-                                    roleList.push(1);
+                                    roleList.unshift(1);
                                 }
-                                console.log(roleList)
+
                             }
                         }
                         gotProject = true;
@@ -319,7 +313,6 @@ function generate() {
             for (let i = 0; i < arrayMember.length; i++) {
                 let request2 = new XMLHttpRequest();
                 if (arrayMember[i] != userId) {
-                    console.log(JSON.stringify(arrayMember) + "ID=" + projectsArray[counterForUser]);
                     request2.open('GET', window.location.origin + "/design-revision/api/user/?id=" + arrayMember[i] + "&pid=" + projectsArray[counterForUser], true);
                     request2.send();
                     request2.onreadystatechange = function () {
@@ -335,7 +328,6 @@ function generate() {
                             userDiv.appendChild(userAvatar);
                             userDiv.className = "clients";
                             customerSpan.appendChild(userDiv);
-                            console.log(userObj.user.name);
                             let userName = document.createElement("p");
                             if (userObj.user.name != "") {
                                 userName.innerHTML = userObj.user.name;
@@ -344,7 +336,6 @@ function generate() {
                             } else {
                                 userName.innerHTML = "Regestrierung austehend";
                                 userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=Regestrierung-austehend");
-                                console.log("NOT");
                             }
                             userDiv.appendChild(userName);
                             let userEmail = document.createElement("p");
@@ -441,7 +432,6 @@ function generate() {
                             customerdiv.click();
                         } else {
 
-                            document.getElementById('searchform').style.display = "none";
                             let userIds = [];
                             let content = document.querySelectorAll('[data-memberid');
                             let helpArray = [];
@@ -454,7 +444,6 @@ function generate() {
                                     }
                                 }
                             }
-                            console.log("Before:" + JSON.stringify(helpArray));
 
                             sendArray = [];
                             arrayBefore = [];
@@ -464,16 +453,12 @@ function generate() {
                                     let mail = helpArray[j];
                                     let member = {"email": mail, "role": arrayRole[i]};
                                     arrayBefore.push(member);
-                                    console.log("Before:" + JSON.stringify(arrayBefore));
                                     sendArray.push(member);
                                     j++;
                                 }
                             }
-                            console.log(sendArray);
-                            console.log(arrayBefore);
                             let btnAddMember = document.getElementById("btnAddMember");
                             updateProjectId = customerdiv.getAttribute('data-id');
-                            console.log(updateProjectId);
                             let mail = document.getElementById('email');
                             mail.required = false;
                             let AdminOrMember = document.getElementById('AdminOrMember');
@@ -568,8 +553,6 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
         for (let i = 1; i < userDivs.length; i++) {
             userDivs[i].style.display = "block";
         }
-        //Disable search in clicked Mode
-        document.getElementById('searchform').style.display = "none";
         tmpClients = members;
         for (let i = 0; i < arrayLength; i++) {
             help = content[i].getAttribute("data-memberId");
@@ -611,8 +594,6 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
         a = false;
 
     } else {
-        //Enable search in clicked Mode
-        document.getElementById('searchform').style.display = "block";
         let customerdiv1 = document.getElementById(customerid);
         customerdiv1.style.background = "white";
         customerdiv1.style.border = "4px solid black";
@@ -647,6 +628,13 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
 
 function showRes() {
     let content = document.querySelectorAll('[data-test');
+    if (!a&&updateOrCreate) {
+        //manually force the trigger event otherwise autocomplete would not be shown because of click
+        $(content[0]).click();
+        let element = document.getElementById('searchform');
+        let event = new Event('input');
+        element.dispatchEvent(event);
+    }
     let arrayLength = content.length;
     let value = document.getElementById("searchform").value;
     //needed to replace invalid characters
@@ -703,20 +691,20 @@ let readyStateCheckInterval = setInterval(function () {
                     if (!(roleList.includes(1))) {
                         document.getElementById('CustumorDashForm').style.display = "none";
                         document.getElementById('scrollArea').style.width = "100%"
-                        if(roleList.length=1){
+                        console.log(roleList)
+                        if (roleList[1]==undefined) {
                             //give Members who have only one poroject a nice message that they will soon have more projects
-                           let topper= document.querySelector('.topDivs')
-                            topper.classList.add('tooltip');
-                           let msg = document.createElement("span");
-                           msg.classList.add("tooltiptext");
-                           msg.innerHTML ="Sie werden hier mehr sehen, sobald sie die Agentur zu mehr Projekte beauftragen";
-                           msg.style.visibility="visible"
-                           topper.appendChild(msg);
-                           setTimeout(function () {
-                               //hide message after 0.25 minute
-                            topper.removeChild(msg);
-                            topper.classList.remove('tooltip')
-                           },15000)
+                            let topper = document.querySelector('.topDivs')
+                            let msg = document.createElement("span");
+                            msg.classList.add("tooltiptext");
+                            msg.innerHTML = "Sie werden hier mehr sehen, sobald sie die Agentur zu mehr Projekte beauftragen";
+                            msg.style.visibility = "visible"
+                            topper.appendChild(msg);
+                            setTimeout(function () {
+                                //hide message after 0.25 minute
+                                topper.removeChild(msg);
+                                topper.classList.remove('tooltip')
+                            }, 15000)
                         }
                     }
 
@@ -748,11 +736,27 @@ let readyStateCheckInterval = setInterval(function () {
                 e.preventDefault();
             }
         }
+        //give the user a message  that drag and drop is also possible, but only if he is admin
+        document.getElementById('imagePreview').addEventListener('mouseover', () => {
+            if (!getCookie('msg')&&roleList.includes(1)) {
+                setCookie('msg', 'show', 2);
+                let topper = document.querySelector('.topDivs')
+                let msg1 = document.createElement("span");
+                msg1.classList.add("tooltiptext");
+                msg1.innerHTML = "Sie können auch Dateien per Drag and Drop hochladen";
+                msg1.style.visibility = "visible"
+                topper.appendChild(msg1);
+                let eventFunc = () => {
+                    topper.removeChild(msg1);
+                }
+                setTimeout(eventFunc, 15000)
+            }
+        })
+
         addMemberWithEmail();
         let projectName = document.getElementById("projectname");
         projectName.addEventListener("keyup", function () {
             let feedback = document.getElementById("nameToLong");
-            console.log(projectName.value.length);
             if (projectName.value.length >= 80) {
                 feedback.style.color = "red";
                 feedback.innerHTML = "<strong>Name zu lang!</strong>";
@@ -813,7 +817,6 @@ let readyStateCheckInterval = setInterval(function () {
                         if (sendArray[i].email === value.email && !(savedEmail.includes(sendArray[i].email))) {
                             savedEmail.push(value.email);
                             sendArray.splice(i, 1);
-                            console.log("sliced " + value.email + " index " + i);
                         }
                     }
 
@@ -825,7 +828,6 @@ let readyStateCheckInterval = setInterval(function () {
                     sendArray.push(arrayBefore[i]);
                 }
             }
-            console.log(sendArray);
             evt.preventDefault();
         });
         //beim submit Event wird der Submit gehindert
@@ -856,7 +858,6 @@ let readyStateCheckInterval = setInterval(function () {
     });
     inputFile.addEventListener("change", function () {
         const file = this.files[0];
-        console.log(file);
         previewFile.style.fontSize = "12px";
         if (file) {
             if (file.type === "application/pdf") {
@@ -946,6 +947,7 @@ function addMember() {
             a = true;
         }
         document.getElementById('searchform').style.display = "none";
+        document.getElementById("message").style.display="none"
         addButton.value = "Zu Projekt hinzufügen";
 
         //springe zum Anfang der Seite
@@ -986,7 +988,6 @@ function addMember() {
                         jasonmembers.push(member);
                     }
                     jasonmembers.sort();
-                    console.log(jasonmembers);
                     sendArray = jasonmembers;
                     parent.style.background = "#FFA500";
                 });
@@ -1016,7 +1017,6 @@ function addMember() {
                         jasonmembers.push(member);
                     }
                     jasonmembers.sort();
-                    console.log(jasonmembers);
                     sendArray = jasonmembers;
                     parent.style.background = "#00FF66"
                 });
@@ -1038,9 +1038,7 @@ function addMember() {
                         }
 
                     }
-                    console.log(jasonmembers);
                     jasonmembers.sort();
-                    console.log(jasonmembers);
                     sendArray = jasonmembers;
                     parent.style.background = "white";
                 });
@@ -1055,15 +1053,12 @@ function addMember() {
             }
         }
     } else {
-        console.log(sendArray);
         addButton.value = "Member auswählen";
         select = true;
-        console.log("Add Member");
         if (boolstatus && !a) {
             document.getElementById("loeschen").style.display = "inline";
         }
         document.getElementById('searchform').style.display = "block";
-        document.getElementById('searchform').value = "";
         for (let i = 0; i < arrayLength; i++) {
             content[i].style.background = "white";
             content[i].style.transform = "scale(0.9)";
@@ -1078,12 +1073,13 @@ function addMember() {
         }
         //springe zum Anfang der Seite
         document.getElementById('projectsScrollContainer').scrollTo(0, 0);
-
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "block";
             projecst[i].style.border = "4px solid black";
             projecst[i].style.background = "white";
         }
+        //suche wieder wenn suche eingegeben wurde
+        if ($("#input").val.length > 0) showRes()
     }
 }
 
@@ -1094,6 +1090,9 @@ function changeClientState(members, role, id) {
     let addButton = document.getElementById("btnAddMember");
     let jasonmembers = [];
     let userIDs = [];
+    //disable Search
+    document.getElementById('searchform').style.display = "none"
+    document.getElementById("message").style.display="none"
     if (select) {
         //speichre aktuelle Position
         yScrollPosition = document.getElementById('projectsScrollContainer').scrollTop;
@@ -1101,7 +1100,6 @@ function changeClientState(members, role, id) {
 
         //springe zum Anfang der Seite
         document.getElementById('projectsScrollContainer').scrollTo(0, 0);
-        console.log("Posttion: " + yScrollPosition);
 
         for (let i = 0; i < projects.length; i++) {
             projects[i].style.display = "none";
@@ -1145,7 +1143,6 @@ function changeClientState(members, role, id) {
                 }
             }
         }
-        console.log(jasonmembers);
         addButton.value = "Zu Projekt hinzufügen";
         for (let i = 0; i < arrayLength; i++) {
             let buttonAdmin = document.createElement("button");
@@ -1170,13 +1167,11 @@ function changeClientState(members, role, id) {
                     }
 
                 }
-                console.log("includes " + include);
                 if (include) {
                     let member = {"email": email, "role": role};
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
-                console.log(jasonmembers);
                 sendArray = jasonmembers;
                 parent.style.background = "#FFA500";
             });
@@ -1208,7 +1203,6 @@ function changeClientState(members, role, id) {
                     jasonmembers.push(member);
                 }
                 jasonmembers.sort();
-                console.log(jasonmembers);
                 sendArray = jasonmembers;
                 parent.style.background = "#00FF66"
             });
@@ -1243,12 +1237,10 @@ function changeClientState(members, role, id) {
 
                 }
                 jasonmembers.sort();
-                console.log(jasonmembers);
                 sendArray = jasonmembers;
                 parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
-            console.log(content[i].style.backgroundColor);
             //schaut ob der Account schon im Projekt ist
             if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
                 buttonMember.style.display = "inline";
@@ -1269,8 +1261,8 @@ function changeClientState(members, role, id) {
             select = false;
         }
     } else {
-
-        console.log(sendArray);
+        //Enable Search
+        document.getElementById('searchform').style.display = "block"
         addButton.value = "Member auswählen";
         select = true;
         for (let i = 0; i < arrayLength; i++) {
@@ -1285,6 +1277,8 @@ function changeClientState(members, role, id) {
         for (let i = 0; i < projects.length; i++) {
             projects[i].style.display = "block";
         }
+        //suche wieder wenn suche eingegeben wurde
+        if ($("#input").val.length > 0) showRes()
         //springe zur gespeicherten Position
         document.getElementById('projectsScrollContainer').scrollTop = yScrollPosition;
     }
@@ -1298,12 +1292,9 @@ function sendNewProject() {
     let progressBar = document.getElementById("loader");
     let percentage = document.getElementById("percentage");
     let tmpArray = JSON.stringify(sendArray);
-    console.log(projectname);
-    console.log(tmpArray);
     let sendURL = window.location.origin + "/design-revision/api/project/create";
     data.append("createproject", "");
     data.append("name", projectname);
-    console.log(projectname);
     data.append("members", tmpArray);
     data.append("file", sendFile, sendFile.name);
     let xhr = new XMLHttpRequest();
@@ -1314,7 +1305,6 @@ function sendNewProject() {
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4 && this.status === 201) {
             showmes("info", "Projekt erfolgreich erstellt");
-            console.log(this.responseText);
 
         } else if (this.readyState === 4) {
             showmes("error", "Projekt konnte nicht erstellt werden");
@@ -1333,13 +1323,11 @@ function sendNewProject() {
 
 function sendDelet(id) {
     let data = "id=" + id;
-    console.log(id);
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4 && this.status === 204) {
             showmes("info", "Projekt erfolgreich gelöscht");
-            console.log(this.responseText);
 
 
         } else if (this.readyState === 4) {
@@ -1360,8 +1348,6 @@ function sendUpdateProject() {
     let tmpArray1 = JSON.stringify(arrayBefore);
     let bool = false;
     let localFile = sendFile;
-    console.log(sendArray);
-    console.log(arrayBefore);
     let b = true;
     let counter = 0;
     let waitMember = false;
@@ -1379,7 +1365,6 @@ function sendUpdateProject() {
         $.each(JSON.parse(tmpArray1), function (key, value) {
             if (tmpArray.indexOf(value.email) == -1) {
                 removeProjectMember(updateProjectId, value.email, value.role);
-                console.log("Remove");
                 b = false;
                 counter++;
                 hadToChange = true;
@@ -1395,9 +1380,6 @@ function sendUpdateProject() {
                     waitMember = true;
                     clearInterval(awaitResonse);
                 }
-                console.log("still waiting");
-                console.log(counter);
-                console.log(counterForSendedMemberXhr);
             }, 4000);
         } else {
             waitMember = true;
@@ -1415,7 +1397,6 @@ function sendUpdateProject() {
                     previewDefaulText.style.color = "red";
                     previewFile.innerHTML = "Bitte PDF hinzufügen";
                     previewFile.style.display = "none";
-                    console.log("Hello");
                     setTimeout(function () {
                         if (sendFile === undefined) {
                             previewDefaulText.style.display = "block";
@@ -1440,10 +1421,9 @@ function sendUpdateProject() {
 
                     if (this.readyState === 4 && this.status === 201) {
                         showmes("info", "Datei wurde hochgeladen");
-                        console.log(this.responseText);
 
                     } else if (this.readyState === 4 && this.status === 409) {
-                        showmes("error", "Der Projektstatus ist nicht zu bearbeiten, also können sie keine neue PDF hochladen");
+                        showmes("error", 'Der Projektstatus ist nicht "wird bearbeitet", also können sie keine neue PDF hochladen');
                     } else if (this.readyState === 4) {
                         showmes("error", "Datei konnte nicht hochgeladen werden");
                     }
@@ -1464,7 +1444,6 @@ function sendUpdateProject() {
 function addProjectMember(projectId, memberMail, memberRole) {
     let member = {"email": memberMail, "role": memberRole};
     let tmpMember = JSON.stringify(member);
-    console.log("Add:" + tmpMember);
     //used raw Data else it did not work
     let data = "id=" + projectId + "&member=" + tmpMember;
     let xhr = new XMLHttpRequest();
@@ -1488,7 +1467,6 @@ function addProjectMember(projectId, memberMail, memberRole) {
             message.style.display = "none";
             message.innerHTML = "";
         }, 4000);
-        console.log(this.responseText);
     });
 
     xhr.open("PUT", window.location.origin + "/design-revision/api/project/addmember");
@@ -1501,7 +1479,6 @@ function addProjectMember(projectId, memberMail, memberRole) {
 function removeProjectMember(projectId, memberMail, memberRole) {
     let member = {"email": memberMail, "role": memberRole};
     let tmpMember = JSON.stringify(member);
-    console.log("Remove:" + tmpMember);
     let memberID;
     //holt mithilfe der E_Mail die Id des Members
     let content = document.querySelectorAll('[data-email');
@@ -1510,7 +1487,6 @@ function removeProjectMember(projectId, memberMail, memberRole) {
             memberID = content[i].getAttribute('data-memberId');
         }
     }
-    console.log(memberID);
     let data = "id=" + projectId + "&member=" + memberID;
     let xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
@@ -1535,7 +1511,6 @@ function removeProjectMember(projectId, memberMail, memberRole) {
                 message.style.display = "none";
                 message.innerHTML = "";
             }, 4000);
-            console.log(this.responseText);
         }
     );
     xhr.open("PUT", window.location.origin + "/design-revision/api/project/removemember");
@@ -1566,7 +1541,6 @@ function update_progress(event, data) {
         //there is no better way to get the process ov the upload than by detection the size of the dataForm
         let percentage1 = document.getElementById("percentage");
         let percentage = Math.floor((event.loaded / size) * 100);
-        console.log("percent " + percentage + '%');
         percentage1.style.display = "block";
         percentage1.innerHTML = percentage + " %";
     } else {
@@ -1587,7 +1561,6 @@ function addMemberWithEmail() {
         if (emailFiled.value != "") {
             objMember = {"email": member, "role": role};
             sendArrayFields[0] = objMember;
-            console.log(sendArrayFields);
         } else {
             adminOrMember.value = "";
             role = -1;
@@ -1597,7 +1570,6 @@ function addMemberWithEmail() {
             } else {
                 sendArrayFields = [];
             }
-            console.log(sendArrayFields);
         }
     };
     adminOrMember.onchange = function () {
@@ -1606,13 +1578,11 @@ function addMemberWithEmail() {
             role = "0";
             objMember = {"email": member, "role": role};
             sendArrayFields[0] = objMember;
-            console.log(sendArrayFields);
         }
         if (test === "Admin") {
             role = "1";
             objMember = {"email": member, "role": role};
             sendArrayFields[0] = objMember;
-            console.log(sendArrayFields);
         }
 
 
@@ -1636,6 +1606,10 @@ function addEmailField() {
             mail.required = true;
             let adminOrMember = document.getElementById('AdminOrMember');
             adminOrMember.required = true;
+        }
+        //hides addMore E-mail Fields button
+        if (moreMember == 2) {
+            document.getElementById("newEmail").style.display = "none"
         }
         emailClone.setAttribute('data-emailFormId', "" + moreMember);
         emailClone.type = "email";
@@ -1663,6 +1637,10 @@ function addEmailField() {
             emailSpan.removeChild(selectClone);
             emailSpan.removeChild(remove);
             moreMember--;
+            //shows addMore E-mail Fields button
+            if (moreMember == 2) {
+                document.getElementById("newEmail").style.display = "inline"
+            }
             //Allows to send empty Fields again in Update Project
             if (moreMember == 1) {
                 //this is looking what state the User is update or Create Project
@@ -1673,7 +1651,6 @@ function addEmailField() {
                     adminOrMember.required = false;
                 }
             }
-            console.log(sendArrayFields);
 
         };
         emailClone.onblur = function () {
@@ -1687,7 +1664,6 @@ function addEmailField() {
                     sendArrayFields[i] = undefined;
                 }
             }
-            console.log(sendArrayFields);
         };
         selectClone.onchange = function () {
             let index = this.getAttribute('data-emailFormId');
@@ -1696,7 +1672,6 @@ function addEmailField() {
                 role = "0";
                 objMember = {"email": member, "role": role};
                 sendArrayFields[index] = objMember;
-                console.log(sendArrayFields);
             }
             if (test === "Admin") {
                 role = "1";
@@ -1710,7 +1685,6 @@ function addEmailField() {
                     sendArrayFields[i] = undefined;
                 }
             }
-            console.log(sendArrayFields);
         };
     }
 }
@@ -1726,7 +1700,6 @@ function putArrayTogether() {
     for (let i = 0; i < sendArray.length; i++) {
         helpSendArray.push(sendArray[i]);
     }
-    console.log(helpSendArray);
     //schaut ob sendArray leer ist
     if (sendArray.length < 1) {
         //fügt Member in hilfs Array
@@ -1738,7 +1711,6 @@ function putArrayTogether() {
             if (arr.indexOf(el) !== i && acc.indexOf(el) < 0) acc.push(el);
             return acc;
         }, []);
-        console.log(duplicates);
         //wenn duplicates leer ist wird nie die gleiche E-Mail verwedet
         if (!(duplicates.length < 1)) {
             message.style.color = "red";
@@ -1832,9 +1804,6 @@ function putArrayTogether() {
         message.innerHTML = "";
     }
 
-    console.log("Field:" + JSON.stringify(sendArrayFields));
-    console.log("Send:" + JSON.stringify(sendArray));
-    console.log(allRight);
     return allRight;
 
 }
@@ -1867,7 +1836,6 @@ function cleraForm() {
         if (updateOrCreate) {
             addMember();
         } else {
-            console.log("Else");
             document.getElementById('btnAddMember').click();
         }
 
@@ -1938,9 +1906,7 @@ function autocomplete(inp, arr) {
         removeActive(x);
         if (currentFocus >= x.length) currentFocus = 0;
         if (currentFocus < 0) currentFocus = (x.length - 1);
-        console.log(currentFocus);
         x[currentFocus].classList.add("autocomplete-active");
-        console.log(x[currentFocus]);
     }
 
     function removeActive(x) {
