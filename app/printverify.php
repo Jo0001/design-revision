@@ -67,7 +67,7 @@ if (!empty($_POST['code']) && !empty($_GET['id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Druckfreigabe bestätigen</title>
     <link rel="stylesheet" type="text/css" href="../files/css/layout.css">
-    <link rel="icon" href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" type="image/x-icon">
 </head>
 <body>
 <div class="middle">

@@ -42,7 +42,7 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
-    <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Reset Password</title>

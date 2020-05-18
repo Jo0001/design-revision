@@ -254,10 +254,10 @@ function generate() {
                         //Abfrage für den Status ob der Kunde gelöscht werden kann
 
                         if (textStatus.innerHTML === "Fertig/Druckfreigabe") {
-                            statusImg.setAttribute("src", "https://cdn-design-revision.netlify.com/files/img/XBereit.png");
+                            statusImg.setAttribute("src", "https://cdn-design-revision.netlify.app/files/img/XBereit.png");
                             boolStatus1 = true;
                         } else {
-                            statusImg.setAttribute("src", "https://cdn-design-revision.netlify.com/files/img/XWarten.png");
+                            statusImg.setAttribute("src", "https://cdn-design-revision.netlify.app/files/img/XWarten.png");
                             boolStatus1 = false;
                         }
 

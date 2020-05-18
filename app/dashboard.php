@@ -15,13 +15,13 @@ if (!isLoggedIn()) {
     <link href="../files/css/message.css" rel="stylesheet">
     <script src="../files/js/CustumorDashboard.js"></script>
     <script src="../files/js/message.js"></script>
-    <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
 </head>
 <body style="overflow: hidden;display:none">
 <div class="topDivs">
-    <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
+    <img alt="tick" height="100%" src="https://cdn-design-revision.netlify.app/files/img/logo.png"
          style="float: left"
          width="100">
     <div id="pageLoader"></div>
@@ -63,7 +63,7 @@ if (!isLoggedIn()) {
                type="button"
                value="Datei suchen"/>
         <div class="image-preview" id="imagePreview">
-            <img alt="PDF" id="pdfIcon" src="https://cdn-design-revision.netlify.com/files/img/pdf.icon.png"
+            <img alt="PDF" id="pdfIcon" src="https://cdn-design-revision.netlify.app/files/img/pdf.icon.png"
                  style="display:none;width: 25%;height: 80%;padding-left: 5px"/><br>
             <span class="image-preview__file"></span>
             <span class="image-preview__default-text">Keine Datei ausgew&auml;lt</span>

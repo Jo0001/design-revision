@@ -10,7 +10,7 @@ if(!isLoggedIn()){
 <head>
     <meta charset="UTF-8">
     <title>Editor - DesignRevision</title>
-    <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="../files/css/Viewport.css" rel="stylesheet">
     <link href="../files/css/CommentDesign.css" rel="stylesheet">
 </head>
@@ -200,13 +200,13 @@ if(!isLoggedIn()){
 </div>
 <div class="toolbox" style="top: 40%; right: 1%;outline-style:none;box-shadow:none;border-color:transparent;">
     <button class="disSelected" id="movePdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
-            alt="Move" class="icon" src="https://cdn-design-revision.netlify.com/files/img/move.png"/></button>
+            alt="Move" class="icon" src="https://cdn-design-revision.netlify.app/files/img/move.png"/></button>
     <br/>
     <button class="disSelected" id="zoomPdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
-            alt="Zoom" class="icon" src="https://cdn-design-revision.netlify.com/files/img/zoom.png"/></button>
+            alt="Zoom" class="icon" src="https://cdn-design-revision.netlify.app/files/img/zoom.png"/></button>
     <br/>
     <button class="disSelected" id="createComment" style="left: 40px; right: 40px; background-color: Transparent;"><img
-            alt="Comment" class="icon" src="https://cdn-design-revision.netlify.com/files/img/addComment.png"/></button>
+            alt="Comment" class="icon" src="https://cdn-design-revision.netlify.app/files/img/addComment.png"/></button>
 
 </div>
 <div class="lowerBar" style="outline-style:none;box-shadow:none;border-color:transparent;">

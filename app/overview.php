@@ -10,7 +10,7 @@ if (!isLoggedIn()) {
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <title>Versionen</title>
     <link href="../files/css/VersionOverview.css" rel="stylesheet">
     <script src="../files/js/message.js"></script>
@@ -20,7 +20,7 @@ if (!isLoggedIn()) {
 <body>
 <div class="topimg">
     <a href="../app/">Zur&uuml;ck</a>
-    <img alt="tick" height="100" src="https://cdn-design-revision.netlify.com/files/img/logo.png"
+    <img alt="tick" height="100" src="https://cdn-design-revision.netlify.app/files/img/logo.png"
          style="float: left"
          width="100">
     <h1>Versions&uuml;bersicht</h1>

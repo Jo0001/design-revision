@@ -31,7 +31,7 @@ if (!empty($_POST['email'])) {
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
     <title>Kennwort vergessen</title>
     <link rel=\"stylesheet\" type=\"text/css\" href=\"../files/css/layout.css\">
-    <link rel=\"icon\" href=\"https://cdn-design-revision.netlify.com/files/img/favicon.ico\" type=\"image/x-icon\">
+    <link rel=\"icon\" href=\"https://cdn-design-revision.netlify.app/files/img/favicon.ico\" type=\"image/x-icon\">
 </head>
 <body>
 <div id=\"verifyBox\" class=\"middle success\">
@@ -67,7 +67,7 @@ if (!empty($_POST['email'])) {
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <link rel="icon" href="https://cdn-design-revision.netlify.com/files/img/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" type="image/x-icon">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title> Reset Password </title>
     <link href="../files/css/Login.css" rel="stylesheet">
