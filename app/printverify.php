@@ -27,7 +27,7 @@ if (!empty($_POST['code']) && !empty($_GET['id'])) {
                         //Sendmail to all members
                         $uname = getUser('name');
                         $pname = $project['p_name'];
-                        $link = $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/view.php?id=" . explode("project_", $pid)[1];
+                        $link = $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/view.php?id=" . explode("project_", $pid)[1];
 
                         $members = json_decode($project['members'], true);
                         foreach ($members as $member) {

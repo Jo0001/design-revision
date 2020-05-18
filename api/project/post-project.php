@@ -100,7 +100,7 @@ function createProject()
                                 if ($status == INVITE) {
                                     informNewbie($tmp, $projectname, $name);
                                 } else {
-                                    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . $pid;
+                                    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/edit.php?id=" . $pid;
                                     sendMail($tmp, IdToName($pdo, $id), "Einladung zu \"" . $projectname . "\"", parseHTML("../../libs/templates/emailFreigebenAcc.html", $name, $link, $projectname, 1));
                                 }
                             }
@@ -172,7 +172,7 @@ function updateFile()
                                     }
                                     //Inform clients
                                     $projectname = getLatestProjectData($pid, $pdo)[0];
-                                    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/simulate/edit.php?id=" . explode("project_", $pid)[1];
+                                    $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/edit.php?id=" . explode("project_", $pid)[1];
                                     $version = getLatestProjectData($pid, $pdo)[1];
                                     $members = json_decode(getLatestProjectData($pid, $pdo)['members'], true);
                                     foreach ($members as $member) {

@@ -1,3 +1,10 @@
+<?php
+require "../libs/auth.php";
+if (!isLoggedIn()) {
+    header("Location: ../login/?returnto=" . getCurrentURL());
+    die;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,31 +28,31 @@
 </div>
 <div class="space">
 </div>
-        <div class="table">
-            <div class="row">
-                <div class="nummer">
-                    <p>Nummer</p>
-                </div>
-                <div class="link">
-                    <p>Link</p>
-                </div>
-                <div class="ZuletztBearbeitet">
-                    <p>Zuletzt Bearbeitet</p>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="tnummer" id="tnummer">
-
-                </div>
-                <div class="tlink" id="tlink">
-
-                </div>
-                <div class="tZuletztBearbeitet" id="tZuletztBearbeitet">
-
-                </div>
-            </div>
+<div class="table">
+    <div class="row">
+        <div class="nummer">
+            <p>Nummer</p>
         </div>
+        <div class="link">
+            <p>Link</p>
+        </div>
+        <div class="ZuletztBearbeitet">
+            <p>Zuletzt Bearbeitet</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="tnummer" id="tnummer">
+
+        </div>
+        <div class="tlink" id="tlink">
+
+        </div>
+        <div class="tZuletztBearbeitet" id="tZuletztBearbeitet">
+
+        </div>
+    </div>
+</div>
 <!-- response message if sending was successful -->
 <div class="warn" id="mes"></div>
 </body>

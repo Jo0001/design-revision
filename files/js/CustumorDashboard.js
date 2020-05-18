@@ -189,9 +189,9 @@ function generate() {
         if (requestredy) {
             clearInterval(checkForProjects);
             projectid = projectsArray[counterForId];
-            let link = window.location.origin + "/design-revision/simulate/view.php?id=" + projectid;
+            let link = window.location.origin + "/design-revision/app/view.php?id=" + projectid;
             projektname.href = link;
-            versionen.href = window.location.origin + "/design-revision/app/VersionOverview.html?id=" + projectid;
+            versionen.href = window.location.origin + "/design-revision/app/overview.php?id=" + projectid;
             //customerdiv id geben
             customerdiv.setAttribute('data-id', "" + projectsArray[counterForId]);
             ableNewProject = counterForId < projectsArray.length;
