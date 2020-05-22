@@ -24,10 +24,7 @@ DefaultLanguage de
 	Header unset X-Powered-By
 </IfModule>
 
-AddDefaultCharset UTF-8
-DefaultLanguage de
-
 ServerSignature Off
 
 #TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.61"
+Header set X-Build-Version "1.62"

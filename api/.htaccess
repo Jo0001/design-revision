@@ -1,2 +1,2 @@
-#Hide .php extension
+#Set default page
 DirectoryIndex api.php
