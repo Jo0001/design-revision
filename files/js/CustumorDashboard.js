@@ -306,7 +306,7 @@ function generate() {
                 };
             }
         }
-    }, 10);
+    }, 1);
     let checkForProjectsToCreateMember = setInterval(function () {
         if (requestredy && gotProject) {
             clearInterval(checkForProjectsToCreateMember);
@@ -367,7 +367,7 @@ function generate() {
             counterForUser++;
 
         }
-    }, 10);
+    }, 1);
 
 
     customerdiv.appendChild(clientname);
