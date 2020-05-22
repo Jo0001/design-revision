@@ -1,7 +1,0 @@
-login.php
-reset.php
-auth.php
-signup.php
-
-put-project in /updatestatus ->'TODO'
-printverify in email link

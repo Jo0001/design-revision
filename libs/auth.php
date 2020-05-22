@@ -20,7 +20,6 @@ function logIn($email, $password, $location)
         $user = $statement->fetch();
 
         if ($user !== false && password_verify($password, $user['pswd'])) {
-          //  $_SESSION['user-status'] = $user['status']; //TODO Not used??
             $_SESSION['user-log'] = "true";
             $_SESSION['user-id'] = $user['pk_id'];
             date_default_timezone_set('Europe/Berlin');
