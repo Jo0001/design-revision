@@ -21,6 +21,11 @@ function createProject()
             $projectname = filter_var($_POST['name'], FILTER_SANITIZE_STRING);
             $members = filter_var($_POST['members'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
 
+            $phash = md5($projectname . $members);
+            if (!empty($_SESSION["phash"]) && $phash === $_SESSION["phash"]) {
+                showError("Identical project", 409);
+            }
+
             if (!filterMembers($members)) {
                 showError("No (valid) JSON Data", 400);
             }
@@ -63,7 +68,6 @@ function createProject()
                         }
                         //convert json post to php array format
                         $members = json_decode($members, true);
-
                         //Remove double entries from the array
                         $members = array_unique($members, SORT_REGULAR);
 
@@ -87,7 +91,7 @@ function createProject()
                                 $id = emailToId($tmp);
                                 //get array with all roles and emails as index and select the one equal to the current email and save it
                                 $role = array_column($members, 'role', 'email')[$tmp];
-                                array_push($memberids, array("id" => (int)$id, "role" => (int) $role));
+                                array_push($memberids, array("id" => (int)$id, "role" => (int)$role));
 
                                 updateUserProjects($pdo, $id, $pid);
 
@@ -129,6 +133,9 @@ function createProject()
                         showError("Something went really wrong", 500);
                     }
                     header("HTTP/1.1 201 Created ");
+
+                    $_SESSION["phash"] = $phash;
+                    header("x-test: $phash");
                 } else {
                     showError("Something went seriously wrong", 500);
                 }
