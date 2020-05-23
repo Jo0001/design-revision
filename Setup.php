@@ -1,7 +1,14 @@
 <?php
 require "libs/sendEmail.php";
 $done = true;
-if (sendMail(emailFromaddress, emailFromname, "Desgin Revision Setup test", "Mail sending is working fine :)")) {
+//Set values for php.ini
+ini_set('file_uploads', true);
+ini_set('memory_limit', '515M');
+ini_set('post_max_size', '510M');
+ini_set('upload_max_filesize', '500M');
+ini_set('display_errors', 0);
+
+if (sendMail(emailFromaddress, emailFromname, "Design Revision Setup test", "Mail sending is working fine :)")) {
     echo "Testemail wurde erfolgreich gesendet &#10003;<br>";
 } else {
     echo "Fehler beim Versenden der Testmail. Bitte Zugangsdaten überprüfen<br>";
@@ -40,7 +47,6 @@ if ($done) {
 }
 
 if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
-    // SSL connection
     echo "<br>Hinweis: Es wurde eine https Verbindung erkannt. Es wird empfohlen die automatische Weiterleitung direkt über den Server Einzustellen (normalerweise Standart).
 <br> Falls dies nicht möglich ist müssen die Zeilen 9-11 in der .htaccess Datei aktiviert werden (#vor den Zeilen entferen)";
 }

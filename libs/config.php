@@ -20,3 +20,7 @@ define("dbDsn","mysql:host=localhost;dbname=design_revision");
 define("dbUsername","dsnRev");
 //Password
 define("dbPassword","4_DiDsrev2019");
+
+/*API Settings*/
+//Should we output some useful information for developers
+define("apiDebug",false);

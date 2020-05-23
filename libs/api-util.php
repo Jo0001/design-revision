@@ -1,4 +1,6 @@
 <?php
+require_once("config.php");
+
 /**
  * Shows the errors as an informative message
  * @param $error String as custom Error Message to display
@@ -27,8 +29,13 @@ function showError($error, $code)
         header("HTTP/1.1 500 Internal Server Error");
         $http_message = "Internal Server Error";
     }
-    $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.8));
-    handleOutput($err);
+    if (apiDebug) {
+        $err = array("error" => array("message" => $error, "http-code" => $code, "http-message" => $http_message, "method" => $_SERVER['REQUEST_METHOD'], "query-string" => $_SERVER['QUERY_STRING'], "api-version" => 2.8));
+        handleOutput($err);
+    } else {
+        $err = array("error" => array("http-code" => $code, "http-message" => $http_message));
+        handleOutput($err);
+    }
     die;
 }
 
