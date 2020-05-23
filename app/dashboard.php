@@ -29,7 +29,7 @@ if (!isLoggedIn()) {
     <form enctype="multipart/form-data" autocomplete="off" id="search1">
         <div class="autocomplete" style="float: right">
             <label>
-                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektnname"
+                <input id="searchform" name="searchform" onkeyup="showRes()" placeholder="Projektname"
                        type="text">
             </label>
         </div>
