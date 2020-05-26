@@ -483,7 +483,6 @@ function setupViewport() {
 
 //API-Request-Stuff
 function handleServerResponse(request, successCallback) {
-    try {
         if (request.readyState === 4 && request.status === 200) {
             try {
                 successCallback(JSON.parse(request.response));
@@ -498,10 +497,6 @@ function handleServerResponse(request, successCallback) {
         } else if (request.readyState === 4 && request.status === 404) {
             window.alert("Nichts gefunden");
         }
-    } catch (r) {
-        console.log(r);
-        console.log(request.response);
-    }
 }
 
 //Error-Correction
@@ -647,13 +642,9 @@ function createTextComment(comment) {
                 let data = "id=" + projectId + "&cid=" + comment.cid;
                 requestURL = window.location.origin + "/design-revision/api/project/solvecomment";
                 requestSolved.open('PUT', requestURL);
-                requestSolved.addEventListener('readystatechange', function (e) {
-                    handleServerResponse(requestSolved, function (response) {
-                        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
-                        clearCommentsAndGetNew();
-                    });
-                });
                 requestSolved.send(data);
+                document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
+                clearCommentsAndGetNew();
             }
         });
     }
