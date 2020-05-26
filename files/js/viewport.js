@@ -483,19 +483,24 @@ function setupViewport() {
 
 //API-Request-Stuff
 function handleServerResponse(request, successCallback) {
-    if (request.readyState === 4 && request.status === 200) {
-        try {
-            successCallback(JSON.parse(request.response));
-        } catch (e) {
-            console.log(request.response);
-            throw new Error("Fuck... Somehow thats non JSON. Why would you give me non JSON??! " + e);
+    try {
+        if (request.readyState === 4 && request.status === 200) {
+            try {
+                successCallback(JSON.parse(request.response));
+            } catch (e) {
+                console.log(request.response);
+                throw new Error("Fuck... Somehow thats non JSON. Why would you give me non JSON??! " + e);
+            }
+        } else if (request.readyState === 4 && request.status === 401) {
+            window.alert("keine Berechtigung");
+        } else if (request.readyState === 4 && request.status === 403) {
+            window.alert("Forbidden");
+        } else if (request.readyState === 4 && request.status === 404) {
+            window.alert("Nichts gefunden");
         }
-    } else if (request.readyState === 4 && request.status === 401) {
-        window.alert("keine Berechtigung");
-    } else if (request.readyState === 4 && request.status === 403) {
-        window.alert("Forbidden");
-    } else if (request.readyState === 4 && request.status === 404) {
-        window.alert("Nichts gefunden");
+    } catch (r) {
+        console.log(r);
+        console.log(request.response);
     }
 }
 
@@ -636,17 +641,20 @@ function createTextComment(comment) {
         document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
     } else {
         document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").addEventListener("click", function () {
-            let requestSolved = new XMLHttpRequest();
-            requestSolved.withCredentials = true;
-            requestURL = window.location.origin + "/design-revision/api/project/solvecomment?id=" + projectId + "&cid=" + comment.cid;
-            requestSolved.open('PUT', requestURL);
-            requestSolved.addEventListener('readystatechange', function (e) {
-                handleServerResponse(requestSolved, function (response) {
-                    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
-                    clearCommentsAndGetNew();
+            if (document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked) {
+                let requestSolved = new XMLHttpRequest();
+                requestSolved.withCredentials = true;
+                let data = "id=" + projectId + "&cid=" + comment.cid;
+                requestURL = window.location.origin + "/design-revision/api/project/solvecomment";
+                requestSolved.open('PUT', requestURL);
+                requestSolved.addEventListener('readystatechange', function (e) {
+                    handleServerResponse(requestSolved, function (response) {
+                        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
+                        clearCommentsAndGetNew();
+                    });
                 });
-            });
-            requestSolved.send();
+                requestSolved.send(data);
+            }
         });
     }
 
