@@ -333,7 +333,7 @@ function solveComment()
                             //Loop through every array from that row
                             foreach ($rawdata as $tmp) {
                                 //Check if id matches and change isImplemented to true
-                                if ($tmp['cid'] === $cid) {
+                                if ($tmp['cid'] == $cid) {
                                     //Check if comment isnt already solved
                                     if (!$tmp['isImplemented']) {
 
