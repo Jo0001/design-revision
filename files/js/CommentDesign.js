@@ -7,8 +7,6 @@ let saveCommentBtn;
 let discardCommentBtn;
 
 function setup() {
-
-
     createCommentBtn = document.getElementById("createComment");
     commentArea = document.getElementById("commentArea");
     messageArea = document.getElementById("commentMsg");
@@ -186,7 +184,6 @@ function openCommentDialog() {
     messageDialog.style.top = ((window.screen.height - messageDialog.style.height.replace("px", "") - 120) / 2) + "px";
     messageDialog.style.display = null;
 }
-
 function generateRandomColor() {
     let letters = '0123456789ABCDEF'.split('');
     let color = '#';

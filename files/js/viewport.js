@@ -544,18 +544,22 @@ function clearCommentsAndGetNew() {
                 let allPdfComments = response.data;
                 for (let index = 0; index < allPdfComments.length; index++) {
                     let comment = allPdfComments[index];
-                    if (filter.versionFilter.length === 0) {
-                        filterByPage(comment);
-                    } else {
-                        if (numberInArray(filter.versionFilter, parseInt(comment.version))) {
+                    if (comment.cid !== undefined) {
+                        if (filter.versionFilter.length === 0) {
                             filterByPage(comment);
+                        } else {
+                            if (numberInArray(filter.versionFilter, parseInt(comment.version))) {
+                                filterByPage(comment);
+                            }
                         }
-                    }
 
-                    if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
-                        // console.log(comment);
-                        displayedComments.push(comment);
-                        createComment(comment);
+                        if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
+                            // console.log(comment);
+                            displayedComments.push(comment);
+                            createComment(comment);
+                        }
+                    } else {
+                        console.log("cid null on: " + comment);
                     }
                 }
             } catch (e) {
@@ -626,6 +630,24 @@ function createTextComment(comment) {
         document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Version").innerText = "Version: " + comment.version;
     } catch (e) {
         console.log(e);
+    }
+
+    if (comment.isImplemented) {
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
+    } else {
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").addEventListener("click", function () {
+            let requestSolved = new XMLHttpRequest();
+            requestSolved.withCredentials = true;
+            requestURL = window.location.origin + "/design-revision/api/project/solvecomment?id=" + projectId + "&cid=" + comment.cid;
+            requestSolved.open('PUT', requestURL);
+            requestSolved.addEventListener('readystatechange', function (e) {
+                handleServerResponse(requestSolved, function (response) {
+                    document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
+                    clearCommentsAndGetNew();
+                });
+            });
+            requestSolved.send();
+        });
     }
 
     let xhr = new XMLHttpRequest();
