@@ -17,8 +17,8 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
     $password2 = filter_var($_POST['againPassword'], FILTER_SANITIZE_STRING);
     $name = $firstname . " " . $lastname;
     //Check if passwords match and email is valid
-    //Password needs a length of 8+, normal letters,numbers, one Caps and one special char and password != email
-    if ($password == $password2 && filter_var($email, FILTER_VALIDATE_EMAIL) && preg_match("#.*^(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#", $password) && (strcasecmp($password, $email) != 0)) {
+    //Password needs a length of 8+, normal letters,numbers, one Caps and one special char and password != email and password not longer than 60 characters
+    if ($password == $password2 && filter_var($email, FILTER_VALIDATE_EMAIL) && preg_match("#.*^(?=.{8,20})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$#", $password) && (strcasecmp($password, $email) != 0) && strlen($password) < 61) {
         $pdo = $GLOBALS['pdo'];
         try {
             $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
