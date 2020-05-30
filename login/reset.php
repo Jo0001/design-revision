@@ -3,6 +3,9 @@ require "../libs/sendEmail.php";
 require "../libs/auth.php";
 if (!empty($_POST['email'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_STRING);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        header("Location: ?err=login");
+    }
     $pdo = $GLOBALS['pdo'];
     try {
         $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
@@ -127,7 +130,7 @@ function emailSent()
         if (err === "login") {
             let feedback = document.getElementById("statusEmail");
             feedback.style.color = "red";
-            feedback.innerHTML = "<strong>E-Mail nicht vorhanden</strong>"
+            feedback.innerHTML = "<strong>G&uuml;ltige E-mail eingeben</strong>"
         }
     };
 </script>
