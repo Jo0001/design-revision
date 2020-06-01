@@ -521,9 +521,6 @@ function customerDelate(members, content, arrayLength) {
     btnYes.onclick = function () {
         closeYes(members, content, arrayLength);
     };
-    toggleDialog();
-
-
 }
 
 //Button Ja gedrückt
@@ -1289,34 +1286,36 @@ function changeClientState(members, role, id) {
             let buttonDeletMember = document.createElement("button");
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
-                let parent = buttonDeletMember.parentNode;
-                let email = parent.getAttribute("data-email");
+                //prevent User from deleting all users in one Project
+                if(jasonmembers.length>1) {
+                    let parent = buttonDeletMember.parentNode;
+                    let email = parent.getAttribute("data-email");
 
-                //sorgt für Dynamische Buttons und schaut ob das Mitglied schon im Projekt ist
-                if (!(members.includes(parent.getAttribute('data-memberid')))) {
-                    buttonMember.style.display = "inline";
-                    buttonAdmin.style.display = "none";
-                } else {
-                    let help1 = members.indexOf(parent.getAttribute('data-memberid'));
-                    if (role[help1] == 0) {
+                    //sorgt für Dynamische Buttons und schaut ob das Mitglied schon im Projekt ist
+                    if (!(members.includes(parent.getAttribute('data-memberid')))) {
                         buttonMember.style.display = "inline";
-                    }
-                    if (role[help1] == 1) {
-                        buttonAdmin.style.display = "inline";
-                    }
-                }
-
-                for (let k in jasonmembers) {
-                    if (jasonmembers.hasOwnProperty(k)) {
-                        if (jasonmembers[k].email == email) {
-                            jasonmembers.splice(k, 1);
+                        buttonAdmin.style.display = "none";
+                    } else {
+                        let help1 = members.indexOf(parent.getAttribute('data-memberid'));
+                        if (role[help1] == 0) {
+                            buttonMember.style.display = "inline";
+                        }
+                        if (role[help1] == 1) {
+                            buttonAdmin.style.display = "inline";
                         }
                     }
+                    for (let k in jasonmembers) {
+                        if (jasonmembers.hasOwnProperty(k)) {
+                            if (jasonmembers[k].email == email) {
+                                jasonmembers.splice(k, 1);
+                            }
+                        }
 
+                    }
+                    jasonmembers.sort();
+                    sendArray = jasonmembers;
+                    parent.style.background = "white";
                 }
-                jasonmembers.sort();
-                sendArray = jasonmembers;
-                parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
             //schaut ob der Account schon im Projekt ist
