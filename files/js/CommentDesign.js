@@ -64,6 +64,7 @@ function setup() {
                 if (this.readyState === 4 && this.status === 204) {
                     createComment(comment);
                     createTextComment(comment);
+                    pageTurned();
                     messageDialog.style.display = "none";
                     messageArea.value = "";
                     resetAreaData();

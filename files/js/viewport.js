@@ -644,7 +644,12 @@ function createTextComment(comment) {
                 requestSolved.open('PUT', requestURL);
                 requestSolved.send(data);
                 document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
-                clearCommentsAndGetNew();
+                requestSolved.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4 && this.status === 204) {
+                        pageTurned();
+                        clearCommentsAndGetNew();
+                    }
+                });
             }
         });
     }
