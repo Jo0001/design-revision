@@ -5,6 +5,8 @@ let messageArea;
 let messageDialog;
 let saveCommentBtn;
 let discardCommentBtn;
+let sendBackBtn;
+let printDesign = false;
 
 function setup() {
     createCommentBtn = document.getElementById("createComment");
@@ -13,6 +15,7 @@ function setup() {
     messageDialog = document.getElementById("messageDialog");
     saveCommentBtn = document.getElementById("saveCommentBtn");
     discardCommentBtn = document.getElementById("discardCommentBtn");
+    sendBackBtn = document.getElementById("sendBack");
     //Comment-Setup
     sidebarGroup.add(createCommentBtn);
     createCommentBtn.addEventListener("click", function (e) {
@@ -80,6 +83,8 @@ function setup() {
         messageArea.value = "";
         resetAreaData();
     });
+
+    sendBackBtn.addEventListener("click", handleSendButtonClick);
 }
 
 //CommentArea-Methods
@@ -174,9 +179,96 @@ function endDragHandler(event) {
     }
 }
 
-//UserLoaded-Callback
+//Loaded-Callback
 function loaded() {
     document.getElementById("emailDisplay").innerHTML = user.email;
+}
+
+async function pageTurned() {
+    if (parseInt(pageNumberContainer.value) === pdf.numPages) {
+        sendBackBtn.style.display = null;
+        getComments(function (commentVersionsArray, commentArray) {
+            if (numberInArray(commentVersionsArray, version) && !commentImplemented(commentArray)) {
+                //Comment that has been added this version!
+                sendBackBtn.innerText = "An die Agentur zurückschicken";
+                centerOnScreen(sendBackBtn);
+                printDesign = false;
+                console.log("There are Comments that have been added this version! CurrentVersion: " + version)
+            } else {
+                printDesign = true;
+                sendBackBtn.innerText = "Zum Druckauftrag freigeben";
+                centerOnScreen(sendBackBtn);
+            }
+        });
+    } else {
+        sendBackBtn.style.display = "none";
+    }
+
+    function centerOnScreen(element) {
+        element.style.left = ((document.body.clientWidth - element.offsetWidth) / 2) / document.body.clientWidth * 100 + "%";
+    }
+
+    function commentImplemented(a) {
+        for (let i = 0; i < a.length; i++) {
+            if (!a[i].isImplemented) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function numberInArray(a, num) {
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] === num) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+//Return PDF-Logic
+function getComments(f) {
+    let commentVersionArray = [];
+    let commentArray = [];
+    let requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
+    let request3 = new XMLHttpRequest();
+    let gotAllData = false;
+    request3.open('GET', requestURL);
+    request3.addEventListener('readystatechange', function (e) {
+        handleServerResponse(request3, function (response) {
+            try {
+                let allPdfComments = response.data;
+                for (let index = 0; index < allPdfComments.length; index++) {
+                    commentVersionArray[index] = allPdfComments[index].version;
+                    commentArray[index] = allPdfComments[index];
+                }
+            } catch (e) {
+                console.log(e);
+            }
+            gotAllData = true;
+            f(commentVersionArray, commentArray);
+        });
+    });
+    request3.send();
+}
+
+function handleSendButtonClick(e) {
+    let status;
+    console.log("Btn click!");
+    if (printDesign) {
+        status = "DONE";
+    } else {
+        status = "TODO";
+    }
+
+    let requestStatusChange = new XMLHttpRequest();
+    requestStatusChange.withCredentials = true;
+    let data = "id=" + projectId + "&status=" + status;
+    requestURL = window.location.origin + "/design-revision/api/project/updatestatus";
+    requestStatusChange.open('PUT', requestURL);
+    requestStatusChange.send(data);
+    // window.location = window.origin + "/design-revision/";
 }
 
 //Comment-Creation
@@ -184,6 +276,7 @@ function openCommentDialog() {
     messageDialog.style.top = ((window.screen.height - messageDialog.style.height.replace("px", "") - 120) / 2) + "px";
     messageDialog.style.display = null;
 }
+
 function generateRandomColor() {
     let letters = '0123456789ABCDEF'.split('');
     let color = '#';

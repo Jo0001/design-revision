@@ -773,6 +773,7 @@ function loadPdfPage(scale) {
         num = num >= 1 ? num : 1;
         num = num <= pdf.numPages ? num : pdf.numPages;
         pageNumberContainer.value = num;
+        pageTurned();
         applyFilter();
         pdf.getPage(parseInt(pageNumberContainer.value)).then(function (localPage) {
             pdfPage = localPage;

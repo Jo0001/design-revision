@@ -209,6 +209,7 @@ if(!isLoggedIn()){
             alt="Comment" class="icon" src="https://cdn-design-revision.netlify.app/files/img/addComment.png"/></button>
 
 </div>
+<button style="position: absolute; top: 84%; display: none;" id="sendBack">Send back!</button>
 <div class="lowerBar" style="outline-style:none;box-shadow:none;border-color:transparent;">
     <button class="button" id="decPage" style="left: 40%;">-</button>
     <label>
