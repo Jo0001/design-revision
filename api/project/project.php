@@ -20,7 +20,6 @@ if (!is_null($id)) {
                 $page = explode("?", basename(filter_var($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL))[0];
                 try {
                     if ($page == "data") {
-
                         $statement = $pdo->prepare("SELECT data FROM " . $id);
                         $statement->execute();
                         $rawdata = $statement->fetchAll();

@@ -2,7 +2,7 @@
 require "../../libs/auth.php";
 require "../../libs/api-util.php";
 if (!empty($_GET['id']) && !empty($_GET['pid'])) {
-    $id = filter_var($_GET['id'], FILTER_SANITIZE_STRING);
+    $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
     $pid = "project_" . filter_var($_GET['pid'], FILTER_SANITIZE_STRING);
     if (isLoggedIn()) {
         $pdo = $GLOBALS['pdo'];

@@ -174,7 +174,7 @@ function removemember()
 {
     if (!empty($GLOBALS['_PUT'] ['id']) && !empty($GLOBALS['_PUT'] ['member'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        $member = (int)filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_STRING);
+        $member = (int)filter_var($GLOBALS['_PUT'] ['member'], FILTER_SANITIZE_NUMBER_INT);
         if (isLoggedIn()) {
             $pid = "project_" . $pid;
             $pdo = $GLOBALS['pdo'];
@@ -312,7 +312,7 @@ function solveComment()
 {
     if (isset($GLOBALS['_PUT'] ['id']) && isset($GLOBALS['_PUT'] ['cid'])) {
         $pid = filter_var($GLOBALS['_PUT'] ['id'], FILTER_SANITIZE_STRING);
-        $cid = filter_var($GLOBALS['_PUT'] ['cid'], FILTER_SANITIZE_STRING);
+        $cid = filter_var($GLOBALS['_PUT'] ['cid'], FILTER_SANITIZE_NUMBER_INT);
         if (isLoggedIn()) {
             $pid = "project_" . $pid;
             $pdo = $GLOBALS['pdo'];
