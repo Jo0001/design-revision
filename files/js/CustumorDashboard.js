@@ -16,6 +16,8 @@ let newKeyUp = true;
 let sendArray = [];
 let sendFile;
 let sendArrayFields = [];
+let savedArray = [];
+let saveDeletable = false;
 let updateOrCreate = true;
 let nameLenght = false;
 let moreMember = 1;
@@ -131,12 +133,12 @@ function generate() {
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
-                if ((tmp === null || tmp[0] === undefined)&&userObject.user.status === "VERIFIED") {
+                if ((tmp === null || tmp[0] === undefined) && userObject.user.status === "VERIFIED") {
                     customerdiv.remove();
                     clearInterval(checkForProjects);
                     ableNewProject = false;
-                        request.abort();
-                        destroy_session("noProjects");
+                    request.abort();
+                    destroy_session("noProjects");
                 } else {
                     let tmp1 = tmp[0];
                     for (let i = 1; i < tmp.length; i++) {
@@ -390,6 +392,12 @@ function generate() {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
+            //delete saved Users
+            if(saveDeletable){
+                savedArray = [];
+                console.log('Deleted Saved Users');
+                saveDeletable=false;
+            }
             sendArray = [];
             let mail = document.getElementById('email');
             mail.required = true;
@@ -420,7 +428,9 @@ function generate() {
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
         if (select) {
-            //Disable search in clicked Mode
+            //delete saved Users
+            savedArray = [];
+            saveDeletable= true;
             for (let i = 0; i < arrayMember.length; i++) {
                 //abfrage ob der User Admin ist oder nicht
                 if (arrayMember[i] == userId) {
@@ -628,7 +638,7 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
 
 function showRes() {
     let content = document.querySelectorAll('[data-test');
-    if (!a&&updateOrCreate) {
+    if (!a && updateOrCreate) {
         //manually force the trigger event otherwise autocomplete would not be shown because of click
         $(content[0]).click();
         let element = document.getElementById('searchform');
@@ -685,14 +695,18 @@ let readyStateCheckInterval = setInterval(function () {
                     generate();
                 } else {
                     clearInterval(userInterval);
+                    /*Disable Search and Projects edits until the side has loaded all projects
+                    otherwise incoming projects caused problems*/
+                    document.getElementById('CustumorDashForm').style.display = "block";
+                    document.getElementById('searchform').style.display = "block";
+                    document.getElementById('scrollArea').style.width = "76%"
                     /*es wird geschaut ob der User in keinem Projekt Admin ist ist das der Fall so kann er kein Projekt erstellen,
-                    da der User wenn der dies tuen würde zum Admin werden würde
-                     */
+                    da der User wenn der dies tuen würde zum Admin werden würde */
                     if (!(roleList.includes(1))) {
                         document.getElementById('CustumorDashForm').style.display = "none";
                         document.getElementById('scrollArea').style.width = "100%"
                         console.log(roleList)
-                        if (roleList[1]==undefined) {
+                        if (roleList[1] == undefined) {
                             //give Members who have only one poroject a nice message that they will soon have more projects
                             let topper = document.querySelector('.topDivs')
                             let msg = document.createElement("span");
@@ -738,7 +752,7 @@ let readyStateCheckInterval = setInterval(function () {
         }
         //give the user a message  that drag and drop is also possible, but only if he is admin
         document.getElementById('imagePreview').addEventListener('mouseover', () => {
-            if (!getCookie('msg')&&roleList.includes(1)) {
+            if (!getCookie('msg') && roleList.includes(1)) {
                 setCookie('msg', 'show', 2);
                 let topper = document.querySelector('.topDivs')
                 let msg1 = document.createElement("span");
@@ -947,7 +961,7 @@ function addMember() {
             a = true;
         }
         document.getElementById('searchform').style.display = "none";
-        document.getElementById("message").style.display="none"
+        document.getElementById("message").style.display = "none"
         addButton.value = "Zu Projekt hinzufügen";
 
         //springe zum Anfang der Seite
@@ -956,12 +970,37 @@ function addMember() {
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "none";
         }
+        //emails zwischen speichern
+        let tmpArray = [];
+        for (let j = 0; j < savedArray.length; j++) {
+            tmpArray.push(savedArray[j].email)
+        }
+
         for (let i = 0; i < arrayLength; i++) {
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 userIDs[i] = content[i].getAttribute('data-memberId');
+                //zeige breits gespeicherte Member an
+                if (savedArray.length != 0) {
+                    if (tmpArray.includes(content[i].getAttribute("data-email"))) {
+                        let mail = content[i].getAttribute("data-email")
+                        let index = tmpArray.indexOf(content[i].getAttribute("data-email"));
+                        if (savedArray[index].role == 0) {
+                            content[i].style.background = "#00FF66";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
+                        if (savedArray[index].role == 1) {
+                            content[i].style.background = "#FFA500";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
+                    } else {
+                        //der User wurde noch nicht ausgewählt
+                        content[i].style.background = "white";
+                    }
+                }
                 content[i].style.display = "block";
                 content[i].style.display = "block";
-                content[i].style.background = "white";
                 content[i].style.transform = "scale(1)";
                 let buttonAdmin = document.createElement("button");
                 buttonAdmin.innerHTML = "Admin";
@@ -1047,6 +1086,16 @@ function addMember() {
                 //sorgt für Dynamische Buttons
                 buttonMember.style.display = "inline";
                 buttonAdmin.style.display = "none";
+                //passt die Buttons an die gespeicherten Personen an
+                if (tmpArray.includes(content[i].getAttribute("data-email"))) {
+                    if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
+                        buttonMember.style.display = "none";
+                        buttonAdmin.style.display = "inline";
+                    } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
+                        buttonMember.style.display = "inline";
+                        buttonAdmin.style.display = "none";
+                    }
+                }
 
             } else {
                 content[i].style.display = "none";
@@ -1080,6 +1129,12 @@ function addMember() {
         }
         //suche wieder wenn suche eingegeben wurde
         if ($("#input").val.length > 0) showRes()
+
+        //User zwischen speichern
+        savedArray = [];
+        for (let i = 0; i < sendArray.length; i++) {
+            savedArray.push(sendArray[i]);
+        }
     }
 }
 
@@ -1092,7 +1147,7 @@ function changeClientState(members, role, id) {
     let userIDs = [];
     //disable Search
     document.getElementById('searchform').style.display = "none"
-    document.getElementById("message").style.display="none"
+    document.getElementById("message").style.display = "none"
     if (select) {
         //speichre aktuelle Position
         yScrollPosition = document.getElementById('projectsScrollContainer').scrollTop;
@@ -1119,26 +1174,49 @@ function changeClientState(members, role, id) {
 
         }
         userIDs = [];
-
-
+        //emails zwischen speichern
+        let tmpArray = [];
+        for (let j = 0; j < savedArray.length; j++) {
+            tmpArray.push(savedArray[j].email)
+        }
         for (let i = 0; i < arrayLength; i++) {
             //sorgt dafür das jeder Member nur einmal in den Array kommt
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 userIDs[i] = content[i].getAttribute('data-memberId');
-                let help = content[i].getAttribute("data-memberId");
-                if (members.includes(help)) {
-                    let help1 = members.indexOf(help);
-                    let mail = content[i].getAttribute('data-email');
-                    if (role[help1] == 0) {
-                        content[i].style.background = "#00FF66";
-
-                        let member = {"email": mail, "role": role[help1]};
-                        jasonmembers.push(member);
+                //abfrage für gespeicherte Member
+                //wenn Member gespeichert wurden werden diese Angezeigt
+                if (savedArray.length != 0) {
+                    if (tmpArray.includes(content[i].getAttribute("data-email"))) {
+                        let mail = content[i].getAttribute("data-email")
+                        let index = tmpArray.indexOf(content[i].getAttribute("data-email"));
+                        if (savedArray[index].role == 0) {
+                            content[i].style.background = "#00FF66";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
+                        if (savedArray[index].role == 1) {
+                            content[i].style.background = "#FFA500";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
                     }
-                    if (role[help1] == 1) {
-                        content[i].style.background = "#FFA500";
-                        let member = {"email": mail, "role": role[help1]};
-                        jasonmembers.push(member);
+                } else {
+                    //wenn keine Member gespeicert wurden werden sie normal angziegt
+                    let help = content[i].getAttribute("data-memberId");
+                    if (members.includes(help)) {
+                        let help1 = members.indexOf(help);
+                        let mail = content[i].getAttribute('data-email');
+                        if (role[help1] == 0) {
+                            content[i].style.background = "#00FF66";
+
+                            let member = {"email": mail, "role": role[help1]};
+                            jasonmembers.push(member);
+                        }
+                        if (role[help1] == 1) {
+                            content[i].style.background = "#FFA500";
+                            let member = {"email": mail, "role": role[help1]};
+                            jasonmembers.push(member);
+                        }
                     }
                 }
             }
@@ -1257,7 +1335,16 @@ function changeClientState(members, role, id) {
                 buttonAdmin.style.display = "none";
                 buttonDeletMember.style.display = "none"
             }
-
+            //passt die Buttons an die gespeicherten Personen an
+            if (tmpArray.includes(content[i].getAttribute("data-email"))&&!members.includes(content[i].getAttribute("data-memberId"))) {
+                if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
+                    buttonMember.style.display = "none";
+                    buttonAdmin.style.display = "inline";
+                } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
+                    buttonMember.style.display = "inline";
+                    buttonAdmin.style.display = "none";
+                }
+            }
             select = false;
         }
     } else {
@@ -1281,6 +1368,11 @@ function changeClientState(members, role, id) {
         if ($("#input").val.length > 0) showRes()
         //springe zur gespeicherten Position
         document.getElementById('projectsScrollContainer').scrollTop = yScrollPosition;
+        //User zwischen speichern
+        savedArray = [];
+        for (let i = 0; i < sendArray.length; i++) {
+            savedArray.push(sendArray[i]);
+        }
     }
 
 
@@ -1305,9 +1397,12 @@ function sendNewProject() {
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4 && this.status === 201) {
             showmes("info", "Projekt erfolgreich erstellt");
-
         } else if (this.readyState === 4) {
-            showmes("error", "Projekt konnte nicht erstellt werden");
+            if (this.status === 409) {
+                showmes("error", "Sie haben das Selbe Projekt schon erstellt");
+            } else {
+                showmes("error", "Projekt konnte nicht erstellt werden");
+            }
         }
         //wartet
         setTimeout(function () {
@@ -1954,7 +2049,7 @@ function setCookie(cname, cvalue, exdays) {
     let d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     let expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/"+";SameSite=Lax";
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/" + ";SameSite=Lax";
 }
 
 function getCookie(name) {

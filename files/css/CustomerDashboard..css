@@ -31,8 +31,10 @@ body {
 .form input:hover {
     color: gray;
 }
-
-
+/*Disable Search and Projects edits until the side has loaded all projects*/
+#searchform,#CustumorDashForm{
+    display: none;
+}
 .form input[type="text"], input[type="password"], input[type="email"] {
     font-weight: 700;
     color: black;
