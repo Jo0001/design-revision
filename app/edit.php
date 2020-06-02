@@ -198,17 +198,18 @@ if(!isLoggedIn()){
         </div>
     </div>
 </div>
-<div class="toolbox" style="top: 40%; right: 1%;outline-style:none;box-shadow:none;border-color:transparent;">
-    <button class="disSelected" id="movePdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
+<div class="toolbox" style="top: 40%; right: 1%;outline-style:none;box-shadow:none;border-color:transparent;outline: none;">
+    <button class="disSelected" id="movePdf" style="left: 40px; right: 40px; background-color: Transparent;outline: none;"><img
             alt="Move" class="icon" src="https://cdn-design-revision.netlify.app/files/img/move.png"/></button>
     <br/>
-    <button class="disSelected" id="zoomPdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
+    <button class="disSelected" id="zoomPdf" style="left: 40px; right: 40px; background-color: Transparent;outline: none;"><img
             alt="Zoom" class="icon" src="https://cdn-design-revision.netlify.app/files/img/zoom.png"/></button>
     <br/>
-    <button class="disSelected" id="createComment" style="left: 40px; right: 40px; background-color: Transparent;"><img
+    <button class="disSelected" id="createComment" style="left: 40px; right: 40px; background-color: Transparent;outline: none;"><img
             alt="Comment" class="icon" src="https://cdn-design-revision.netlify.app/files/img/addComment.png"/></button>
 
 </div>
+<button style="position: absolute; top: 84%; display: none;" id="sendBack">Send back!</button>
 <div class="lowerBar" style="outline-style:none;box-shadow:none;border-color:transparent;">
     <button class="button" id="decPage" style="left: 40%;">-</button>
     <label>

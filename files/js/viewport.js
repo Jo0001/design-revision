@@ -483,20 +483,20 @@ function setupViewport() {
 
 //API-Request-Stuff
 function handleServerResponse(request, successCallback) {
-    if (request.readyState === 4 && request.status === 200) {
-        try {
-            successCallback(JSON.parse(request.response));
-        } catch (e) {
-            console.log(request.response);
-            throw new Error("Fuck... Somehow thats non JSON. Why would you give me non JSON??! " + e);
+        if (request.readyState === 4 && request.status === 200) {
+            try {
+                successCallback(JSON.parse(request.response));
+            } catch (e) {
+                console.log(request.response);
+                throw new Error("Fuck... Somehow thats non JSON. Why would you give me non JSON??! " + e);
+            }
+        } else if (request.readyState === 4 && request.status === 401) {
+            window.alert("keine Berechtigung");
+        } else if (request.readyState === 4 && request.status === 403) {
+            window.alert("Forbidden");
+        } else if (request.readyState === 4 && request.status === 404) {
+            window.alert("Nichts gefunden");
         }
-    } else if (request.readyState === 4 && request.status === 401) {
-        window.alert("keine Berechtigung");
-    } else if (request.readyState === 4 && request.status === 403) {
-        window.alert("Forbidden");
-    } else if (request.readyState === 4 && request.status === 404) {
-        window.alert("Nichts gefunden");
-    }
 }
 
 //Error-Correction
@@ -544,18 +544,22 @@ function clearCommentsAndGetNew() {
                 let allPdfComments = response.data;
                 for (let index = 0; index < allPdfComments.length; index++) {
                     let comment = allPdfComments[index];
-                    if (filter.versionFilter.length === 0) {
-                        filterByPage(comment);
-                    } else {
-                        if (numberInArray(filter.versionFilter, parseInt(comment.version))) {
+                    if (comment.cid !== undefined) {
+                        if (filter.versionFilter.length === 0) {
                             filterByPage(comment);
+                        } else {
+                            if (numberInArray(filter.versionFilter, parseInt(comment.version))) {
+                                filterByPage(comment);
+                            }
                         }
-                    }
 
-                    if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
-                        // console.log(comment);
-                        displayedComments.push(comment);
-                        createComment(comment);
+                        if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
+                            // console.log(comment);
+                            displayedComments.push(comment);
+                            createComment(comment);
+                        }
+                    } else {
+                        console.log("cid null on: " + comment);
                     }
                 }
             } catch (e) {
@@ -626,6 +630,28 @@ function createTextComment(comment) {
         document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Version").innerText = "Version: " + comment.version;
     } catch (e) {
         console.log(e);
+    }
+
+    if (comment.isImplemented) {
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
+    } else {
+        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").addEventListener("click", function () {
+            if (document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked) {
+                let requestSolved = new XMLHttpRequest();
+                requestSolved.withCredentials = true;
+                let data = "id=" + projectId + "&cid=" + comment.cid;
+                requestURL = window.location.origin + "/design-revision/api/project/solvecomment";
+                requestSolved.open('PUT', requestURL);
+                requestSolved.send(data);
+                document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").disabled = true;
+                requestSolved.addEventListener("readystatechange", function () {
+                    if (this.readyState === 4 && this.status === 204) {
+                        pageTurned();
+                        clearCommentsAndGetNew();
+                    }
+                });
+            }
+        });
     }
 
     let xhr = new XMLHttpRequest();
@@ -752,6 +778,7 @@ function loadPdfPage(scale) {
         num = num >= 1 ? num : 1;
         num = num <= pdf.numPages ? num : pdf.numPages;
         pageNumberContainer.value = num;
+        pageTurned();
         applyFilter();
         pdf.getPage(parseInt(pageNumberContainer.value)).then(function (localPage) {
             pdfPage = localPage;

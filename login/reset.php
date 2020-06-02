@@ -3,6 +3,9 @@ require "../libs/sendEmail.php";
 require "../libs/auth.php";
 if (!empty($_POST['email'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_STRING);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        header("Location: ?err=login");
+    }
     $pdo = $GLOBALS['pdo'];
     try {
         $statement = $pdo->prepare("SELECT * FROM users WHERE email = :email");
@@ -15,7 +18,6 @@ if (!empty($_POST['email'])) {
 
             if (dateDifference($timestamp, $user['token_timestamp']) > 120) {
 
-
                 $statement = $pdo->prepare("UPDATE users SET token = ?, token_timestamp=? WHERE email = ?");
                 $hash = generateHash($pdo);
                 $statement->execute(array($hash, $timestamp, $email));
@@ -24,22 +26,7 @@ if (!empty($_POST['email'])) {
 
                 sendMail($email, $user['name'], "=?utf-8?q?Setzen_Sie_Ihr_Kennwort_zur=C3=BCck?= ", parseHTML("../libs/templates/resetPassword.html", $user['name'], $link, null, null));
 
-                die("<!DOCTYPE html>
-<html lang=\"de\">
-<head>
-    <meta charset=\"UTF-8\">
-    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>Kennwort vergessen</title>
-    <link rel=\"stylesheet\" type=\"text/css\" href=\"../files/css/layout.css\">
-    <link rel=\"icon\" href=\"https://cdn-design-revision.netlify.app/files/img/favicon.ico\" type=\"image/x-icon\">
-</head>
-<body>
-<div id=\"verifyBox\" class=\"middle success\">
-    <h3>Bitte schauen Sie in Ihr Postfach</h3>
-    <p>Wenn Sie die E-Mal nicht in Ihrem Posteingang finden,<br> überprüfen Sie bitte auch Ihren Spam-Ordner.</p>
-</div>
-</body>
-</html>");
+                emailSent();
             } else {
                 die("<!DOCTYPE html>
 <html lang=\"de\">
@@ -58,11 +45,33 @@ if (!empty($_POST['email'])) {
 </body>
 </html>");
             }
+        } else {
+            emailSent();
         }
     } catch (PDOException $e) {
         showError("Something went really wrong", 500);
     }
 }
+function emailSent()
+{
+    die("<!DOCTYPE html>
+<html lang=\"de\">
+<head>
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
+    <title>Kennwort vergessen</title>
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"../files/css/layout.css\">
+    <link rel=\"icon\" href=\"https://cdn-design-revision.netlify.app/files/img/favicon.ico\" type=\"image/x-icon\">
+</head>
+<body>
+<div id=\"verifyBox\" class=\"middle success\">
+    <h3>Bitte schauen Sie in Ihr Postfach</h3>
+    <p>Wenn Sie die E-Mal nicht in Ihrem Posteingang finden,<br> überprüfen Sie bitte auch Ihren Spam-Ordner.</p>
+</div>
+</body>
+</html>");
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -103,13 +112,13 @@ if (!empty($_POST['email'])) {
     }
 
 
-   $('#email').on('keyup', function(e) {
-       //when enter is pressed the wrong email message don´t disappears
+    $('#email').on('keyup', function (e) {
+        //when enter is pressed the wrong email message don´t disappears
         if (!(e.key === 'Enter')) {
-           let statusEmail = document.getElementById('statusEmail');
-                   statusEmail.innerHTML = "";
-            }
-        })
+            let statusEmail = document.getElementById('statusEmail');
+            statusEmail.innerHTML = "";
+        }
+    })
 
     function getURLParameter(name) {
         let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
@@ -121,7 +130,7 @@ if (!empty($_POST['email'])) {
         if (err === "login") {
             let feedback = document.getElementById("statusEmail");
             feedback.style.color = "red";
-            feedback.innerHTML = "<strong>E-Mail nicht vorhanden</strong>"
+            feedback.innerHTML = "<strong>G&uuml;ltige E-mail eingeben</strong>"
         }
     };
 </script>
