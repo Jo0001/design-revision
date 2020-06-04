@@ -135,7 +135,7 @@ function createProject()
                     header("HTTP/1.1 201 Created ");
 
                     $_SESSION["phash"] = $phash;
-                    header("x-test: $phash");
+
                 } else {
                     showError("Something went seriously wrong", 500);
                 }
