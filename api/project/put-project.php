@@ -257,7 +257,7 @@ function updateStatus()
                             }
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("something went wrong", 400);
+                            showError("something went wrong", 409);
                         }
 
                     } else if ($status === IN_PROGRESS) {
@@ -266,7 +266,7 @@ function updateStatus()
                             changeStatus($pdo, $pid, IN_PROGRESS);
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("something went wrong", 400);
+                            showError("something went wrong", 409);
                         }
 
 
@@ -288,7 +288,7 @@ function updateStatus()
                             sendMail(getUser('email'), getUser('name'), "Druckfreigabebestätigung von \"" . $projectname . "\"", parseHTML("../../libs/templates/printverify.html", null, $link, $projectname, $securitycode));
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("Something went wrong", 400);
+                            showError("Something went wrong", 409);
                         }
 
                     } else {
