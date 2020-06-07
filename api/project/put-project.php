@@ -271,7 +271,7 @@ function updateStatus()
 
 
                     } else if ($status === DONE) {
-                        if ($currentStatus === IN_PROGRESS) {
+                        if ($currentStatus === WAITING_FOR_RESPONSE) {
                             //Send confirm Mail
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/printverify.php?id=" . explode("project_", $pid)[1];
                             $securitycode = null;
