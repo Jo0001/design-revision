@@ -339,14 +339,10 @@ function solveComment()
 
                                         $tmp['isImplemented'] = true;
 
-                                        //Save edited array back to whole row array and save it back to the database
+                                        //Save edited array back to whole row array and save it back to the database and update lastedit timestamp
                                         $rawdata[$j] = $tmp;
-                                        $statement = $pdo->prepare("UPDATE $pid SET data = ? WHERE version = ?");
+                                        $statement = $pdo->prepare("UPDATE $pid SET data = ?,lastedit = CURRENT_TIMESTAMP  WHERE version = ?");
                                         $statement->execute(array(json_encode($rawdata), $i));
-
-                                        //Update lastedit timestamp
-                                        $statement = $pdo->prepare("UPDATE $pid SET lastedit = CURRENT_TIMESTAMP ORDER BY version DESC LIMIT 1");
-                                        $statement->execute();
 
                                         header("HTTP/1.1 204 No Content");
                                         die();
