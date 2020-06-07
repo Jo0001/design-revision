@@ -37,6 +37,7 @@ let arrayBefore = [];
 let counterForSendedMemberXhr = 0;
 //scroll
 let yScrollPosition;
+let firstUser = false;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -134,11 +135,24 @@ function generate() {
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
                 if ((tmp === null || tmp[0] === undefined) && userObject.user.status === "VERIFIED") {
-                    customerdiv.remove();
-                    clearInterval(checkForProjects);
-                    ableNewProject = false;
-                    request.abort();
-                    destroy_session("noProjects");
+                    //first user will not get logged out
+                    if (userId === 1) {
+                        let msg = document.createElement('h1');
+                        msg.innerHTML = 'Sie haben noch keine Projekte';
+                        msg.style.position ="absolute"
+                        msg.style.marginTop='3%'
+                        msg.style.marginLeft='20%'
+                        projectsScrollContainer = document.getElementById('projectsScrollContainer');
+                        projectsScrollContainer.appendChild(msg);
+                        firstUser = true;
+                    } else {
+                        //other user will be redirected to loggin
+                        customerdiv.remove();
+                        clearInterval(checkForProjects);
+                        ableNewProject = false;
+                        request.abort();
+                        destroy_session("noProjects");
+                    }
                 } else {
                     let tmp1 = tmp[0];
                     for (let i = 1; i < tmp.length; i++) {
@@ -393,10 +407,10 @@ function generate() {
         let arrayLength = content.length;
         if (select) {
             //delete saved Users
-            if(saveDeletable){
+            if (saveDeletable) {
                 savedArray = [];
                 console.log('Deleted Saved Users');
-                saveDeletable=false;
+                saveDeletable = false;
             }
             sendArray = [];
             let mail = document.getElementById('email');
@@ -430,7 +444,7 @@ function generate() {
         if (select) {
             //delete saved Users
             savedArray = [];
-            saveDeletable= true;
+            saveDeletable = true;
             for (let i = 0; i < arrayMember.length; i++) {
                 //abfrage ob der User Admin ist oder nicht
                 if (arrayMember[i] == userId) {
@@ -695,11 +709,15 @@ let readyStateCheckInterval = setInterval(function () {
                     /*Disable Search and Projects edits until the side has loaded all projects
                     otherwise incoming projects caused problems*/
                     document.getElementById('CustumorDashForm').style.display = "block";
-                    document.getElementById('searchform').style.display = "block";
+                    if (!firstUser) {
+                        document.getElementById('searchform').style.display = "block";
+                    } else {
+                        document.getElementById('projectsScrollContainer').style.overflowY = 'hidden';
+                    }
                     document.getElementById('scrollArea').style.width = "76%"
                     /*es wird geschaut ob der User in keinem Projekt Admin ist ist das der Fall so kann er kein Projekt erstellen,
                     da der User wenn der dies tuen würde zum Admin werden würde */
-                    if (!(roleList.includes(1))) {
+                    if (!(roleList.includes(1)) && !firstUser) {
                         document.getElementById('CustumorDashForm').style.display = "none";
                         document.getElementById('scrollArea').style.width = "100%"
                         console.log(roleList)
@@ -1287,7 +1305,7 @@ function changeClientState(members, role, id) {
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
                 //prevent User from deleting all users in one Project
-                if(jasonmembers.length>1) {
+                if (jasonmembers.length > 1) {
                     let parent = buttonDeletMember.parentNode;
                     let email = parent.getAttribute("data-email");
 
@@ -1335,7 +1353,7 @@ function changeClientState(members, role, id) {
                 buttonDeletMember.style.display = "none"
             }
             //passt die Buttons an die gespeicherten Personen an
-            if (tmpArray.includes(content[i].getAttribute("data-email"))&&!members.includes(content[i].getAttribute("data-memberId"))) {
+            if (tmpArray.includes(content[i].getAttribute("data-email")) && !members.includes(content[i].getAttribute("data-memberId"))) {
                 if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
                     buttonMember.style.display = "none";
                     buttonAdmin.style.display = "inline";
