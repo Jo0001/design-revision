@@ -31,6 +31,7 @@ let userId;
 let userCompany;
 let userProjects = [];
 let gotUserData = false;
+let savedMember = [];
 //update Project id
 let updateProjectId;
 let arrayBefore = [];
@@ -139,9 +140,9 @@ function generate() {
                     if (userId === 1) {
                         let msg = document.createElement('h1');
                         msg.innerHTML = 'Sie haben noch keine Projekte';
-                        msg.style.position ="absolute"
-                        msg.style.marginTop='3%'
-                        msg.style.marginLeft='20%'
+                        msg.style.position = "absolute"
+                        msg.style.marginTop = '3%'
+                        msg.style.marginLeft = '20%'
                         projectsScrollContainer = document.getElementById('projectsScrollContainer');
                         projectsScrollContainer.appendChild(msg);
                         firstUser = true;
@@ -329,55 +330,34 @@ function generate() {
             for (let i = 0; i < arrayMember.length; i++) {
                 let request2 = new XMLHttpRequest();
                 if (arrayMember[i] != userId) {
-                    request2.open('GET', window.location.origin + "/design-revision/api/user/?id=" + arrayMember[i] + "&pid=" + projectsArray[counterForUser], true);
-                    request2.send();
-                    request2.onreadystatechange = function () {
-                        if (request2.readyState === 4 && request2.status === 200) {
-                            let userObj = JSON.parse(request2.response);
-                            let userDiv = document.createElement("div");
-                            //css for Users
-                            userDiv.style.marginLeft = "5%";
-                            userDiv.style.transform = "scale(0.9)";
-                            userDiv.style.width = "60%";
-                            //******
-                            let userAvatar = document.createElement("IMG");
-                            userDiv.appendChild(userAvatar);
-                            userDiv.className = "clients";
-                            customerSpan.appendChild(userDiv);
-                            let userName = document.createElement("p");
-                            if (userObj.user.name != "") {
-                                userName.innerHTML = userObj.user.name;
-                                userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
-
-                            } else {
-                                userName.innerHTML = "Regestrierung austehend";
-                                userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=Regestrierung-austehend");
+                    let savedTemps = [];
+                    for (let j = 0; j < savedMember.length; j++) {
+                        savedTemps.push(savedMember[j].id)
+                    }
+                    if (savedTemps.includes(arrayMember[i])) {
+                        //if we have already got the user-data, we use the saved data otherwise we request the data
+                        displayMember(savedMember[savedTemps.indexOf(arrayMember[i])].obj, arrayMember, customerSpan, i)
+                    } else {
+                        //request the user because we did not get him jet
+                        request2.open('GET', window.location.origin + "/design-revision/api/user/?id=" + arrayMember[i] + "&pid=" + projectsArray[counterForUser], true);
+                        request2.send();
+                        request2.onreadystatechange = function () {
+                            if (request2.readyState === 4 && request2.status === 200) {
+                                let userObj = JSON.parse(request2.response);
+                                displayMember(userObj, arrayMember, customerSpan, i)
+                                //saving the current member
+                                savedMember.push({'id': arrayMember[i], 'obj': userObj})
+                            } else if (request2.readyState === 4 && request2.status === 403) {
+                                showmes("error", "Verboten");
+                            } else if (request2.readyState === 4 && request2.status === 401) {
+                                document.location = window.location.origin + "/design-revision/login/";
+                            } else if (request2.readyState === 4 && request2.status === 404) {
+                                showmes("warn", "Nichts gefunden");
+                            } else if (request2.readyState === 4 && request2.status === 400) {
+                                showmes("error", "Unbekannter AnfrageParameter");
                             }
-                            userDiv.appendChild(userName);
-                            let userEmail = document.createElement("p");
-                            userEmail.innerHTML = userObj.user.email;
-                            userDiv.appendChild(userEmail);
-                            userAvatar.setAttribute("alt", "tick");
-                            userAvatar.style.borderRadius = "200px";
-                            userAvatar.style.padding = "3px";
-                            userAvatar.style.transform = "scale(0.7)";
-                            let userCompany = document.createElement("p");
-                            userCompany.innerHTML = userObj.user.company;
-                            userDiv.appendChild(userCompany);
-                            userDiv.setAttribute('data-email', userObj.user.email);
-                            userDiv.setAttribute('data-memberId', arrayMember[i]);
-                            userDiv.style.display = "none";
-
-                        } else if (request2.readyState === 4 && request2.status === 403) {
-                            showmes("error", "Verboten");
-                        } else if (request2.readyState === 4 && request2.status === 401) {
-                            document.location = window.location.origin + "/design-revision/login/";
-                        } else if (request2.readyState === 4 && request2.status === 404) {
-                            showmes("warn", "Nichts gefunden");
-                        } else if (request2.readyState === 4 && request2.status === 400) {
-                            showmes("error", "Unbekannter AnfrageParameter");
-                        }
-                    };
+                        };
+                    }
                 }
             }
             counterForUser++;
@@ -526,6 +506,43 @@ function generate() {
             }
         }
     });
+}
+
+function displayMember(userObj, arrayMember, customerSpan, i) {
+    //function to display the Member of a project
+    let userDiv = document.createElement("div");
+    //css for Users
+    userDiv.style.marginLeft = "5%";
+    userDiv.style.transform = "scale(0.9)";
+    userDiv.style.width = "60%";
+    //******
+    let userAvatar = document.createElement("IMG");
+    userDiv.appendChild(userAvatar);
+    userDiv.className = "clients";
+    customerSpan.appendChild(userDiv);
+    let userName = document.createElement("p");
+    if (userObj.user.name != "") {
+        userName.innerHTML = userObj.user.name;
+        userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
+
+    } else {
+        userName.innerHTML = "Regestrierung austehend";
+        userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=Regestrierung-austehend");
+    }
+    userDiv.appendChild(userName);
+    let userEmail = document.createElement("p");
+    userEmail.innerHTML = userObj.user.email;
+    userDiv.appendChild(userEmail);
+    userAvatar.setAttribute("alt", "tick");
+    userAvatar.style.borderRadius = "200px";
+    userAvatar.style.padding = "3px";
+    userAvatar.style.transform = "scale(0.7)";
+    let userCompany = document.createElement("p");
+    userCompany.innerHTML = userObj.user.company;
+    userDiv.appendChild(userCompany);
+    userDiv.setAttribute('data-email', userObj.user.email);
+    userDiv.setAttribute('data-memberId', arrayMember[i]);
+    userDiv.style.display = "none";
 }
 
 function customerDelate(members, content, arrayLength) {
