@@ -81,6 +81,7 @@ if (!empty($_POST['code']) && !empty($_GET['id'])) {
 </html>
 <!--
 TODO Handle success & error @Frontend
+done=1 -> Success
 err=status ->Project is already done
 err=code ->Invalid/Wrong Code
 err=member ->Not a project member
