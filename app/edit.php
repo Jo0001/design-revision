@@ -13,6 +13,8 @@ if(!isLoggedIn()){
     <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="../files/css/Viewport.css" rel="stylesheet">
     <link href="../files/css/CommentDesign.css" rel="stylesheet">
+    <link href="../files/css/message.css" rel="stylesheet">
+    <script src="../files/js/message.js"></script>
 </head>
 <body>
 <!-- The pdf.js library and controls-->
@@ -228,5 +230,6 @@ if(!isLoggedIn()){
         <div class="progress-value" id="loading" style="height: 35%; width: 10px;"></div>
     </div>
 </div>
+<div class="warn" id="mes"></div>
 </body>
 </html>
