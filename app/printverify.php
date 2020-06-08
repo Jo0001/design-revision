@@ -67,23 +67,79 @@ if (!empty($_POST['code']) && !empty($_GET['id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Druckfreigabe bestätigen</title>
     <link rel="stylesheet" type="text/css" href="../files/css/layout.css">
+    <link href="../files/css/message.css" rel="stylesheet">
+    <script src="../files/js/message.js"></script>
     <link rel="icon" href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" type="image/x-icon">
 </head>
+<style>
+    #codeinput {
+        font-weight: 700;
+        color: black;
+        text-align: center;
+        width: 100%;
+        border-top: none;
+        border-right: none;
+        border-left: none;
+        border-color: black;
+        border-width: 0.1em;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    #printbtn {
+        text-align: center;
+        background-color: #333;
+        color: #fff;
+        font-size: 20px;
+        padding: 10px 20px;
+        margin-top: 10px;
+        border: none;
+        cursor: pointer
+    }
+</style>
 <body>
+<div class="warn" id="mes"></div>
 <div class="middle">
     <form method="post">
-        <input type="text" placeholder="123456" name="code" required>
+
+        <label for="codeinput" style="font-size: 26px">Sicherheitscode eingeben:</label><br><input type="text"
+                                                                                                   placeholder="123456"
+                                                                                                   id="codeinput"
+                                                                                                   name="code" required>
         <br>
-        <input type="submit" value="Endg&uuml;ltig zum Druckfreigeben">
+        <input type="submit" id="printbtn" value="Endg&uuml;ltig zum Druckfreigeben">
+
     </form>
 </div>
+
+<script>
+    function getURLParameter(name) {
+        let value = decodeURIComponent((RegExp(name + '=' + '(.+?)(&|$)').exec(location.search) || [, ""])[1]);
+        return (value !== 'null') ? value : false;
+    }
+
+    let stateCheck = setInterval(() => {
+        if (document.readyState === 'complete') {
+            clearInterval(stateCheck);
+            if (getURLParameter('done') == 1) {
+                document.getElementById("mes-btn").addEventListener("click", function () {
+                    window.location.replace("../app/");
+                });
+                showmes("info", "Projekt erfolgreich zum Endgültigen Druck freigegeben");
+            } else {
+                document.getElementById("mes-btn").removeEventListener("click", reload);
+                if (getURLParameter('err') === "status") {
+                    showmes("error", "Das Projekt wurde bereits freigegeben");
+                } else if (getURLParameter('err') === "code") {
+                    showmes("error", "Ungültiger Sicherheitscode");
+                } else if (getURLParameter('err') === "member") {
+                    showmes("error", "Kein Projektmitglied");
+                } else if (getURLParameter('err') === "project") {
+                    showmes("error", "Ungültiges Projekt");
+                }
+            }
+        }
+    }, 200);
+</script>
 </body>
 </html>
-<!--
-TODO Handle success & error @Frontend
-done=1 -> Success
-err=status ->Project is already done
-err=code ->Invalid/Wrong Code
-err=member ->Not a project member
-err=project->invalid project
--->
