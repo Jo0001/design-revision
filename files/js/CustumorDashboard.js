@@ -107,7 +107,9 @@ function generate() {
         clientname.innerHTML = userName;
         clientemail.innerHTML = userEmail;
         company.innerHTML = userCompany;
-        nameimg.setAttribute("src", nameImgSrc);
+        if(nameImgSrc) {
+            nameimg.setAttribute("src", nameImgSrc);
+        }
 
         counter++;
         requestredy = true;
