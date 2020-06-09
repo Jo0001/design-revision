@@ -11,21 +11,17 @@ function generate() {
         let nummer = document.createElement("p");
         let link = document.createElement("a");
         let lastModified = document.createElement("p");
-        link.style.lineHeight="40px";
         nummer.style.lineHeight="25px";
         lastModified.style.lineHeight="15px";
-        link.style.cursor = "pointer";
-        link.style.textDecoration = "none";
-        link.style.color = "black";
-        link.style.paddingTop = "20px";
         link.onmouseover = function () {
             link.style.color = "lightgray";
         };
         link.onmouseout = function () {
-            link.style.color = "black";
+            link.style.color = "white";
         };
         nummer.innerHTML = "" + (i + 1);
-        link.innerHTML = "link.to/file" + (i + 1);
+        link.innerHTML = "anschauen";
+        link.classList.add('btn')
         link.href = window.location.origin + "/design-revision/app/view.php?pdf=" + obj[i].link + "&&id=" + urlParameter;
         lastModified.innerHTML = obj[i].lastedit;
         lastModified.style.paddingTop = "10px";
