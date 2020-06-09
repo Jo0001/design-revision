@@ -28,7 +28,6 @@ function generate() {
         tableNummer.appendChild(nummer);
         tableLink.appendChild(link);
         let br = document.createElement("BR");
-        br.style.paddingTop="px";
         tableLink.appendChild(br);
         tableLastModified.appendChild(lastModified);
     }
