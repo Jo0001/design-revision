@@ -26,4 +26,7 @@ DefaultLanguage de
 
 ServerSignature Off
 
-Header set X-Build-Version "1.76"
+php_value upload_max_filesize 50M
+php_value post_max_size 55M
+
+Header set X-Build-Version "1.78"
