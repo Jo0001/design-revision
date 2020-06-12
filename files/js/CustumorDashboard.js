@@ -1381,6 +1381,14 @@ function changeClientState(members, role, id) {
                     buttonAdmin.style.display = "none";
                 }
             }
+            //schaue ob ein Member geslöcht wurde und passe den Button an, wenn der User zuvor Admin war
+            if(!tmpArray.includes(content[i].getAttribute("data-email"))&&content[i].style.display =='block'&&members.includes(content[i].getAttribute("data-memberId"))){
+                let index= members.indexOf(content[i].getAttribute("data-memberId"))
+                if(role[index] ==1){
+                    buttonMember.style.display = "none";
+                    buttonAdmin.style.display = "inline";
+                }
+            }
             select = false;
         }
     } else {
