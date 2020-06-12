@@ -20,10 +20,22 @@ DefaultLanguage de
 	Header set Referrer-Policy: strict-origin-when-cross-origin
 	Header set X-XSS-Protection "1; mode=block"
 	Header set X-Content-Type-Options "nosniff"
-
+    Header set Content-Security-Policy "form-action 'self';"
 	Header unset X-Powered-By
 </IfModule>
 
 ServerSignature Off
 
-Header set X-Build-Version "1.76"
+php_value upload_max_filesize 50M
+php_value post_max_size 55M
+
+#Block CSRF
+RewriteEngine On
+RewriteCond %{HTTP_REFERER} !(.*)localhost(.*)
+RewriteCond %{HTTP_REFERER} !(.*)design-revision.ddns.net(.*)
+RewriteCond %{HTTP_REFERER} !(.*)designrev-deggenhau.ddns.net(.*)
+RewriteCond %{HTTP_REFERER} !(.*)designrev-weingarte.ddns.net(.*)
+RewriteRule (.*) /  [R=403,F]
+
+
+Header set X-Build-Version "1.80"
