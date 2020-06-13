@@ -25,7 +25,7 @@ if (!isLoggedIn()) {
          style="float: left"
          width="100">
     <div id="pageLoader"></div>
-    <a href="../login/?logout">Log Out</a>
+    <a href="../login/?logout&csrf=<?php echo getCSRF() ?>">Log Out</a>
     <form enctype="multipart/form-data" autocomplete="off" id="search1">
         <div class="autocomplete" style="float: right">
             <label>

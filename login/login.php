@@ -1,6 +1,7 @@
 <?php
 require "../libs/auth.php";
-if (isset($_GET['logout'])) {
+if (isset($_GET['logout']) ) {
+    handleCSRF(filter_var($_GET['csrf'], FILTER_SANITIZE_STRING));
     logOut();
     die;
 }
@@ -10,6 +11,7 @@ if (isLoggedIn()) {
 }
 
 if (!empty($_POST['password']) && !empty($_POST['email'])) {
+    handleCSRF(filter_var($_POST['csrf'], FILTER_SANITIZE_STRING));
     $password = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     if (!empty($_POST['returnto'])) {
@@ -58,12 +60,13 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
         </div>
         <input type="hidden" name="returnto" id="returnto"/>
         <p>Passwort vergessen? <a href="reset.php">Zurücksetzen</a></p>
-        <input id="btnLogin" name="btnLogin" type="submit" value="Anmelden">
+        <input type="hidden" name="csrf" value="<?php echo getCSRF() ?>">
+        <input id="btnLogin"  type="submit" value="Anmelden">
     </form>
     <p>Sie haben noch kein Konto? <a href="signup.php">Erstellen sie sich jetzt eins</a></p>
 
 </div>
-</body>
+
 <script>
     let resetPass = document.getElementById("login");
     let statusEmail = document.getElementById('statusEmail');
@@ -171,4 +174,5 @@ if (!empty($_POST['password']) && !empty($_POST['email'])) {
 
     saveLocation();
 </script>
+</body>
 </html>
