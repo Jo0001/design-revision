@@ -29,13 +29,4 @@ ServerSignature Off
 php_value upload_max_filesize 50M
 php_value post_max_size 55M
 
-#Block CSRF
-RewriteEngine On
-RewriteCond %{HTTP_REFERER} !(.*)localhost(.*)
-RewriteCond %{HTTP_REFERER} !(.*)design-revision.ddns.net(.*)
-RewriteCond %{HTTP_REFERER} !(.*)designrev-deggenhau.ddns.net(.*)
-RewriteCond %{HTTP_REFERER} !(.*)designrev-weingarte.ddns.net(.*)
-RewriteRule (.*) /  [R=403,F]
-
-
-Header set X-Build-Version "1.80"
+Header set X-Build-Version "1.81"
