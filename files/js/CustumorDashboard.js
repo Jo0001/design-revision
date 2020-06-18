@@ -1111,7 +1111,7 @@ function addMember() {
                 buttonMember.innerHTML = "Member";
                 content[i].appendChild(buttonMember);
                 let buttonDeletMember = document.createElement("button");
-                buttonDeletMember.innerHTML = "Entfehrnen";
+                buttonDeletMember.innerHTML = "Entfernen";
                 buttonDeletMember.addEventListener('click', function () {
                     //sorgt für Dynamische Buttons
                     buttonMember.style.display = "inline";
@@ -1336,7 +1336,7 @@ function changeClientState(members, role, id) {
             buttonMember.innerHTML = "Member";
             content[i].appendChild(buttonMember);
             let buttonDeletMember = document.createElement("button");
-            buttonDeletMember.innerHTML = "Entfehrnen";
+            buttonDeletMember.innerHTML = "Entfernen";
             buttonDeletMember.addEventListener('click', function () {
                 //prevent User from deleting all users in one Project
                 if (jasonmembers.length > 1) {

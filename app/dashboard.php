@@ -6,7 +6,7 @@ if (!isLoggedIn()) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -73,12 +73,12 @@ if (!isLoggedIn()) {
                value="Member ausw&#228;hlen"/><br>
         <input id="bearbeitung_angehen" style="display:none" type="button" value="Bearbeitung angehen"></br>
         <input id="submitButton" type="submit" value="Speichern">
-        <b id="loeschen">Kunde löschen</b>
+        <b id="loeschen">Projekt löschen</b>
         <div id="loader"><span id="percentage" style="display: none"></span></div>
     </form>
 </div>
 <dialog aria-labelledby="dialog-heading" id="dialog">
-    <p> Wollen sie den Kunden wirklich löschen?</p>
+    <p> Wollen sie diese Projekt wirklich löschen?</p>
     <p id="pName">Name</p>
     <p id="pProjekt">Projekt</p>
     <button class="Dialog_button" id="btnYes">Ja</button>
