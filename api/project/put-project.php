@@ -247,7 +247,7 @@ function updateStatus()
                             $members = json_decode($projectdata['members'], true);
                             $projectname = getLatestProjectData($pid, $pdo)[0];
                             $user = getUser('name');
-                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/edit.php?id=" . explode("project_", $pid)[1];
+                            $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/view.php?id=" . explode("project_", $pid)[1];
                             $version = getLatestProjectData($pid, $pdo)[1];
 
                             foreach ($members as $member) {
