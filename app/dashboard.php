@@ -71,6 +71,7 @@ if (!isLoggedIn()) {
         <input id="btnAddMember" onclick="addMember()"
                type="button"
                value="Member ausw&#228;hlen"/><br>
+        <input id="bearbeitung_angehen" style="display:none" type="button" value="Bearbeitung angehen"></br>
         <input id="submitButton" type="submit" value="Speichern">
         <b id="loeschen">Kunde löschen</b>
         <div id="loader"><span id="percentage" style="display: none"></span></div>

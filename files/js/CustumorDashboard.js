@@ -107,7 +107,7 @@ function generate() {
         clientname.innerHTML = userName;
         clientemail.innerHTML = userEmail;
         company.innerHTML = userCompany;
-        if(nameImgSrc) {
+        if (nameImgSrc) {
             nameimg.setAttribute("src", nameImgSrc);
         }
 
@@ -202,8 +202,6 @@ function generate() {
         if (requestredy) {
             clearInterval(checkForProjects);
             projectid = projectsArray[counterForId];
-            let link = window.location.origin + "/design-revision/app/view.php?id=" + projectid;
-            projektname.href = link;
             versionen.href = window.location.origin + "/design-revision/app/overview.php?id=" + projectid;
             //customerdiv id geben
             customerdiv.setAttribute('data-id', "" + projectsArray[counterForId]);
@@ -303,8 +301,13 @@ function generate() {
                             if (arrayMember[i] == userId) {
                                 if (arrayRole[i] == 0) {
                                     roleList.unshift(0);
+                                    //switching the link to editor right for USer role
+                                    let link = window.location.origin + "/design-revision/app/edit.php?id=" + projectid;
+                                    projektname.href = link;
                                 } else {
                                     roleList.unshift(1);
+                                    let link = window.location.origin + "/design-revision/app/view.php?id=" + projectid;
+                                    projektname.href = link;
                                 }
 
                             }
@@ -419,6 +422,8 @@ function generate() {
             updateOrCreate = true;
             doubleClickSelect = true;
             arrayBefore = [];
+            //hide the status button when clicked
+            document.getElementById('bearbeitung_angehen').style.display="none"
         }
     };
     //Client Doppel Click
@@ -501,6 +506,15 @@ function generate() {
                                 doubleClickSelect = false;
                                 a = false;
                                 customerdiv.style.border = "4px solid black";
+
+                                //Able porject status change when project is in right status
+                                if(textStatus.innerHTML=="Bearbeitung ausstehend"){
+                                    let btn_status=document.getElementById('bearbeitung_angehen')
+                                    btn_status.style.display= "inline"
+                                    btn_status.addEventListener('click',()=>{
+                                        changeProjectState(updateProjectId)
+                                    })
+                                }
                             }
                         }
                     }
@@ -771,9 +785,9 @@ let readyStateCheckInterval = setInterval(function () {
             //he will be redirected to lo again if the logout took to long
             //the user get redirected to login with message
             if (getCookie('projects') == "noProjects") {
-                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf="+csrf);
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf=" + csrf);
             } else if (getCookie('verify') == "notVerified") {
-                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf="+csrf);
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf=" + csrf);
             }
         }
         /*this should prevent the Browser form  asking if the User really wants to leave because he has unsaved things in the forms
@@ -1383,9 +1397,9 @@ function changeClientState(members, role, id) {
                 }
             }
             //schaue ob ein Member geslöcht wurde und passe den Button an, wenn der User zuvor Admin war
-            if(!tmpArray.includes(content[i].getAttribute("data-email"))&&content[i].style.display =='block'&&members.includes(content[i].getAttribute("data-memberId"))){
-                let index= members.indexOf(content[i].getAttribute("data-memberId"))
-                if(role[index] ==1){
+            if (!tmpArray.includes(content[i].getAttribute("data-email")) && content[i].style.display == 'block' && members.includes(content[i].getAttribute("data-memberId"))) {
+                let index = members.indexOf(content[i].getAttribute("data-memberId"))
+                if (role[index] == 1) {
                     buttonMember.style.display = "none";
                     buttonAdmin.style.display = "inline";
                 }
@@ -2080,11 +2094,11 @@ function destroy_session(state) {
     let csrf = document.getElementById("logoutbtn").getAttribute("href").split("=")[1];
     if (state === "noProjects") {
         setCookie('projects', 'noProjects', 1)
-        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf="+csrf);
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf=" + csrf);
     }
     if (state === "notVerified") {
         setCookie("verify", "notVerified", 1)
-        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf="+csrf);
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf=" + csrf);
     }
 
 
@@ -2102,4 +2116,25 @@ function getCookie(name) {
         "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
     ));
     return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function changeProjectState(pId) {
+    let data = "id=" + pId + "&status=" + "IN_PROGRESS";
+
+    let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4 && this.status == 204) {
+            showmes("info", 'Sie bearbeiten nun die PDF');
+            console.log(this.response);
+        }else if(this.readyState === 4){
+            showmes("error", 'Fehler der Status konnte nicht geändert werden');
+        }
+    });
+
+    xhr.open("PUT", window.location.origin + "/design-revision/api/project/updatestatus");
+
+    xhr.send(data);
+
 }
