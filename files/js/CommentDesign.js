@@ -275,7 +275,7 @@ function handleSendButtonClick(e) {
         if (printDesign) {
             showmes("info", "Druckfreigabecode wurde per E-Mail gesendet")
         } else {
-            showmes("info", "Änderungswünsche wurden and die Agentur weitergeleitet")
+            showmes("info", "Änderungswünsche wurden an die Agentur weitergeleitet")
         }
     }else  if (requestStatusChange.readyState === 4 && requestStatusChange.status === 409) {
         showmes("error","Das Projekt kann in diesem Stadium nicht freigegeben werden")
