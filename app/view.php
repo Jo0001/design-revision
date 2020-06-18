@@ -92,6 +92,7 @@ if(!isLoggedIn()){
                 </td>
             </tr>
         </table>
+        <button id="applyFilter">Filtereinstellungen speichern</button>
     </div>
 </div>
 <div class="toolbox" id="changeCommentContainer"
