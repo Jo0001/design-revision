@@ -2127,9 +2127,11 @@ function changeProjectState(pId) {
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4 && this.status == 204) {
             showmes("info", 'Sie bearbeiten nun die PDF');
+            cleraForm()
             console.log(this.response);
         }else if(this.readyState === 4){
             showmes("error", 'Fehler der Status konnte nicht geändert werden');
+            cleraForm()
         }
     });
 
