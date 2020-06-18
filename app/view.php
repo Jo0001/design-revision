@@ -9,7 +9,7 @@ if(!isLoggedIn()){
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Editor - DesignRevision</title>
+    <title>Änderungswunschansicht - DesignRevision</title>
     <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="../files/css/Viewport.css" rel="stylesheet">
     <link href="../files/css/ViewDesign.css" rel="stylesheet">
