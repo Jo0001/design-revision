@@ -16,6 +16,8 @@ let newKeyUp = true;
 let sendArray = [];
 let sendFile;
 let sendArrayFields = [];
+let savedArray = [];
+let saveDeletable = false;
 let updateOrCreate = true;
 let nameLenght = false;
 let moreMember = 1;
@@ -29,12 +31,14 @@ let userId;
 let userCompany;
 let userProjects = [];
 let gotUserData = false;
+let savedMember = [];
 //update Project id
 let updateProjectId;
 let arrayBefore = [];
 let counterForSendedMemberXhr = 0;
 //scroll
 let yScrollPosition;
+let firstUser = false;
 
 function emailIsValid(email) {
     return (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
@@ -103,7 +107,9 @@ function generate() {
         clientname.innerHTML = userName;
         clientemail.innerHTML = userEmail;
         company.innerHTML = userCompany;
-        nameimg.setAttribute("src", nameImgSrc);
+        if(nameImgSrc) {
+            nameimg.setAttribute("src", nameImgSrc);
+        }
 
         counter++;
         requestredy = true;
@@ -131,12 +137,25 @@ function generate() {
                 }
                 //Projects-array von Api holen
                 let tmp = userObject.user.projects;
-                if ((tmp === null || tmp[0] === undefined)&&userObject.user.status === "VERIFIED") {
-                    customerdiv.remove();
-                    clearInterval(checkForProjects);
-                    ableNewProject = false;
+                if ((tmp === null || tmp[0] === undefined) && userObject.user.status === "VERIFIED") {
+                    //first user will not get logged out
+                    if (userId === 1) {
+                        let msg = document.createElement('h1');
+                        msg.innerHTML = 'Sie haben noch keine Projekte';
+                        msg.style.position = "absolute"
+                        msg.style.marginTop = '3%'
+                        msg.style.marginLeft = '20%'
+                        projectsScrollContainer = document.getElementById('projectsScrollContainer');
+                        projectsScrollContainer.appendChild(msg);
+                        firstUser = true;
+                    } else {
+                        //other user will be redirected to loggin
+                        customerdiv.remove();
+                        clearInterval(checkForProjects);
+                        ableNewProject = false;
                         request.abort();
                         destroy_session("noProjects");
+                    }
                 } else {
                     let tmp1 = tmp[0];
                     for (let i = 1; i < tmp.length; i++) {
@@ -313,55 +332,34 @@ function generate() {
             for (let i = 0; i < arrayMember.length; i++) {
                 let request2 = new XMLHttpRequest();
                 if (arrayMember[i] != userId) {
-                    request2.open('GET', window.location.origin + "/design-revision/api/user/?id=" + arrayMember[i] + "&pid=" + projectsArray[counterForUser], true);
-                    request2.send();
-                    request2.onreadystatechange = function () {
-                        if (request2.readyState === 4 && request2.status === 200) {
-                            let userObj = JSON.parse(request2.response);
-                            let userDiv = document.createElement("div");
-                            //css for Users
-                            userDiv.style.marginLeft = "5%";
-                            userDiv.style.transform = "scale(0.9)";
-                            userDiv.style.width = "60%";
-                            //******
-                            let userAvatar = document.createElement("IMG");
-                            userDiv.appendChild(userAvatar);
-                            userDiv.className = "clients";
-                            customerSpan.appendChild(userDiv);
-                            let userName = document.createElement("p");
-                            if (userObj.user.name != "") {
-                                userName.innerHTML = userObj.user.name;
-                                userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
-
-                            } else {
-                                userName.innerHTML = "Regestrierung austehend";
-                                userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=Regestrierung-austehend");
+                    let savedTemps = [];
+                    for (let j = 0; j < savedMember.length; j++) {
+                        savedTemps.push(savedMember[j].id)
+                    }
+                    if (savedTemps.includes(arrayMember[i])) {
+                        //if we have already got the user-data, we use the saved data otherwise we request the data
+                        displayMember(savedMember[savedTemps.indexOf(arrayMember[i])].obj, arrayMember, customerSpan, i)
+                    } else {
+                        //request the user because we did not get him jet
+                        request2.open('GET', window.location.origin + "/design-revision/api/user/?id=" + arrayMember[i] + "&pid=" + projectsArray[counterForUser], true);
+                        request2.send();
+                        request2.onreadystatechange = function () {
+                            if (request2.readyState === 4 && request2.status === 200) {
+                                let userObj = JSON.parse(request2.response);
+                                displayMember(userObj, arrayMember, customerSpan, i)
+                                //saving the current member
+                                savedMember.push({'id': arrayMember[i], 'obj': userObj})
+                            } else if (request2.readyState === 4 && request2.status === 403) {
+                                showmes("error", "Verboten");
+                            } else if (request2.readyState === 4 && request2.status === 401) {
+                                document.location = window.location.origin + "/design-revision/login/";
+                            } else if (request2.readyState === 4 && request2.status === 404) {
+                                showmes("warn", "Nichts gefunden");
+                            } else if (request2.readyState === 4 && request2.status === 400) {
+                                showmes("error", "Unbekannter AnfrageParameter");
                             }
-                            userDiv.appendChild(userName);
-                            let userEmail = document.createElement("p");
-                            userEmail.innerHTML = userObj.user.email;
-                            userDiv.appendChild(userEmail);
-                            userAvatar.setAttribute("alt", "tick");
-                            userAvatar.style.borderRadius = "200px";
-                            userAvatar.style.padding = "3px";
-                            userAvatar.style.transform = "scale(0.7)";
-                            let userCompany = document.createElement("p");
-                            userCompany.innerHTML = userObj.user.company;
-                            userDiv.appendChild(userCompany);
-                            userDiv.setAttribute('data-email', userObj.user.email);
-                            userDiv.setAttribute('data-memberId', arrayMember[i]);
-                            userDiv.style.display = "none";
-
-                        } else if (request2.readyState === 4 && request2.status === 403) {
-                            showmes("error", "Verboten");
-                        } else if (request2.readyState === 4 && request2.status === 401) {
-                            document.location = window.location.origin + "/design-revision/login/";
-                        } else if (request2.readyState === 4 && request2.status === 404) {
-                            showmes("warn", "Nichts gefunden");
-                        } else if (request2.readyState === 4 && request2.status === 400) {
-                            showmes("error", "Unbekannter AnfrageParameter");
-                        }
-                    };
+                        };
+                    }
                 }
             }
             counterForUser++;
@@ -390,6 +388,12 @@ function generate() {
         let content = document.querySelectorAll('[data-memberid');
         let arrayLength = content.length;
         if (select) {
+            //delete saved Users
+            if (saveDeletable) {
+                savedArray = [];
+                console.log('Deleted Saved Users');
+                saveDeletable = false;
+            }
             sendArray = [];
             let mail = document.getElementById('email');
             mail.required = true;
@@ -420,7 +424,9 @@ function generate() {
     //Client Doppel Click
     customerdiv.addEventListener('dblclick', function (e) {
         if (select) {
-            //Disable search in clicked Mode
+            //delete saved Users
+            savedArray = [];
+            saveDeletable = true;
             for (let i = 0; i < arrayMember.length; i++) {
                 //abfrage ob der User Admin ist oder nicht
                 if (arrayMember[i] == userId) {
@@ -504,6 +510,43 @@ function generate() {
     });
 }
 
+function displayMember(userObj, arrayMember, customerSpan, i) {
+    //function to display the Member of a project
+    let userDiv = document.createElement("div");
+    //css for Users
+    userDiv.style.marginLeft = "5%";
+    userDiv.style.transform = "scale(0.9)";
+    userDiv.style.width = "60%";
+    //******
+    let userAvatar = document.createElement("IMG");
+    userDiv.appendChild(userAvatar);
+    userDiv.className = "clients";
+    customerSpan.appendChild(userDiv);
+    let userName = document.createElement("p");
+    if (userObj.user.name != "") {
+        userName.innerHTML = userObj.user.name;
+        userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=" + userObj.user.name);
+
+    } else {
+        userName.innerHTML = "Regestrierung austehend";
+        userAvatar.setAttribute("src", window.location.origin + "/design-revision/api/user/avatar.php?name=Regestrierung-austehend");
+    }
+    userDiv.appendChild(userName);
+    let userEmail = document.createElement("p");
+    userEmail.innerHTML = userObj.user.email;
+    userDiv.appendChild(userEmail);
+    userAvatar.setAttribute("alt", "tick");
+    userAvatar.style.borderRadius = "200px";
+    userAvatar.style.padding = "3px";
+    userAvatar.style.transform = "scale(0.7)";
+    let userCompany = document.createElement("p");
+    userCompany.innerHTML = userObj.user.company;
+    userDiv.appendChild(userCompany);
+    userDiv.setAttribute('data-email', userObj.user.email);
+    userDiv.setAttribute('data-memberId', arrayMember[i]);
+    userDiv.style.display = "none";
+}
+
 function customerDelate(members, content, arrayLength) {
     let dialog = document.getElementById("dialog");
     dialog.setAttribute('open', 'open');
@@ -511,9 +554,6 @@ function customerDelate(members, content, arrayLength) {
     btnYes.onclick = function () {
         closeYes(members, content, arrayLength);
     };
-    toggleDialog();
-
-
 }
 
 //Button Ja gedrückt
@@ -628,7 +668,7 @@ function clientDivClick(customerDiv, name1, projekt1, id1, boolStatus, members, 
 
 function showRes() {
     let content = document.querySelectorAll('[data-test');
-    if (!a&&updateOrCreate) {
+    if (!a && updateOrCreate) {
         //manually force the trigger event otherwise autocomplete would not be shown because of click
         $(content[0]).click();
         let element = document.getElementById('searchform');
@@ -685,14 +725,22 @@ let readyStateCheckInterval = setInterval(function () {
                     generate();
                 } else {
                     clearInterval(userInterval);
+                    /*Disable Search and Projects edits until the side has loaded all projects
+                    otherwise incoming projects caused problems*/
+                    document.getElementById('CustumorDashForm').style.display = "block";
+                    if (!firstUser) {
+                        document.getElementById('searchform').style.display = "block";
+                    } else {
+                        document.getElementById('projectsScrollContainer').style.overflowY = 'hidden';
+                    }
+                    document.getElementById('scrollArea').style.width = "76%"
                     /*es wird geschaut ob der User in keinem Projekt Admin ist ist das der Fall so kann er kein Projekt erstellen,
-                    da der User wenn der dies tuen würde zum Admin werden würde
-                     */
-                    if (!(roleList.includes(1))) {
+                    da der User wenn der dies tuen würde zum Admin werden würde */
+                    if (!(roleList.includes(1)) && !firstUser) {
                         document.getElementById('CustumorDashForm').style.display = "none";
                         document.getElementById('scrollArea').style.width = "100%"
                         console.log(roleList)
-                        if (roleList[1]==undefined) {
+                        if (roleList[1] == undefined) {
                             //give Members who have only one poroject a nice message that they will soon have more projects
                             let topper = document.querySelector('.topDivs')
                             let msg = document.createElement("span");
@@ -719,12 +767,13 @@ let readyStateCheckInterval = setInterval(function () {
                 }
             }, 200);
         } else {
+            let csrf = document.getElementById("logoutbtn").getAttribute("href").split("=")[1];
             //he will be redirected to lo again if the logout took to long
             //the user get redirected to login with message
             if (getCookie('projects') == "noProjects") {
-                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf="+csrf);
             } else if (getCookie('verify') == "notVerified") {
-                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified");
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf="+csrf);
             }
         }
         /*this should prevent the Browser form  asking if the User really wants to leave because he has unsaved things in the forms
@@ -738,7 +787,7 @@ let readyStateCheckInterval = setInterval(function () {
         }
         //give the user a message  that drag and drop is also possible, but only if he is admin
         document.getElementById('imagePreview').addEventListener('mouseover', () => {
-            if (!getCookie('msg')&&roleList.includes(1)) {
+            if (!getCookie('msg') && roleList.includes(1)) {
                 setCookie('msg', 'show', 2);
                 let topper = document.querySelector('.topDivs')
                 let msg1 = document.createElement("span");
@@ -947,7 +996,7 @@ function addMember() {
             a = true;
         }
         document.getElementById('searchform').style.display = "none";
-        document.getElementById("message").style.display="none"
+        document.getElementById("message").style.display = "none"
         addButton.value = "Zu Projekt hinzufügen";
 
         //springe zum Anfang der Seite
@@ -956,12 +1005,37 @@ function addMember() {
         for (let i = 0; i < projecst.length; i++) {
             projecst[i].style.display = "none";
         }
+        //emails zwischen speichern
+        let tmpArray = [];
+        for (let j = 0; j < savedArray.length; j++) {
+            tmpArray.push(savedArray[j].email)
+        }
+
         for (let i = 0; i < arrayLength; i++) {
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 userIDs[i] = content[i].getAttribute('data-memberId');
+                //zeige breits gespeicherte Member an
+                if (savedArray.length != 0) {
+                    if (tmpArray.includes(content[i].getAttribute("data-email"))) {
+                        let mail = content[i].getAttribute("data-email")
+                        let index = tmpArray.indexOf(content[i].getAttribute("data-email"));
+                        if (savedArray[index].role == 0) {
+                            content[i].style.background = "#00FF66";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
+                        if (savedArray[index].role == 1) {
+                            content[i].style.background = "#FFA500";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
+                    } else {
+                        //der User wurde noch nicht ausgewählt
+                        content[i].style.background = "white";
+                    }
+                }
                 content[i].style.display = "block";
                 content[i].style.display = "block";
-                content[i].style.background = "white";
                 content[i].style.transform = "scale(1)";
                 let buttonAdmin = document.createElement("button");
                 buttonAdmin.innerHTML = "Admin";
@@ -1047,6 +1121,16 @@ function addMember() {
                 //sorgt für Dynamische Buttons
                 buttonMember.style.display = "inline";
                 buttonAdmin.style.display = "none";
+                //passt die Buttons an die gespeicherten Personen an
+                if (tmpArray.includes(content[i].getAttribute("data-email"))) {
+                    if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
+                        buttonMember.style.display = "none";
+                        buttonAdmin.style.display = "inline";
+                    } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
+                        buttonMember.style.display = "inline";
+                        buttonAdmin.style.display = "none";
+                    }
+                }
 
             } else {
                 content[i].style.display = "none";
@@ -1080,6 +1164,12 @@ function addMember() {
         }
         //suche wieder wenn suche eingegeben wurde
         if ($("#input").val.length > 0) showRes()
+
+        //User zwischen speichern
+        savedArray = [];
+        for (let i = 0; i < sendArray.length; i++) {
+            savedArray.push(sendArray[i]);
+        }
     }
 }
 
@@ -1092,7 +1182,7 @@ function changeClientState(members, role, id) {
     let userIDs = [];
     //disable Search
     document.getElementById('searchform').style.display = "none"
-    document.getElementById("message").style.display="none"
+    document.getElementById("message").style.display = "none"
     if (select) {
         //speichre aktuelle Position
         yScrollPosition = document.getElementById('projectsScrollContainer').scrollTop;
@@ -1119,26 +1209,49 @@ function changeClientState(members, role, id) {
 
         }
         userIDs = [];
-
-
+        //emails zwischen speichern
+        let tmpArray = [];
+        for (let j = 0; j < savedArray.length; j++) {
+            tmpArray.push(savedArray[j].email)
+        }
         for (let i = 0; i < arrayLength; i++) {
             //sorgt dafür das jeder Member nur einmal in den Array kommt
             if (!(userIDs.includes(content[i].getAttribute('data-memberId')))) {
                 userIDs[i] = content[i].getAttribute('data-memberId');
-                let help = content[i].getAttribute("data-memberId");
-                if (members.includes(help)) {
-                    let help1 = members.indexOf(help);
-                    let mail = content[i].getAttribute('data-email');
-                    if (role[help1] == 0) {
-                        content[i].style.background = "#00FF66";
-
-                        let member = {"email": mail, "role": role[help1]};
-                        jasonmembers.push(member);
+                //abfrage für gespeicherte Member
+                //wenn Member gespeichert wurden werden diese Angezeigt
+                if (savedArray.length != 0) {
+                    if (tmpArray.includes(content[i].getAttribute("data-email"))) {
+                        let mail = content[i].getAttribute("data-email")
+                        let index = tmpArray.indexOf(content[i].getAttribute("data-email"));
+                        if (savedArray[index].role == 0) {
+                            content[i].style.background = "#00FF66";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
+                        if (savedArray[index].role == 1) {
+                            content[i].style.background = "#FFA500";
+                            let member = {"email": mail, "role": savedArray[index].role};
+                            jasonmembers.push(member);
+                        }
                     }
-                    if (role[help1] == 1) {
-                        content[i].style.background = "#FFA500";
-                        let member = {"email": mail, "role": role[help1]};
-                        jasonmembers.push(member);
+                } else {
+                    //wenn keine Member gespeicert wurden werden sie normal angziegt
+                    let help = content[i].getAttribute("data-memberId");
+                    if (members.includes(help)) {
+                        let help1 = members.indexOf(help);
+                        let mail = content[i].getAttribute('data-email');
+                        if (role[help1] == 0) {
+                            content[i].style.background = "#00FF66";
+
+                            let member = {"email": mail, "role": role[help1]};
+                            jasonmembers.push(member);
+                        }
+                        if (role[help1] == 1) {
+                            content[i].style.background = "#FFA500";
+                            let member = {"email": mail, "role": role[help1]};
+                            jasonmembers.push(member);
+                        }
                     }
                 }
             }
@@ -1211,34 +1324,36 @@ function changeClientState(members, role, id) {
             let buttonDeletMember = document.createElement("button");
             buttonDeletMember.innerHTML = "Entfehrnen";
             buttonDeletMember.addEventListener('click', function () {
-                let parent = buttonDeletMember.parentNode;
-                let email = parent.getAttribute("data-email");
+                //prevent User from deleting all users in one Project
+                if (jasonmembers.length > 1) {
+                    let parent = buttonDeletMember.parentNode;
+                    let email = parent.getAttribute("data-email");
 
-                //sorgt für Dynamische Buttons und schaut ob das Mitglied schon im Projekt ist
-                if (!(members.includes(parent.getAttribute('data-memberid')))) {
-                    buttonMember.style.display = "inline";
-                    buttonAdmin.style.display = "none";
-                } else {
-                    let help1 = members.indexOf(parent.getAttribute('data-memberid'));
-                    if (role[help1] == 0) {
+                    //sorgt für Dynamische Buttons und schaut ob das Mitglied schon im Projekt ist
+                    if (!(members.includes(parent.getAttribute('data-memberid')))) {
                         buttonMember.style.display = "inline";
-                    }
-                    if (role[help1] == 1) {
-                        buttonAdmin.style.display = "inline";
-                    }
-                }
-
-                for (let k in jasonmembers) {
-                    if (jasonmembers.hasOwnProperty(k)) {
-                        if (jasonmembers[k].email == email) {
-                            jasonmembers.splice(k, 1);
+                        buttonAdmin.style.display = "none";
+                    } else {
+                        let help1 = members.indexOf(parent.getAttribute('data-memberid'));
+                        if (role[help1] == 0) {
+                            buttonMember.style.display = "inline";
+                        }
+                        if (role[help1] == 1) {
+                            buttonAdmin.style.display = "inline";
                         }
                     }
+                    for (let k in jasonmembers) {
+                        if (jasonmembers.hasOwnProperty(k)) {
+                            if (jasonmembers[k].email == email) {
+                                jasonmembers.splice(k, 1);
+                            }
+                        }
 
+                    }
+                    jasonmembers.sort();
+                    sendArray = jasonmembers;
+                    parent.style.background = "white";
                 }
-                jasonmembers.sort();
-                sendArray = jasonmembers;
-                parent.style.background = "white";
             });
             content[i].appendChild(buttonDeletMember);
             //schaut ob der Account schon im Projekt ist
@@ -1257,7 +1372,24 @@ function changeClientState(members, role, id) {
                 buttonAdmin.style.display = "none";
                 buttonDeletMember.style.display = "none"
             }
-
+            //passt die Buttons an die gespeicherten Personen an
+            if (tmpArray.includes(content[i].getAttribute("data-email")) && !members.includes(content[i].getAttribute("data-memberId"))) {
+                if (content[i].style.backgroundColor === "rgb(0, 255, 102)") {
+                    buttonMember.style.display = "none";
+                    buttonAdmin.style.display = "inline";
+                } else if (content[i].style.backgroundColor === "rgb(255, 165, 0)") {
+                    buttonMember.style.display = "inline";
+                    buttonAdmin.style.display = "none";
+                }
+            }
+            //schaue ob ein Member geslöcht wurde und passe den Button an, wenn der User zuvor Admin war
+            if(!tmpArray.includes(content[i].getAttribute("data-email"))&&content[i].style.display =='block'&&members.includes(content[i].getAttribute("data-memberId"))){
+                let index= members.indexOf(content[i].getAttribute("data-memberId"))
+                if(role[index] ==1){
+                    buttonMember.style.display = "none";
+                    buttonAdmin.style.display = "inline";
+                }
+            }
             select = false;
         }
     } else {
@@ -1281,6 +1413,11 @@ function changeClientState(members, role, id) {
         if ($("#input").val.length > 0) showRes()
         //springe zur gespeicherten Position
         document.getElementById('projectsScrollContainer').scrollTop = yScrollPosition;
+        //User zwischen speichern
+        savedArray = [];
+        for (let i = 0; i < sendArray.length; i++) {
+            savedArray.push(sendArray[i]);
+        }
     }
 
 
@@ -1305,9 +1442,12 @@ function sendNewProject() {
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4 && this.status === 201) {
             showmes("info", "Projekt erfolgreich erstellt");
-
         } else if (this.readyState === 4) {
-            showmes("error", "Projekt konnte nicht erstellt werden");
+            if (this.status === 409) {
+                showmes("error", "Sie haben das Selbe Projekt schon erstellt");
+            } else {
+                showmes("error", "Projekt konnte nicht erstellt werden");
+            }
         }
         //wartet
         setTimeout(function () {
@@ -1937,14 +2077,14 @@ function destroy_session(state) {
      */
     //hide body
     document.body.style.display = "none";
+    let csrf = document.getElementById("logoutbtn").getAttribute("href").split("=")[1];
     if (state === "noProjects") {
         setCookie('projects', 'noProjects', 1)
-        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
-
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf="+csrf);
     }
     if (state === "notVerified") {
         setCookie("verify", "notVerified", 1)
-        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified");
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf="+csrf);
     }
 
 
@@ -1954,7 +2094,7 @@ function setCookie(cname, cvalue, exdays) {
     let d = new Date();
     d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
     let expires = "expires=" + d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/"+";SameSite=Lax";
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/" + ";SameSite=Lax";
 }
 
 function getCookie(name) {

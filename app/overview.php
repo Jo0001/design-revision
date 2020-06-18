@@ -33,11 +33,11 @@ if (!isLoggedIn()) {
         <div class="nummer">
             <p>Nummer</p>
         </div>
-        <div class="link">
-            <p>Link</p>
-        </div>
         <div class="ZuletztBearbeitet">
             <p>Zuletzt Bearbeitet</p>
+         </div>
+        <div class="link">
+            <p>Link</p>
         </div>
     </div>
 
@@ -45,10 +45,10 @@ if (!isLoggedIn()) {
         <div class="tnummer" id="tnummer">
 
         </div>
-        <div class="tlink" id="tlink">
+        <div class="tZuletztBearbeitet" id="tZuletztBearbeitet">
 
         </div>
-        <div class="tZuletztBearbeitet" id="tZuletztBearbeitet">
+        <div class="tlink" id="tlink">
 
         </div>
     </div>

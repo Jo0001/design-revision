@@ -20,11 +20,13 @@ DefaultLanguage de
 	Header set Referrer-Policy: strict-origin-when-cross-origin
 	Header set X-XSS-Protection "1; mode=block"
 	Header set X-Content-Type-Options "nosniff"
-
+    Header set Content-Security-Policy "form-action 'self';"
 	Header unset X-Powered-By
 </IfModule>
 
 ServerSignature Off
 
-#TODO Increment the value every time before you commit/push stuff
-Header set X-Build-Version "1.71"
+php_value upload_max_filesize 50M
+php_value post_max_size 55M
+
+Header set X-Build-Version "1.82"

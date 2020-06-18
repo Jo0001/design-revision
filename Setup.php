@@ -4,8 +4,6 @@ $done = true;
 //Set values for php.ini
 ini_set('file_uploads', true);
 ini_set('memory_limit', '515M');
-ini_set('post_max_size', '510M');
-ini_set('upload_max_filesize', '500M');
 ini_set('display_errors', 0);
 
 if (sendMail(emailFromaddress, emailFromname, "Design Revision Setup test", "Mail sending is working fine :)")) {

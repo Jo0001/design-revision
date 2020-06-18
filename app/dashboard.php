@@ -25,7 +25,7 @@ if (!isLoggedIn()) {
          style="float: left"
          width="100">
     <div id="pageLoader"></div>
-    <a href="../login/?logout">Log Out</a>
+    <a id="logoutbtn" href="../login/?logout&csrf=<?php echo getCSRF() ?>">Log Out</a>
     <form enctype="multipart/form-data" autocomplete="off" id="search1">
         <div class="autocomplete" style="float: right">
             <label>
@@ -87,7 +87,7 @@ if (!isLoggedIn()) {
 
 <!-- response message if sending was successful -->
 <div class="warn" id="mes"></div>
-<div id="scrollArea" style="position: fixed; top: 11%; width: 76%; height: 90%; min-height: 90%; overflow: hidden;">
+<div id="scrollArea" style="position: fixed; top: 11%; width: 100%; height: 90%; min-height: 90%; overflow: hidden;">
     <div id="projectsScrollContainer" style="height: 98%; width: 99%; overflow-x: hidden; overflow-y: scroll;">
     </div>
 </div>

@@ -24,8 +24,7 @@ function logIn($email, $password, $location)
             $_SESSION['user-id'] = $user['pk_id'];
             date_default_timezone_set('Europe/Berlin');
             $_SESSION['user-time'] = date("Y-m-d H:i:s");
-
-            $_SESSION['sec-hash'] = hash("ripemd160",$_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time']);
+            $_SESSION['sec-hash'] = hash("ripemd160", $_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time']);
 
             if (is_null($location)) {
                 $location = "../app/";
@@ -44,13 +43,13 @@ function logIn($email, $password, $location)
 
 function isLoggedIn()
 {
-    if ( isset($_SESSION['user-id']) && isset($_SESSION['user-log']) && isset($_SESSION['user-time']) && $_SESSION['user-log'] === "true") {
+    if (isset($_SESSION['user-id']) && isset($_SESSION['user-log']) && isset($_SESSION['user-time']) && $_SESSION['user-log'] === "true") {
         date_default_timezone_set('Europe/Berlin');
         $currentdate = date("Y-m-d H:i:s");
         $usertime = $_SESSION['user-time'];
         $diff = dateDifference($usertime, $currentdate);
 
-        if ($diff < 86400 && $_SESSION['sec-hash'] === hash("ripemd160",$_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time'])) {
+        if ($diff < 86400 && $_SESSION['sec-hash'] === hash("ripemd160", $_SESSION['user-log'] . $_SESSION['user-id'] . $_SESSION['user-time'])) {
             return true;
         } else {
             logout();
@@ -70,4 +69,20 @@ function logOut()
 function getCurrentURL()
 {
     return urlencode(filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL));
+}
+
+function getCSRF()
+{
+    if (is_null($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(openssl_random_pseudo_bytes(13));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function handleCSRF($var)
+{
+    if ($var !== getCSRF()) {
+        header("HTTP/1.1 403 Forbidden");
+        die("Ungültiger/ fehlender Token!");
+    }
 }

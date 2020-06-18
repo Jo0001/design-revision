@@ -32,7 +32,9 @@ function load() {
     mbtn.type = "button";
     mbtn.innerText = "Okay";
     mbtn.style.color = "black";
-    mbtn.setAttribute("onClick", "cls()");
+    //mbtn.setAttribute("onClick", "cls()");
+    mbtn.addEventListener("click", cls);
+    mbtn.addEventListener("click", reload);
     mes.appendChild(h1);
     mes.appendChild(micon);
     mes.appendChild(mtxt);
@@ -41,9 +43,12 @@ function load() {
 
 
 function cls() {
-    //page reload only for Dashboard
-    location.reload(true);
     mes.style.display = "none";
+}
+
+function reload() {
+//page reload only for Dashboard
+    location.reload(true);
 }
 
 function showmes(type, txt) {
@@ -52,7 +57,7 @@ function showmes(type, txt) {
     mes.classList.remove(list);
     mes.classList.add(type);
     icon.classList = '';
-   //icon.classList.remove(clist2);
+    //icon.classList.remove(clist2);
     icon.classList.add(type);
     icon.classList.add("circle");
     icon.classList.add("center");

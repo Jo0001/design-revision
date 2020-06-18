@@ -31,8 +31,10 @@ body {
 .form input:hover {
     color: gray;
 }
-
-
+/*Disable Search and Projects edits until the side has loaded all projects*/
+#searchform,#CustumorDashForm{
+    display: none;
+}
 .form input[type="text"], input[type="password"], input[type="email"] {
     font-weight: 700;
     color: black;
@@ -369,4 +371,44 @@ input:invalid {
     border-width: 5px;
     border-style: solid;
     border-color: transparent black transparent transparent;
+}
+/*Selector style */
+select {
+    /*only hide arrows in firefox because they look awful*/
+    -moz-appearance: none;
+    /* but show arrows in Chrome*/
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8nwYAAmoBZ0eMiB8AAAAASUVORK5CYII=) repeat;
+    background-position:right 50%;
+    border: none;
+    border-radius: 3px;
+    box-shadow: 2px 2px 5px 1px rgba(0,0,0,.3);
+    color: black;
+    cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    height: 30px;
+    outline: none;
+    padding-left: 10px;
+    margin-left: 20px;
+    width: 20%;
+}
+/*firefox gets other style because otherwise the Css caused none clickable inputs*/
+@supports (-moz-appearance:none){
+    select {
+        padding-left: 0px;
+        margin-left: 20px;
+        width: 15%;
+    }
+}
+
+select option {
+    color: #666;
+}
+
+select::-ms-expand {
+    display: none;
+}
+
+select:focus::-ms-value {
+    background-color: transparent;
 }

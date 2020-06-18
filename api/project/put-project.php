@@ -257,7 +257,7 @@ function updateStatus()
                             }
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("something went wrong", 400);
+                            showError("something went wrong", 409);
                         }
 
                     } else if ($status === IN_PROGRESS) {
@@ -266,12 +266,12 @@ function updateStatus()
                             changeStatus($pdo, $pid, IN_PROGRESS);
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("something went wrong", 400);
+                            showError("something went wrong", 409);
                         }
 
 
                     } else if ($status === DONE) {
-                        if ($currentStatus === IN_PROGRESS) {
+                        if ($currentStatus === WAITING_FOR_RESPONSE) {
                             //Send confirm Mail
                             $link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . filter_var($_SERVER['HTTP_HOST'], FILTER_SANITIZE_STRING) . "/design-revision/app/printverify.php?id=" . explode("project_", $pid)[1];
                             $securitycode = null;
@@ -288,7 +288,7 @@ function updateStatus()
                             sendMail(getUser('email'), getUser('name'), "Druckfreigabebestätigung von \"" . $projectname . "\"", parseHTML("../../libs/templates/printverify.html", null, $link, $projectname, $securitycode));
                             header("HTTP/1.1 204 No Content");
                         } else {
-                            showError("Something went wrong", 400);
+                            showError("Something went wrong", 409);
                         }
 
                     } else {
@@ -339,14 +339,10 @@ function solveComment()
 
                                         $tmp['isImplemented'] = true;
 
-                                        //Save edited array back to whole row array and save it back to the database
+                                        //Save edited array back to whole row array and save it back to the database and update lastedit timestamp
                                         $rawdata[$j] = $tmp;
-                                        $statement = $pdo->prepare("UPDATE $pid SET data = ? WHERE version = ?");
+                                        $statement = $pdo->prepare("UPDATE $pid SET data = ?,lastedit = CURRENT_TIMESTAMP  WHERE version = ?");
                                         $statement->execute(array(json_encode($rawdata), $i));
-
-                                        //Update lastedit timestamp
-                                        $statement = $pdo->prepare("UPDATE $pid SET lastedit = CURRENT_TIMESTAMP ORDER BY version DESC LIMIT 1");
-                                        $statement->execute();
 
                                         header("HTTP/1.1 204 No Content");
                                         die();
