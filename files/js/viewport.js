@@ -177,6 +177,7 @@ let commentContainerObserver = new MutationObserver(function (mutations) {
 let version;
 let filterSettingsBtn;
 let filter = {pageFilter: [], versionFilter: [], commentStatus: 0};
+let applyFilterBtn;
 //Progressbar-Variables
 let percentLoaded = 1;
 //Page-Turn-Logic
@@ -288,6 +289,26 @@ function setupViewport() {
     //Filter-Button-Setup
     filterSettingsBtn = document.getElementById("filterSettingsBtn");
     filterSettingsBtn.addEventListener("click", function (e) {
+        if (document.getElementById("filterDialog").style.display === "block") {
+            applyFilter();
+            closeForm();
+        } else {
+            applyFilter();
+            openForm();
+        }
+
+        //Filter-Functions
+        function openForm() {
+            document.getElementById("filterDialog").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("filterDialog").style.display = "none";
+        }
+    });
+
+    applyFilterBtn = document.getElementById("applyFilter");
+    applyFilterBtn.addEventListener("click", function (e) {
         if (document.getElementById("filterDialog").style.display === "block") {
             applyFilter();
             closeForm();

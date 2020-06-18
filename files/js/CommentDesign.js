@@ -258,7 +258,6 @@ function getComments(f) {
 
 function handleSendButtonClick(e) {
     let status;
-    console.log("Btn click!");
     if (printDesign) {
         status = "DONE";
     } else {
@@ -273,7 +272,11 @@ function handleSendButtonClick(e) {
     requestStatusChange.send(data);
     requestStatusChange.onreadystatechange = function () {
     if (requestStatusChange.readyState === 4 && requestStatusChange.status === 204) {
-        showmes("info","Druckfreigabecode wurde per E-Mail gesendet")
+        if (printDesign) {
+            showmes("info", "Druckfreigabecode wurde per E-Mail gesendet")
+        } else {
+            showmes("info", "Änderungswünsche wurden and die Agentur weitergeleitet")
+        }
     }else  if (requestStatusChange.readyState === 4 && requestStatusChange.status === 409) {
         showmes("error","Das Projekt kann in diesem Stadium nicht freigegeben werden")
     }};
