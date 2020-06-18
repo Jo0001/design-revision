@@ -767,12 +767,13 @@ let readyStateCheckInterval = setInterval(function () {
                 }
             }, 200);
         } else {
+            let csrf = document.getElementById("logoutbtn").getAttribute("href").split("=")[1];
             //he will be redirected to lo again if the logout took to long
             //the user get redirected to login with message
             if (getCookie('projects') == "noProjects") {
-                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf="+csrf);
             } else if (getCookie('verify') == "notVerified") {
-                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified");
+                document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf="+csrf);
             }
         }
         /*this should prevent the Browser form  asking if the User really wants to leave because he has unsaved things in the forms
@@ -2076,14 +2077,14 @@ function destroy_session(state) {
      */
     //hide body
     document.body.style.display = "none";
+    let csrf = document.getElementById("logoutbtn").getAttribute("href").split("=")[1];
     if (state === "noProjects") {
         setCookie('projects', 'noProjects', 1)
-        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects");
-
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&projects=noProjects&csrf="+csrf);
     }
     if (state === "notVerified") {
         setCookie("verify", "notVerified", 1)
-        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified");
+        document.location.replace(window.location.origin + "/design-revision/login/?logout&verify=notVerified&csrf="+csrf);
     }
 
 
