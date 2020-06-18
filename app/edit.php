@@ -27,6 +27,7 @@ if(!isLoggedIn()){
 </div>
 <canvas id="pdf" style="top: 20px; left: 10px;"></canvas>
 <!--<div id="pdf" style="top: 20px; left: 10px;"></div>-->
+<!--<div id="pdf" style="top: 20px; left: 10px;"></div>-->
 <div id="commentContainer" style="top: 20px; left: 10px;">
     <div id="commentArea" style="display: none; width: 10px; height: 10px; z-index: -3;"></div>
 </div>

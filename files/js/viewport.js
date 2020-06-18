@@ -140,6 +140,7 @@ class Comment {
 
 //Settings
 let user;
+let project;
 let requestURL;
 //Rendering-Variables
 let canvas;
@@ -244,10 +245,7 @@ function setupViewport() {
         handleServerResponse(request3, function (response) {
             console.log(response.user.email);
             user = response.user;
-            try {
-                loaded();
-            } catch (e) {
-            }
+            loaded();
         });
     });
     request3.send();
@@ -342,6 +340,8 @@ function setupViewport() {
         handleServerResponse(request, function (response) {
             version = response.project.version;
             titleCard.innerText = titleCard.innerHTML.replace("/", response.project.name);
+            project = response.project;
+            loaded();
         });
     });
     request.send();
@@ -506,20 +506,16 @@ function setupViewport() {
 
 //API-Request-Stuff
 function handleServerResponse(request, successCallback) {
-        if (request.readyState === 4 && request.status === 200) {
-            try {
-                successCallback(JSON.parse(request.response));
-            } catch (e) {
-                console.log(request.response);
-                throw new Error("Fuck... Somehow thats non JSON. Why would you give me non JSON??! " + e);
-            }
-        } else if (request.readyState === 4 && request.status === 401) {
-            window.alert("keine Berechtigung");
-        } else if (request.readyState === 4 && request.status === 403) {
-            window.alert("Forbidden");
-        } else if (request.readyState === 4 && request.status === 404) {
-            window.alert("Nichts gefunden");
-        }
+    if (request.readyState === 4 && request.status === 200) {
+        let resp = JSON.parse(request.response);
+        successCallback(resp);
+    } else if (request.readyState === 4 && request.status === 401) {
+        window.alert("keine Berechtigung");
+    } else if (request.readyState === 4 && request.status === 403) {
+        window.alert("Forbidden");
+    } else if (request.readyState === 4 && request.status === 404) {
+        window.alert("Nichts gefunden");
+    }
 }
 
 //Error-Correction
@@ -758,7 +754,7 @@ function applyFilter() {
             }
         }
         filter.versionFilter = versionFilter;
-        console.log(versionFilter);
+        // console.log(versionFilter);
     }
 
     clearCommentsAndGetNew();
