@@ -35,7 +35,6 @@ class TargetScaleHandlerClass {
                 if (this.handlerId > 0) {
                     clearInterval(this.handlerId);
                     this.isScalingATM = false;
-                    //console.log("Removed Listener. " + this.handlerId + " " + (this.scale === this.innerTargetScale) + " " + this.scale + " " + this.innerTargetScale);
                     this.handlerId = -1;
                     this.scale = this.round(this.scale);
                     this.timeSinceResize = 0;
@@ -46,6 +45,7 @@ class TargetScaleHandlerClass {
             }
         };
         let timeout = 1;
+
         this.updateScale = function updateScale() {
             if (this.handlerId < 0) {
                 this.handlerId = setInterval(this.check.bind(this, this.handlerId), timeout);
@@ -54,6 +54,8 @@ class TargetScaleHandlerClass {
                 //console.log("Already have a scale Updater with targetScale: " + this.innerTargetScale);
             }
         };
+
+
         this.handleTime = function handleTime() {
             this.timeSinceResize += timeout;
         };
@@ -107,7 +109,7 @@ class ButtonGroup {
     selectSidebarElementById(id) {
         let tmp;
         if ((tmp = this.getSelectedSidebarElement()) !== undefined) {
-            tmp.click();
+            tmp.click(); //deaktivate old Selected Button
         }
         document.getElementById(id).classList.remove("disSelected");
         document.getElementById(id).classList.add("selected");
@@ -155,7 +157,7 @@ let viewport;
 let projectId;
 let commentContainer;
 let changeCommentContainer;
-let displayedComments = [];
+let displayedVisibleComments = [];
 let displayedTextComments = [];
 let canvasObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutationRecord) {
@@ -225,7 +227,7 @@ function setupViewport() {
     canvasObserver.observe(canvas, {attributes: true});
     canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
     canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-    let middleMove = dragElementWhenBtnIsDown(canvas, 1);
+    let movePDFUsingMouse = dragElementWhenBtnIsDown(canvas, 1);
     context = canvas.getContext('2d');
 
     //Comment-Setup
@@ -273,13 +275,13 @@ function setupViewport() {
             canvas.addEventListener("mousedown", startPointZoom);
             canvas.removeEventListener("wheel", listenForMouseWheelTurn, false);
             canvas.removeEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-            canvas.removeEventListener("mousedown", middleMove);
+            canvas.removeEventListener("mousedown", movePDFUsingMouse);
         } else {
             sidebarGroup.deselectSidebarElementById(zoomBtn.id);
             canvas.removeEventListener("mousedown", startPointZoom);
             canvas.addEventListener("wheel", listenForMouseWheelTurn, false);
             canvas.addEventListener("DOMMouseScroll", listenForMouseWheelTurn, false);
-            middleMove = dragElementWhenBtnIsDown(canvas, 1)
+            movePDFUsingMouse = dragElementWhenBtnIsDown(canvas, 1)
         }
     });
 
@@ -354,7 +356,7 @@ function setupViewport() {
 
     //Viewport-Movement
     function dragElementWhenBtnIsDown(element, btn) {
-        let pos1 = 0, pos2 = 0, cursorXinView = 0, cursorYinView = 0;
+        let deltaX = 0, deltaY = 0, cursorXinView = 0, cursorYinView = 0;
         let han = function handle(e) {
             if (e.button === btn) {
                 e.preventDefault();
@@ -374,13 +376,13 @@ function setupViewport() {
             e.preventDefault();
             if (!preventZoomAndMovement) {
                 // calculate the new cursor position:
-                pos1 = cursorXinView - e.clientX;
-                pos2 = cursorYinView - e.clientY;
+                deltaX = cursorXinView - e.clientX;
+                deltaY = cursorYinView - e.clientY;
                 cursorXinView = e.clientX;
                 cursorYinView = e.clientY;
                 // set the element's new position:
-                element.style.top = (element.offsetTop - pos2) + "px";
-                element.style.left = (element.offsetLeft - pos1) + "px";
+                element.style.top = (element.offsetTop - deltaY) + "px";
+                element.style.left = (element.offsetLeft - deltaX) + "px";
             }
         }
 
@@ -523,7 +525,7 @@ function ensureEventAttributes(event) {
 
 //Comment-Management
 function clearCommentsAndGetNew() {
-    for (let index = 0; index < displayedComments.length; index++) {
+    for (let index = 0; index < displayedVisibleComments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
         commentDiv.remove();
     }
@@ -532,7 +534,7 @@ function clearCommentsAndGetNew() {
         textComment.remove();
     }
     displayedTextComments = [];
-    displayedComments = [];
+    displayedVisibleComments = [];
     //Json Comments aus Api hohlen
     let requestURL = window.location.origin + "/design-revision/api/project/data?id=" + projectId;
     let request3 = new XMLHttpRequest();
@@ -555,7 +557,7 @@ function clearCommentsAndGetNew() {
 
                         if (parseInt(comment.page) === parseInt(pageNumberContainer.value)) {
                             // console.log(comment);
-                            displayedComments.push(comment);
+                            displayedVisibleComments.push(comment);
                             createComment(comment);
                         }
                     } else {
@@ -602,9 +604,9 @@ function clearCommentsAndGetNew() {
 }
 
 function createComment(comment) {
-    if (displayedComments.indexOf(comment) >= 0) {
+    if (displayedVisibleComments.indexOf(comment) >= 0) {
         let commentDiv = document.createElement("div");
-        commentDiv.setAttribute("id", "comment" + displayedComments.indexOf(comment));
+        commentDiv.setAttribute("id", "comment" + displayedVisibleComments.indexOf(comment));
         setCommentAttributes(commentDiv, comment);
         commentContainer.appendChild(commentDiv);
     }
@@ -679,9 +681,9 @@ function setCommentAttributes(commentDiv, comment) {
 }
 
 function resizeComments() {
-    for (let index = 0; index < displayedComments.length; index++) {
+    for (let index = 0; index < displayedVisibleComments.length; index++) {
         let commentDiv = document.getElementById("comment" + index);
-        let comment = displayedComments[index];
+        let comment = displayedVisibleComments[index];
         setCommentAttributes(commentDiv, comment);
     }
 }
@@ -804,54 +806,6 @@ async function renderIfReady(scale) {
     if (!isRendering && targetScaleHandler.getTimeMsSinceLastScale() > 100) {
         isRendering = true;
         renderPageFromPdf(scale);
-
-        function renderPageFromPdf(scale) {
-            viewport = pdfPage.getViewport({scale});
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            canvas.style.height = canvas.height + "px";
-            canvas.style.width = canvas.width + "px";
-            pdfjsLib.disableWorker = false;
-            let renderTask = pdfPage.render({
-                canvasContext: context,
-                viewport: viewport
-            });
-            renderTask.promise.then(function () {
-                isRendering = false;
-                if (firstTimeDisplay) {
-                    firstTimeDisplay = false;
-                    canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
-                    canvas.style.top = "100px";
-                }
-            });
-            /* SVG-Rendering-Code but not all Graphic
-            Sates have been implemented in the library + convas needs to be div
-            let viewport = pdfPage.getViewport({scale: scale});
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
-            canvas.style.height = viewport.height + 'px';
-            canvas.style.width = viewport.width + 'px';
-            //Make sure Div is clean
-            while (canvas.firstChild) {
-                canvas.removeChild(canvas.firstChild);
-            }
-            pdfPage.getOperatorList()
-                .then(function (opList) {
-                    let svgGfx = new pdfjsLib.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
-                    return svgGfx.getSVG(opList, viewport);
-                })
-                .then(function (svg) {
-                    canvas.appendChild(svg);
-                })
-                .then(function () {
-                    isRendering = false;
-                        if (firstTimeDisplay) {
-                            firstTimeDisplay = false;
-                            canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
-                            canvas.style.top = "100px";
-                        }
-                });*/
-        }
     } else {
         // console.log(targetScaleHandler.getTimeMsSinceLastScale());
         if (!isRendering) {
@@ -859,6 +813,27 @@ async function renderIfReady(scale) {
                 renderIfReady(targetScaleHandler.scale);
             });
         }
+    }
+
+    function renderPageFromPdf(scale) {
+        viewport = pdfPage.getViewport({scale});
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.style.height = canvas.height + "px";
+        canvas.style.width = canvas.width + "px";
+        pdfjsLib.disableWorker = false;
+        let renderTask = pdfPage.render({
+            canvasContext: context,
+            viewport: viewport
+        });
+        renderTask.promise.then(function () {
+            isRendering = false;
+            if (firstTimeDisplay) {
+                firstTimeDisplay = false;
+                canvas.style.left = ((document.body.clientWidth - canvas.width) / 2) + "px";
+                canvas.style.top = "100px";
+            }
+        });
     }
 
     function sleep(ms) {

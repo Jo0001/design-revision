@@ -55,7 +55,7 @@ function setup() {
             comment.cid = String(JSON.stringify(comment)).hashCode();
             console.log(comment);
             displayedTextComments.push(comment);
-            displayedComments.push(comment);
+            displayedVisibleComments.push(comment);
             console.log("Trying to push comment to database, projectID: " + projectId + " " + JSON.stringify(comment));
             let data = "id=" + projectId + "&comment=" + JSON.stringify(comment);
             let xhr = new XMLHttpRequest();
@@ -101,6 +101,8 @@ function resizeCommentArea(event) {
         event.pageY >= clientHeight) {
         resetAreaData();
     }
+
+
     let eventXRelativeCanvas = (event.pageX - parseFloat(commentContainer.style.left.replace("px", "")));
     let eventYRelativeCanvas = (event.pageY - parseFloat(commentContainer.style.top.replace("px", "")));
     let width = (eventXRelativeCanvas - commentAreaData.sX);
@@ -117,11 +119,11 @@ function resizeCommentArea(event) {
                 width = (commentAreaData.sX - eventXRelativeCanvas);
             }
             if (commentAreaData.sY < eventYRelativeCanvas) {
-                //pageX is top corner
+                //pageY is top corner
                 commentArea.style.top = commentAreaData.sY + "px";
                 height = (eventYRelativeCanvas - commentAreaData.sY);
             } else {
-                //pageX lower corner
+                //pageY lower corner
                 commentArea.style.top = eventYRelativeCanvas + "px";
                 height = (commentAreaData.sY - eventYRelativeCanvas);
             }
