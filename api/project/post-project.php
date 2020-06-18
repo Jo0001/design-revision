@@ -172,7 +172,7 @@ function updateFile()
                             if (filter_var($_FILES["file"]["type"], FILTER_SANITIZE_STRING) === "application/pdf" && !file_exists($target_file) && (int)filter_var($_FILES["file"]["size"], FILTER_SANITIZE_NUMBER_INT) < 500000001) {
                                 if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
                                     try {
-                                        $statement = $pdo->prepare("INSERT INTO $pid (p_name, link, members, status) SELECT p_name,?, members, ? FROM $pid ORDER BY version DESC LIMIT 1");
+                                        $statement = $pdo->prepare("INSERT INTO $pid (p_name, link, members, status, data) SELECT p_name,?, members, ?, '[]' FROM $pid ORDER BY version DESC LIMIT 1");
                                         $statement->execute(array($filename, WAITING_FOR_RESPONSE));
                                     } catch (PDOException $e) {
                                         showError("Something went really wrong", 500);
