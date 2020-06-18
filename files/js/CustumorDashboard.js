@@ -251,7 +251,7 @@ function generate() {
                                 textStatus.innerHTML = "Warten auf Kundenrückmeldung";
                                 break;
                             case "IN_PROGRESS":
-                                textStatus.innerHTML = "Wird bearbeitet";
+                                textStatus.innerHTML = "Wird durch die Agentur bearbeitet";
                                 break;
                             case "TODO":
                                 textStatus.innerHTML = "Bearbeitung ausstehend";
@@ -1577,7 +1577,7 @@ function sendUpdateProject() {
                         showmes("info", "Datei wurde hochgeladen");
 
                     } else if (this.readyState === 4 && this.status === 409) {
-                        showmes("error", 'Der Projektstatus ist nicht "wird bearbeitet", also können sie keine neue PDF hochladen');
+                        showmes("error", 'Der Projektstatus ist nicht "Wird durch die Agentur bearbeitet", also können sie keine neue PDF hochladen');
                     } else if (this.readyState === 4) {
                         showmes("error", "Datei konnte nicht hochgeladen werden");
                     }
