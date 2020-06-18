@@ -121,6 +121,7 @@ if(!isLoggedIn()){
             </tr>
         </table>
     </div>
+     <button id="applyFilter">Filtereinstellungen speichern</button>
 </div>
 <div class="toolbox" id="changeCommentContainer"
      style="top: 15%; width: 28%; height: 63%; min-height: 60%; left: 1%;outline-style:none;box-shadow:none;border-color:transparent; padding-right: 15px;">
