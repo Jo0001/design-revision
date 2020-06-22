@@ -300,6 +300,16 @@ function changeStatus($pdo, $pid, $status)
     }
 }
 
+/**
+ * Detect if a project is locked
+ * @param $pid
+ * @return boolean
+ */
+function isLocked($pid){
+    $pdo = $GLOBALS['pdo'];
+   return (getLatestProjectData($pid,$pdo)['status'] == DONE);
+}
+
 //constants
 //user:
 define("INVITE", "INVITE");
