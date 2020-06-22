@@ -33,6 +33,9 @@ function addComment()
 
         //Check if user is logged in and a projectmember
         if (isLoggedIn() && isValidProject($pid, $pdo) && isMember($pid, getUser('pk_id'))) {
+            if (isLocked($pid)) {
+                showError("Already in printmode", 409);
+            }
 
             $data = filter_var($GLOBALS['_PUT']['comment'], FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
             //Check if JSON is valid
@@ -318,6 +321,9 @@ function solveComment()
             $pdo = $GLOBALS['pdo'];
             if (isValidProject($pid, $pdo)) {
                 if (isMember($pid, getUser('pk_id'))) {
+                    if (isLocked($pid)) {
+                        showError("Already in printmode", 409);
+                    }
 
                     $versions = getLatestProjectData($pid, $pdo)['version'];
                     try {
