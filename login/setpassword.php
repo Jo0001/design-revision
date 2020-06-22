@@ -187,6 +187,12 @@ if (!empty($_GET['token']) && !empty($_POST['password']) && !empty($_POST['again
             feedback.style.color = "green";
             feedback.innerHTML = "<strong>Passwort erfolgreich ge&auml;ndert</strong>"
         }
+        let err = getURLParameter('err');
+        if (err == "pswd") {
+                    let feedback = document.getElementById("feedback");
+                    feedback.style.color = "red";
+                    feedback.innerHTML = "<strong>Ung&uuml;ltiges Passwort</strong>"
+        }
     };
 
     function passwordToggle() {
