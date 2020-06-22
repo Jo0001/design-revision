@@ -242,14 +242,10 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
         let tmp = getURLParameter("email");
         mail.value = tmp;
         let err = getURLParameter('err');
-        if (err === "pswd") {
+        if (err == "pswd") {
             let feedback = document.getElementById("feedback");
             feedback.style.color = "red";
             feedback.innerHTML = "<strong>Ung&uuml;ltiges Passwort</strong>"
-        }
-        let success = getURLParameter('success');
-        if (success === "pswd") {
-            document.location = "../login/verifizieren.html"
         }
     };
 
