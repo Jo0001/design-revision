@@ -667,6 +667,8 @@ function createTextComment(comment) {
                     if (this.readyState === 4 && this.status === 204) {
                         pageTurned();
                         clearCommentsAndGetNew();
+                    } else {
+                        document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked = false;
                     }
                 });
             }
