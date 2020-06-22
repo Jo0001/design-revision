@@ -270,17 +270,18 @@ function handleSendButtonClick(e) {
     requestURL = window.location.origin + "/design-revision/api/project/updatestatus";
     requestStatusChange.open('PUT', requestURL);
     requestStatusChange.send(data);
+    document.getElementById("mes-btn").removeEventListener("click", reload);
     requestStatusChange.onreadystatechange = function () {
-    if (requestStatusChange.readyState === 4 && requestStatusChange.status === 204) {
-        if (printDesign) {
-            showmes("info", "Druckfreigabecode wurde per E-Mail gesendet")
-        } else {
-            showmes("info", "Änderungswünsche wurden an die Agentur weitergeleitet")
+        if (requestStatusChange.readyState === 4 && requestStatusChange.status === 204) {
+            if (printDesign) {
+                showmes("info", "Druckfreigabecode wurde per E-Mail gesendet")
+            } else {
+                showmes("info", "Änderungswünsche wurden an die Agentur weitergeleitet")
+            }
+        } else if (requestStatusChange.readyState === 4 && requestStatusChange.status === 409) {
+            showmes("error", "Das Projekt kann in diesem Stadium nicht freigegeben werden")
         }
-    }else  if (requestStatusChange.readyState === 4 && requestStatusChange.status === 409) {
-        showmes("error","Das Projekt kann in diesem Stadium nicht freigegeben werden")
-    }};
-    // window.location = window.origin + "/design-revision/";
+    };
 }
 
 //Comment-Creation
