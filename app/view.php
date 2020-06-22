@@ -13,6 +13,8 @@ if(!isLoggedIn()){
     <link href="https://cdn-design-revision.netlify.app/files/img/favicon.ico" rel="icon" type="image/x-icon">
     <link href="../files/css/Viewport.css" rel="stylesheet">
     <link href="../files/css/ViewDesign.css" rel="stylesheet">
+    <link href="../files/css/message.css" rel="stylesheet">
+    <script src="../files/js/message.js"></script>
 </head>
 <body>
 <!-- The pdf.js library and controls-->
@@ -180,6 +182,7 @@ if(!isLoggedIn()){
     <button class="disSelected" id="zoomPdf" style="left: 40px; right: 40px; background-color: Transparent;"><img
             alt="Zoom" class="icon" src="https://cdn-design-revision.netlify.app/files/img/zoom.png"/></button>
 </div>
+<button style="position: absolute; top: 84%; display: none;" id="currentlyWorking">Design bearbeiten</button>
 <div class="lowerBar" style="outline-style:none;box-shadow:none;border-color:transparent;">
     <button class="button" id="decPage" style="left: 40%;">-</button>
     <label>
@@ -198,5 +201,6 @@ if(!isLoggedIn()){
         <div class="progress-value" id="loading" style="height: 35%; width: 10px;"></div>
     </div>
 </div>
+<div class="warn" id="mes"></div>
 </body>
 </html>
