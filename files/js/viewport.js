@@ -667,8 +667,10 @@ function createTextComment(comment) {
                     if (this.readyState === 4 && this.status === 204) {
                         pageTurned();
                         clearCommentsAndGetNew();
-                    } else {
+                    } else if (this.readyState === 4 && this.status === 409) {
+                        document.getElementById("mes-btn").removeEventListener("click", reload);
                         document.getElementById("comment" + displayedTextComments.indexOf(comment) + "Implemented").checked = false;
+                        showmes("error", "Sie können keine Änderungen mehr machen nachdem sie den Designvorschlag zurüchgesendet haben.");
                     }
                 });
             }

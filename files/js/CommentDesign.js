@@ -68,6 +68,9 @@ function setup() {
                     messageDialog.style.display = "none";
                     messageArea.value = "";
                     resetAreaData();
+                } else if (this.readyState === 4 && this.status === 409) {
+                    document.getElementById("mes-btn").removeEventListener("click", reload);
+                    showmes("error", "Sie können keine Änderungen mehr machen nachdem sie den Designvorschlag zurüchgesendet haben.");
                 } else if (this.readyState === 4 && this.status !== 204) {
                     window.alert(this.responseText)
                 }
@@ -76,7 +79,8 @@ function setup() {
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.send(data);
         } else {
-            window.alert("Message of Comment empty.");
+            document.getElementById("mes-btn").removeEventListener("click", reload);
+            showmes("error", "Sie können keine Komentare ohne Nachricht erstellen.");
         }
     });
     discardCommentBtn.addEventListener("click", function (e) {
