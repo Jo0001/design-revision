@@ -245,7 +245,7 @@ if (!empty($_POST['firstName']) && !empty($_POST['lastName']) && !empty($_POST['
         if (err == "pswd") {
             let feedback = document.getElementById("feedback");
             feedback.style.color = "red";
-            feedback.innerHTML = "<strong>Ung&uuml;ltiges Passwort</strong>"
+            feedback.innerHTML = "<strong>Ung&uuml;ltiges Passwort oder ung&uuml;tige E-Mail</strong>"
         }
     };
 
